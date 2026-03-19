@@ -1,0 +1,154 @@
+---
+title: "Quickstart"
+description: "Make your first API call to OpenModex in under 2 minutes."
+---
+
+## 1. Get Your API Key
+
+Sign up at [openmodex.com](https://openmodex.com) and create an API key from the [dashboard](https://openmodex.com/dashboard/api-keys).
+
+Your key will look like: `omx_sk_xxxxxxxxxxxxxxxx`
+
+## 2. Make Your First Request
+
+<CodeGroup>
+```bash cURL
+curl https://api.openmodex.com/v1/chat/completions \
+  -H "Authorization: Bearer omx_sk_YOUR_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "model": "gpt-4o",
+    "messages": [{"role": "user", "content": "Hello!"}]
+  }'
+```
+
+```typescript Node.js
+import OpenModex from '@openmodex/sdk';
+
+const client = new OpenModex({ apiKey: 'omx_sk_YOUR_KEY' });
+
+const response = await client.chat.completions.create({
+  model: 'gpt-4o',
+  messages: [{ role: 'user', content: 'Hello!' }],
+});
+
+console.log(response.choices[0].message.content);
+```
+
+```python Python
+from openmodex import OpenModex
+
+client = OpenModex(api_key="omx_sk_YOUR_KEY")
+
+response = client.chat.completions.create(
+    model="gpt-4o",
+    messages=[{"role": "user", "content": "Hello!"}],
+)
+
+print(response.choices[0].message.content)
+```
+
+```go Go
+package main
+
+import (
+    "context"
+    "fmt"
+    openmodex "github.com/openmodexlabs/openmodex-sdk-go"
+)
+
+func main() {
+    client := openmodex.NewClient("omx_sk_YOUR_KEY")
+
+    resp, _ := client.Chat.Completions.Create(context.Background(), &openmodex.ChatCompletionParams{
+        Model:    "gpt-4o",
+        Messages: []openmodex.ChatMessage{{Role: "user", Content: "Hello!"}},
+    })
+
+    fmt.Println(resp.Choices[0].Message.Content)
+}
+```
+</CodeGroup>
+
+## 3. Try Streaming
+
+Get real-time token-by-token responses:
+
+<CodeGroup>
+```bash cURL
+curl https://api.openmodex.com/v1/chat/completions \
+  -H "Authorization: Bearer omx_sk_YOUR_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "model": "gpt-4o",
+    "messages": [{"role": "user", "content": "Write a haiku about code."}],
+    "stream": true
+  }'
+```
+
+```typescript Node.js
+const stream = await client.chat.completions.create({
+  model: 'gpt-4o',
+  messages: [{ role: 'user', content: 'Write a haiku about code.' }],
+  stream: true,
+});
+
+for await (const chunk of stream) {
+  process.stdout.write(chunk.choices[0]?.delta?.content ?? '');
+}
+```
+
+```python Python
+stream = client.chat.completions.create(
+    model="gpt-4o",
+    messages=[{"role": "user", "content": "Write a haiku about code."}],
+    stream=True,
+)
+
+for chunk in stream:
+    content = chunk.choices[0].delta.content
+    if content:
+        print(content, end="", flush=True)
+```
+</CodeGroup>
+
+## 4. Try a Different Model
+
+Switch models by changing one parameter — no code changes needed:
+
+```typescript
+// Use Claude
+const response1 = await client.chat.completions.create({
+  model: 'claude-3.5-sonnet',
+  messages: [{ role: 'user', content: 'Explain quantum computing.' }],
+});
+
+// Use Gemini
+const response2 = await client.chat.completions.create({
+  model: 'gemini-2.0-flash',
+  messages: [{ role: 'user', content: 'Explain quantum computing.' }],
+});
+
+// Use DeepSeek
+const response3 = await client.chat.completions.create({
+  model: 'deepseek-chat',
+  messages: [{ role: 'user', content: 'Explain quantum computing.' }],
+});
+```
+
+## What's Next?
+
+<CardGroup cols={2}>
+  <Card title="Authentication" icon="key" href="/introduction/authentication">
+    Learn about API key authentication and security.
+  </Card>
+  <Card title="Smart Routing" icon="route" href="/features/smart-routing">
+    Automatically route to the best model for each request.
+  </Card>
+  <Card title="Install an SDK" icon="download" href="/sdks/overview">
+    Get type-safe clients for your language.
+  </Card>
+  <Card title="API Reference" icon="book" href="/api-reference/overview">
+    Explore all available endpoints.
+  </Card>
+</CardGroup>

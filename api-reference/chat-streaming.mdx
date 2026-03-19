@@ -1,0 +1,144 @@
+---
+title: "Streaming"
+description: "POST /v1/chat/completions — Stream chat completion responses in real-time."
+---
+
+## Overview
+
+Set `stream: true` to receive responses as Server-Sent Events (SSE). Each event contains a partial response chunk, allowing you to display content in real-time as it's generated.
+
+## Stream Format
+
+The stream sends `data:` lines containing JSON objects:
+
+```
+data: {"id":"chatcmpl-abc","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"role":"assistant"},"finish_reason":null}]}
+
+data: {"id":"chatcmpl-abc","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"content":"Hello"},"finish_reason":null}]}
+
+data: {"id":"chatcmpl-abc","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"content":"!"},"finish_reason":null}]}
+
+data: {"id":"chatcmpl-abc","object":"chat.completion.chunk","choices":[{"index":0,"delta":{},"finish_reason":"stop"}]}
+
+data: [DONE]
+```
+
+## Chunk Object
+
+Each chunk contains:
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `id` | string | Shared across all chunks in one response |
+| `object` | string | Always `chat.completion.chunk` |
+| `created` | integer | Unix timestamp |
+| `model` | string | Model that generated the response |
+| `choices[].delta.role` | string | Only present in the first chunk |
+| `choices[].delta.content` | string | Token content (may be empty) |
+| `choices[].finish_reason` | string \| null | `stop`, `length`, or `null` while streaming |
+
+## Examples
+
+<CodeGroup>
+```bash cURL
+curl https://api.openmodex.com/v1/chat/completions \
+  -H "Authorization: Bearer omx_sk_YOUR_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "model": "gpt-4o",
+    "messages": [{"role": "user", "content": "Write a poem about the sea."}],
+    "stream": true
+  }'
+```
+
+```typescript Node.js
+import OpenModex from '@openmodex/sdk';
+
+const client = new OpenModex({ apiKey: 'omx_sk_YOUR_KEY' });
+
+const stream = await client.chat.completions.create({
+  model: 'gpt-4o',
+  messages: [{ role: 'user', content: 'Write a poem about the sea.' }],
+  stream: true,
+});
+
+for await (const chunk of stream) {
+  const content = chunk.choices[0]?.delta?.content;
+  if (content) process.stdout.write(content);
+}
+```
+
+```python Python
+from openmodex import OpenModex
+
+client = OpenModex(api_key="omx_sk_YOUR_KEY")
+
+stream = client.chat.completions.create(
+    model="gpt-4o",
+    messages=[{"role": "user", "content": "Write a poem about the sea."}],
+    stream=True,
+)
+
+for chunk in stream:
+    content = chunk.choices[0].delta.content
+    if content:
+        print(content, end="", flush=True)
+```
+
+```tsx React
+import { useChat } from '@openmodex/react';
+
+function Chat() {
+  const { messages, input, setInput, sendMessage, isLoading, stop } = useChat({
+    apiKey: 'omx_sk_YOUR_KEY',
+    model: 'gpt-4o',
+  });
+
+  return (
+    <div>
+      {messages.map((m) => (
+        <p key={m.id}><b>{m.role}:</b> {m.content}</p>
+      ))}
+      <input value={input} onChange={(e) => setInput(e.target.value)} />
+      <button onClick={() => sendMessage()} disabled={isLoading}>Send</button>
+      {isLoading && <button onClick={stop}>Stop</button>}
+    </div>
+  );
+}
+```
+</CodeGroup>
+
+## Aborting a Stream
+
+You can cancel an in-progress stream:
+
+<CodeGroup>
+```typescript Node.js
+const stream = await client.chat.completions.create({
+  model: 'gpt-4o',
+  messages: [{ role: 'user', content: 'Write a long story...' }],
+  stream: true,
+});
+
+// Abort after 2 seconds
+setTimeout(() => stream.abort(), 2000);
+
+for await (const chunk of stream) {
+  process.stdout.write(chunk.choices[0]?.delta?.content ?? '');
+}
+```
+
+```python Python
+stream = client.chat.completions.create(
+    model="gpt-4o",
+    messages=[{"role": "user", "content": "Write a long story..."}],
+    stream=True,
+)
+
+for chunk in stream:
+    content = chunk.choices[0].delta.content
+    if content:
+        print(content, end="", flush=True)
+    # Call stream.close() to abort
+```
+</CodeGroup>

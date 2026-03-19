@@ -1,0 +1,94 @@
+---
+title: "Best Practices"
+description: "Tips for getting the most out of OpenModex."
+---
+
+## Choose the Right Model
+
+Not every task needs the most expensive model:
+
+| Use Case | Recommended Model | Why |
+|----------|-------------------|-----|
+| Simple Q&A, classification | `gpt-4o-mini`, `gemini-2.0-flash` | Fast and cheap |
+| Complex reasoning | `gpt-4o`, `claude-3.5-sonnet` | Higher quality |
+| Code generation | `claude-3.5-sonnet`, `deepseek-chat` | Best at code |
+| Long documents | `claude-3.5-sonnet`, `gemini-1.5-pro` | Large context |
+| Cost-sensitive | `deepseek-chat`, `gpt-4o-mini` | Lowest cost |
+
+## Use Smart Routing
+
+Let OpenModex choose the best model instead of hardcoding:
+
+```typescript
+// Don't do this
+if (isSimpleQuery) {
+  model = 'gpt-4o-mini';
+} else {
+  model = 'gpt-4o';
+}
+
+// Do this instead
+const response = await client.chat.completions.create({
+  model: 'gpt-4o',
+  messages,
+  routing: { strategy: 'cost_optimized' },
+});
+```
+
+## Always Configure Fallbacks
+
+For production applications, always set up fallbacks:
+
+```typescript
+const client = new OpenModex({
+  apiKey: 'omx_sk_...',
+  fallbackModels: ['claude-3.5-sonnet', 'gemini-2.0-flash'],
+});
+```
+
+## Use Streaming for Chat UIs
+
+Streaming dramatically improves user experience:
+
+```typescript
+// Bad — user waits 3-10 seconds staring at a spinner
+const response = await client.chat.completions.create({
+  model: 'gpt-4o',
+  messages,
+});
+
+// Good — user sees text appearing in real-time
+const stream = await client.chat.completions.create({
+  model: 'gpt-4o',
+  messages,
+  stream: true,
+});
+```
+
+## Enable Caching for Repeated Queries
+
+If you have predictable or repeated prompts, enable caching:
+
+```typescript
+const response = await client.chat.completions.create({
+  model: 'gpt-4o',
+  messages: [{ role: 'user', content: 'What are your business hours?' }],
+  cache: { enabled: true, ttl: 3600 },
+});
+```
+
+## Set Appropriate Timeouts
+
+```typescript
+const client = new OpenModex({
+  apiKey: 'omx_sk_...',
+  timeout: 60_000, // 60 seconds for complex tasks
+});
+```
+
+## Monitor Your Usage
+
+- Check the [dashboard](https://openmodex.com/dashboard) for usage analytics
+- Track costs per model, per API key
+- Set up alerts for unusual spending patterns
+- Use the `openmodex.cost_usd` field in responses to track per-request costs

@@ -1,0 +1,141 @@
+{
+  "$schema": "https://mintlify.com/docs.json",
+  "theme": "mint",
+  "name": "OpenModex",
+  "logo": {
+    "light": "/images/logo-light.svg",
+    "dark": "/images/logo-dark.svg"
+  },
+  "favicon": "/images/favicon.svg",
+  "colors": {
+    "primary": "#6366F1",
+    "light": "#818CF8",
+    "dark": "#4F46E5",
+    "background": {
+      "dark": "#0F0F11"
+    }
+  },
+  "navbar": {
+    "links": [
+      {
+        "label": "Dashboard",
+        "href": "https://openmodex.com/dashboard"
+      }
+    ],
+    "primary": {
+      "type": "button",
+      "label": "Get API Key",
+      "href": "https://openmodex.com/dashboard/api-keys"
+    }
+  },
+  "navigation": {
+    "tabs": [
+      {
+        "tab": "Documentation",
+        "groups": [
+          {
+            "group": "Getting Started",
+            "pages": [
+              "introduction/overview",
+              "introduction/quickstart",
+              "introduction/authentication",
+              "introduction/api-keys"
+            ]
+          },
+          {
+            "group": "Core Features",
+            "pages": [
+              "features/smart-routing",
+              "features/prompt-caching",
+              "features/fallbacks",
+              "features/rate-limiting",
+              "features/streaming"
+            ]
+          },
+          {
+            "group": "Guides",
+            "pages": [
+              "guides/migration-from-openai",
+              "guides/error-handling",
+              "guides/best-practices",
+              "guides/billing-and-costs"
+            ]
+          }
+        ]
+      },
+      {
+        "tab": "API Reference",
+        "groups": [
+          {
+            "group": "Overview",
+            "pages": [
+              "api-reference/overview"
+            ]
+          },
+          {
+            "group": "Chat",
+            "pages": [
+              "api-reference/chat-completions",
+              "api-reference/chat-streaming"
+            ]
+          },
+          {
+            "group": "Completions",
+            "pages": [
+              "api-reference/completions"
+            ]
+          },
+          {
+            "group": "Embeddings",
+            "pages": [
+              "api-reference/embeddings"
+            ]
+          },
+          {
+            "group": "Models",
+            "pages": [
+              "api-reference/models-list",
+              "api-reference/models-retrieve",
+              "api-reference/models-compare"
+            ]
+          }
+        ]
+      },
+      {
+        "tab": "SDKs",
+        "groups": [
+          {
+            "group": "Official SDKs",
+            "pages": [
+              "sdks/overview",
+              "sdks/node",
+              "sdks/python",
+              "sdks/go"
+            ]
+          },
+          {
+            "group": "Frontend",
+            "pages": [
+              "sdks/react",
+              "sdks/cli"
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  "footerSocials": {
+    "github": "https://github.com/openmodexlabs",
+    "x": "https://x.com/openmodex"
+  },
+  "feedback": {
+    "thumbsRating": true
+  },
+  "api": {
+    "baseUrl": "https://api.openmodex.com/v1",
+    "auth": {
+      "method": "bearer",
+      "name": "Authorization"
+    }
+  }
+}

@@ -1,0 +1,56 @@
+---
+title: "API Keys"
+description: "Create, manage, and rotate your OpenModex API keys."
+---
+
+## Creating a Key
+
+1. Go to your [API Keys dashboard](https://openmodex.com/dashboard/api-keys)
+2. Click **Create New Key**
+3. Give it a descriptive name (e.g., "Production", "Development")
+4. Copy the key immediately — it won't be shown again
+
+<Warning>
+  Your API key is displayed only once at creation. Store it securely. If you lose it, create a new one.
+</Warning>
+
+## Managing Keys
+
+From the dashboard you can:
+
+- **View usage** — see request counts and cost per key
+- **Rename** — update the key's label
+- **Rotate** — generate a new key value while keeping the same configuration
+- **Revoke** — permanently disable a key
+
+## Key Rotation
+
+To rotate a key without downtime:
+
+1. Create a new key
+2. Update your application to use the new key
+3. Verify the new key works in production
+4. Revoke the old key
+
+## Rate Limits
+
+Rate limits are applied per API key:
+
+| Tier | Requests per Minute | Tokens per Minute |
+|------|--------------------:|------------------:|
+| Free | 30 | 60,000 |
+| Pro | 120 | 500,000 |
+| Enterprise | 300+ | Custom |
+
+When you exceed a rate limit, you'll receive a `429 Too Many Requests` response with a `Retry-After` header.
+
+## Using BYOK (Bring Your Own Key)
+
+OpenModex also supports using your own provider API keys for direct access:
+
+1. Go to **Settings → Provider Keys** in the dashboard
+2. Add your provider API key (e.g., OpenAI, Anthropic)
+3. Keys are encrypted at rest using AWS KMS envelope encryption
+4. Requests will be routed using your provider key when available
+
+This gives you the routing and monitoring benefits of OpenModex while using your own provider agreements.

@@ -1,0 +1,69 @@
+---
+title: "Prompt Caching"
+description: "Cache repeated prompts to reduce latency and cost."
+---
+
+## Overview
+
+Prompt caching stores responses for identical requests, returning cached results instantly without making a new API call. This is ideal for:
+
+- Repeated queries (FAQ bots, common questions)
+- Development and testing
+- High-traffic endpoints with predictable inputs
+
+## Enable Caching
+
+Add the `cache` parameter to your request:
+
+```typescript
+const response = await client.chat.completions.create({
+  model: 'gpt-4o',
+  messages: [{ role: 'user', content: 'What is 2+2?' }],
+  cache: {
+    enabled: true,
+    ttl: 3600, // cache for 1 hour
+  },
+});
+
+console.log(response.openmodex?.cache_hit); // true on subsequent requests
+```
+
+## How It Works
+
+1. OpenModex hashes the request (model + messages + parameters)
+2. If a cached response exists and hasn't expired, it's returned immediately
+3. If no cache exists, the request goes to the provider and the response is cached
+
+## Cache Key
+
+The cache key is computed from:
+- Model name
+- Messages array (content and roles)
+- Temperature, max_tokens, and other generation parameters
+
+Changing any of these parameters results in a different cache key.
+
+## TTL (Time to Live)
+
+| Setting | Value |
+|---------|-------|
+| Default TTL | 300 seconds (5 minutes) |
+| Minimum TTL | 60 seconds |
+| Maximum TTL | 86400 seconds (24 hours) |
+
+## Cost Savings
+
+Cached responses are significantly cheaper:
+- **Cached input tokens** are billed at ~50% of the normal rate
+- **No output token cost** for cached responses
+- **Zero latency** — responses are returned in <10ms
+
+## Check Cache Status
+
+```typescript
+const response = await client.chat.completions.create({...});
+
+if (response.openmodex?.cache_hit) {
+  console.log('Served from cache!');
+}
+```

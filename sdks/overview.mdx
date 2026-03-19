@@ -1,0 +1,63 @@
+---
+title: "SDK Overview"
+description: "Official SDKs for Node.js, Python, Go, React, and CLI."
+---
+
+## Official SDKs
+
+OpenModex provides official SDKs for all major platforms:
+
+<CardGroup cols={2}>
+  <Card title="Node.js / TypeScript" icon="js" href="/sdks/node">
+    `npm install @openmodex/sdk`
+  </Card>
+  <Card title="Python" icon="python" href="/sdks/python">
+    `pip install openmodex`
+  </Card>
+  <Card title="Go" icon="golang" href="/sdks/go">
+    `go get github.com/openmodexlabs/openmodex-sdk-go`
+  </Card>
+  <Card title="React" icon="react" href="/sdks/react">
+    `npm install @openmodex/react`
+  </Card>
+</CardGroup>
+
+## Feature Matrix
+
+| Feature | Node.js | Python | Go |
+|---------|:-------:|:------:|:--:|
+| Chat completions | ✅ | ✅ | ✅ |
+| Streaming | ✅ | ✅ | ✅ |
+| Embeddings | ✅ | ✅ | ✅ |
+| Model listing | ✅ | ✅ | ✅ |
+| Model comparison | ✅ | ✅ | ✅ |
+| Client-side fallbacks | ✅ | ✅ | ✅ |
+| Routing config | ✅ | ✅ | ✅ |
+| Cache config | ✅ | ✅ | ✅ |
+| Auto retries | ✅ | ✅ | ✅ |
+| Async support | ✅ | ✅ | ✅ |
+| TypeScript types | ✅ | — | — |
+
+## OpenAI SDK Compatibility
+
+Already using the OpenAI SDK? You can use it with OpenModex by changing the base URL:
+
+<CodeGroup>
+```typescript Node.js
+import OpenAI from 'openai';
+
+const client = new OpenAI({
+  apiKey: 'omx_sk_...',
+  baseURL: 'https://api.openmodex.com/v1',
+});
+```
+
+```python Python
+from openai import OpenAI
+
+client = OpenAI(
+    api_key="omx_sk_...",
+    base_url="https://api.openmodex.com/v1",
+)
+```
+</CodeGroup>

@@ -1,0 +1,77 @@
+---
+title: "What is OpenModex?"
+description: "One API, 100+ AI models. Intelligent routing, automatic fallbacks, and unified billing."
+---
+
+## The Universal AI Gateway
+
+OpenModex is a unified API gateway that gives you access to 100+ large language models from all major providers through a single, OpenAI-compatible API.
+
+Instead of managing multiple API keys, different SDKs, and separate billing for each AI provider, OpenModex lets you:
+
+- **Use one API key** to access OpenAI, Anthropic, Google Gemini, DeepSeek, Mistral, Qwen, and more
+- **Switch models instantly** — change one parameter, not your entire codebase
+- **Route intelligently** — let OpenModex pick the best model based on cost, latency, or quality
+- **Fail gracefully** — automatic fallbacks ensure your app stays up even when providers go down
+- **Save money** — prompt caching, cost-optimized routing, and transparent pricing
+
+## How It Works
+
+<Steps>
+  <Step title="Get your API key">
+    Sign up at [openmodex.com](https://openmodex.com) and create an API key from your dashboard.
+  </Step>
+  <Step title="Point your code at OpenModex">
+    Replace your provider's base URL with `https://api.openmodex.com/v1`. If you're already using the OpenAI SDK, it's a one-line change.
+  </Step>
+  <Step title="Choose any model">
+    Use any supported model by name — `gpt-4o`, `claude-3.5-sonnet`, `gemini-2.0-flash`, `deepseek-chat`, and many more.
+  </Step>
+</Steps>
+
+## OpenAI Compatible
+
+If you're already using the OpenAI API, switching to OpenModex is trivial:
+
+```typescript
+import OpenAI from 'openai';
+
+const client = new OpenAI({
+  apiKey: 'omx_sk_...',                      // your OpenModex key
+  baseURL: 'https://api.openmodex.com/v1',   // point to OpenModex
+});
+
+// Everything else stays the same
+const response = await client.chat.completions.create({
+  model: 'gpt-4o',  // or any other model
+  messages: [{ role: 'user', content: 'Hello!' }],
+});
+```
+
+## Supported Providers
+
+| Provider | Models | Highlights |
+|----------|--------|-----------|
+| **OpenAI** | GPT-4o, GPT-4o-mini, o1, o3 | Industry standard |
+| **Anthropic** | Claude 3.5 Sonnet, Claude 3 Opus | Best for long context |
+| **Google** | Gemini 2.0 Flash, Gemini 1.5 Pro | Multimodal + speed |
+| **DeepSeek** | DeepSeek-V3, DeepSeek-R1 | Cost-effective reasoning |
+| **Mistral** | Mistral Large, Mistral Small | European AI |
+| **Qwen** | Qwen2.5, Qwen-Max | Chinese language optimization |
+
+## Next Steps
+
+<CardGroup cols={2}>
+  <Card title="Quickstart" icon="rocket" href="/introduction/quickstart">
+    Make your first API call in under 2 minutes.
+  </Card>
+  <Card title="API Reference" icon="code" href="/api-reference/overview">
+    Explore the complete API documentation.
+  </Card>
+  <Card title="SDKs" icon="puzzle-piece" href="/sdks/overview">
+    Official SDKs for Node.js, Python, Go, and React.
+  </Card>
+  <Card title="Smart Routing" icon="route" href="/features/smart-routing">
+    Learn how intelligent routing saves cost and improves reliability.
+  </Card>
+</CardGroup>

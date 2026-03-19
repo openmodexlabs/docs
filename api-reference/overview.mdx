@@ -1,0 +1,98 @@
+---
+title: "API Overview"
+description: "OpenModex API reference — OpenAI-compatible endpoints with enhanced features."
+---
+
+## Base URL
+
+```
+https://api.openmodex.com/v1
+```
+
+All API endpoints are OpenAI-compatible. If you're already using the OpenAI API, you can switch by changing the base URL and API key.
+
+## Authentication
+
+Include your API key in the `Authorization` header:
+
+```
+Authorization: Bearer omx_sk_YOUR_API_KEY
+```
+
+## Endpoints
+
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| `POST` | `/chat/completions` | Create a chat completion |
+| `POST` | `/completions` | Create a text completion (legacy) |
+| `POST` | `/embeddings` | Create embeddings |
+| `GET` | `/models` | List available models |
+| `GET` | `/models/:id` | Retrieve a model |
+| `GET` | `/models/compare` | Compare models side by side |
+
+## Request Format
+
+All `POST` requests accept JSON bodies with `Content-Type: application/json`.
+
+## Response Format
+
+All responses return JSON. Successful responses include the data directly. Error responses follow this format:
+
+```json
+{
+  "error": {
+    "message": "Human-readable error message",
+    "type": "invalid_request_error",
+    "code": "invalid_api_key"
+  }
+}
+```
+
+## HTTP Status Codes
+
+| Code | Description |
+|------|-------------|
+| `200` | Success |
+| `400` | Bad request — check your parameters |
+| `401` | Unauthorized — invalid or missing API key |
+| `403` | Forbidden — insufficient permissions |
+| `404` | Not found — invalid endpoint or model |
+| `429` | Rate limited — slow down or upgrade your plan |
+| `500` | Server error — retry with backoff |
+| `502` | Bad gateway — upstream provider error |
+| `503` | Service unavailable — temporary outage |
+
+## OpenModex Response Metadata
+
+Every response includes an optional `openmodex` field with routing and performance metadata:
+
+```json
+{
+  "id": "chatcmpl-abc123",
+  "choices": [...],
+  "usage": {...},
+  "openmodex": {
+    "request_id": "req_abc123",
+    "model_used": "gpt-4o-2024-08-06",
+    "provider": "openai",
+    "cache_hit": false,
+    "routing_strategy": "cost_optimized",
+    "fallback_used": false,
+    "latency_ms": 1250
+  }
+}
+```
+
+## Idempotency
+
+For `POST` requests, you can pass an `Idempotency-Key` header to ensure the same request is not processed twice:
+
+```bash
+curl https://api.openmodex.com/v1/chat/completions \
+  -H "Authorization: Bearer omx_sk_..." \
+  -H "Idempotency-Key: my-unique-key-123" \
+  -H "Content-Type: application/json" \
+  -d '...'
+```
+
+Idempotency keys are valid for 24 hours.

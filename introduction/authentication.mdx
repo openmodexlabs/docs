@@ -1,0 +1,86 @@
+---
+title: "Authentication"
+description: "Authenticate your API requests with Bearer tokens."
+---
+
+## API Keys
+
+All API requests require an API key passed in the `Authorization` header:
+
+```bash
+Authorization: Bearer omx_sk_YOUR_API_KEY
+```
+
+API keys are created and managed in your [dashboard](https://openmodex.com/dashboard/api-keys).
+
+## Key Format
+
+OpenModex API keys follow the format:
+
+```
+omx_sk_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+```
+
+- `omx_` — OpenModex prefix
+- `sk_` — secret key identifier
+- Followed by a random alphanumeric string
+
+## Usage
+
+<CodeGroup>
+```bash cURL
+curl https://api.openmodex.com/v1/chat/completions \
+  -H "Authorization: Bearer omx_sk_YOUR_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{"model": "gpt-4o", "messages": [{"role": "user", "content": "Hi"}]}'
+```
+
+```typescript Node.js
+import OpenModex from '@openmodex/sdk';
+
+// Pass directly
+const client = new OpenModex({ apiKey: 'omx_sk_YOUR_KEY' });
+
+// Or use environment variable (auto-detected)
+// OPENMODEX_API_KEY=omx_sk_YOUR_KEY
+const client = new OpenModex();
+```
+
+```python Python
+from openmodex import OpenModex
+
+# Pass directly
+client = OpenModex(api_key="omx_sk_YOUR_KEY")
+
+# Or use environment variable (auto-detected)
+# OPENMODEX_API_KEY=omx_sk_YOUR_KEY
+client = OpenModex()
+```
+</CodeGroup>
+
+## Environment Variables
+
+All official SDKs automatically read the `OPENMODEX_API_KEY` environment variable:
+
+```bash
+export OPENMODEX_API_KEY=omx_sk_YOUR_KEY
+```
+
+## Security Best Practices
+
+<Warning>
+  Never expose your API key in client-side code, public repositories, or browser requests. API keys carry billing permissions and should be kept secret.
+</Warning>
+
+- **Use environment variables** — never hardcode keys in source code
+- **Rotate keys regularly** — create new keys and revoke old ones from the dashboard
+- **Use separate keys** for development and production
+- **Set permissions** — restrict keys to specific models or rate limits when possible
+
+## Error Responses
+
+| Status | Meaning |
+|--------|---------|
+| `401 Unauthorized` | Missing or invalid API key |
+| `403 Forbidden` | Key doesn't have permission for this operation |
+| `429 Too Many Requests` | Rate limit exceeded |

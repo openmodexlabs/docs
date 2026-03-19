@@ -1,0 +1,77 @@
+---
+title: "Automatic Fallbacks"
+description: "Keep your app running even when AI providers go down."
+---
+
+## Overview
+
+Fallbacks ensure your application stays reliable by automatically switching to an alternative model when the primary one fails. OpenModex supports both server-side and client-side fallbacks.
+
+## Server-Side Fallbacks
+
+Configured per request. OpenModex handles the failover on the server:
+
+```typescript
+const response = await client.chat.completions.create({
+  model: 'gpt-4o',
+  messages: [{ role: 'user', content: 'Hello!' }],
+  routing: {
+    fallback: ['claude-3.5-sonnet', 'gemini-2.0-flash'],
+  },
+});
+```
+
+**How it works:**
+1. Try `gpt-4o`
+2. If it fails (5xx, rate limit, timeout) → try `claude-3.5-sonnet`
+3. If that fails → try `gemini-2.0-flash`
+4. If all fail → return error
+
+## Client-Side Fallbacks
+
+Configured on the SDK client. Applies to all requests:
+
+<CodeGroup>
+```typescript Node.js
+import OpenModex from '@openmodex/sdk';
+
+const client = new OpenModex({
+  apiKey: 'omx_sk_...',
+  fallbackModels: ['claude-3.5-sonnet', 'gemini-2.0-flash'],
+});
+
+// If the requested model fails, the SDK automatically retries
+// with each fallback model
+const response = await client.chat.completions.create({
+  model: 'gpt-4o',
+  messages: [{ role: 'user', content: 'Hello!' }],
+});
+```
+
+```go Go
+client := openmodex.NewClient("omx_sk_...",
+    openmodex.WithFallbackModels("claude-3.5-sonnet", "gemini-2.0-flash"),
+)
+```
+</CodeGroup>
+
+## When Fallbacks Trigger
+
+Fallbacks are triggered by:
+- **5xx errors** — server errors from the provider
+- **429 errors** — rate limit exceeded
+- **Timeouts** — request didn't complete in time
+- **Network errors** — connection failures
+
+Fallbacks are **not** triggered by:
+- **4xx errors** (except 429) — these indicate a problem with your request
+- **Successful responses** — even if the content is unexpected
+
+## Check If Fallback Was Used
+
+```typescript
+const response = await client.chat.completions.create({...});
+
+console.log(response.openmodex?.model_used);     // actual model that responded
+console.log(response.openmodex?.fallback_used);   // true if fallback was used
+```

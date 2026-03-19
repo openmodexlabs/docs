@@ -1,0 +1,119 @@
+---
+title: "Migration from OpenAI"
+description: "Switch from the OpenAI API to OpenModex in minutes."
+---
+
+## Overview
+
+OpenModex is fully compatible with the OpenAI API. Migration typically requires changing just two lines of code: the base URL and the API key.
+
+## Option 1: Use the OpenAI SDK (Fastest)
+
+If you're already using the OpenAI SDK, just change the configuration:
+
+<CodeGroup>
+```typescript Node.js
+import OpenAI from 'openai';
+
+const client = new OpenAI({
+  apiKey: 'omx_sk_YOUR_KEY',                   // ← OpenModex key
+  baseURL: 'https://api.openmodex.com/v1',     // ← OpenModex URL
+});
+
+// All existing code works unchanged
+const response = await client.chat.completions.create({
+  model: 'gpt-4o',
+  messages: [{ role: 'user', content: 'Hello!' }],
+});
+```
+
+```python Python
+from openai import OpenAI
+
+client = OpenAI(
+    api_key="omx_sk_YOUR_KEY",                   # ← OpenModex key
+    base_url="https://api.openmodex.com/v1",     # ← OpenModex URL
+)
+
+# All existing code works unchanged
+response = client.chat.completions.create(
+    model="gpt-4o",
+    messages=[{"role": "user", "content": "Hello!"}],
+)
+```
+</CodeGroup>
+
+## Option 2: Use the OpenModex SDK
+
+For access to routing, caching, fallbacks, and model comparison:
+
+<CodeGroup>
+```typescript Node.js
+// Before (OpenAI)
+import OpenAI from 'openai';
+const client = new OpenAI({ apiKey: 'sk-...' });
+
+// After (OpenModex)
+import OpenModex from '@openmodex/sdk';
+const client = new OpenModex({ apiKey: 'omx_sk_...' });
+
+// API calls are identical
+const response = await client.chat.completions.create({
+  model: 'gpt-4o',
+  messages: [{ role: 'user', content: 'Hello!' }],
+});
+```
+
+```python Python
+# Before (OpenAI)
+from openai import OpenAI
+client = OpenAI(api_key="sk-...")
+
+# After (OpenModex)
+from openmodex import OpenModex
+client = OpenModex(api_key="omx_sk_...")
+
+# API calls are identical
+response = client.chat.completions.create(
+    model="gpt-4o",
+    messages=[{"role": "user", "content": "Hello!"}],
+)
+```
+</CodeGroup>
+
+## Option 3: Environment Variable
+
+For zero-code migration, just set environment variables:
+
+```bash
+# Replace
+export OPENAI_API_KEY=sk-...
+export OPENAI_BASE_URL=https://api.openai.com/v1
+
+# With
+export OPENAI_API_KEY=omx_sk_...
+export OPENAI_BASE_URL=https://api.openmodex.com/v1
+```
+
+## What You Gain
+
+After migrating, you get access to:
+
+| Feature | OpenAI Direct | OpenModex |
+|---------|:---:|:---:|
+| OpenAI models | ✅ | ✅ |
+| Anthropic, Google, etc. | ❌ | ✅ |
+| Automatic fallbacks | ❌ | ✅ |
+| Smart routing | ❌ | ✅ |
+| Prompt caching | ❌ | ✅ |
+| Model comparison | ❌ | ✅ |
+| Unified billing | ❌ | ✅ |
+| Usage analytics | Basic | ✅ |
+
+## Compatibility Notes
+
+- All OpenAI chat completion parameters are supported
+- Streaming works identically (SSE format)
+- Function calling / tool use is fully supported
+- Response format is identical — your parsing code stays the same
+- The `openmodex` metadata field is additive and won't break existing code

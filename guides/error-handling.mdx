@@ -1,0 +1,94 @@
+---
+title: "Error Handling"
+description: "Handle API errors gracefully in your application."
+---
+
+## Error Response Format
+
+All API errors return a consistent JSON format:
+
+```json
+{
+  "error": {
+    "message": "Human-readable error description",
+    "type": "error_type",
+    "code": "error_code"
+  }
+}
+```
+
+## Error Types
+
+| Status | Type | When |
+|--------|------|------|
+| `400` | `invalid_request_error` | Missing or invalid parameters |
+| `401` | `authentication_error` | Invalid or missing API key |
+| `403` | `permission_error` | Key lacks permissions |
+| `404` | `not_found_error` | Invalid endpoint or model |
+| `429` | `rate_limit_error` | Too many requests |
+| `500` | `server_error` | Internal server error |
+| `502` | `upstream_error` | Provider returned an error |
+| `503` | `service_unavailable` | Temporary outage |
+
+## SDK Error Handling
+
+<CodeGroup>
+```typescript Node.js
+import OpenModex, { APIError } from '@openmodex/sdk';
+
+try {
+  const response = await client.chat.completions.create({...});
+} catch (err) {
+  if (err instanceof APIError) {
+    console.log(err.statusCode);     // 429
+    console.log(err.message);        // "Rate limit exceeded"
+    console.log(err.code);           // "rate_limit_exceeded"
+
+    if (err.isRateLimited) {
+      // Wait and retry
+    } else if (err.isAuthError) {
+      // Check API key
+    } else if (err.isServerError) {
+      // Retry with backoff
+    }
+  }
+}
+```
+
+```python Python
+from openmodex import OpenModex, APIError
+
+try:
+    response = client.chat.completions.create(...)
+except APIError as e:
+    print(e.status_code)   # 429
+    print(e.message)       # "Rate limit exceeded"
+
+    if e.status_code == 429:
+        # Wait and retry
+        pass
+    elif e.status_code == 401:
+        # Check API key
+        pass
+```
+</CodeGroup>
+
+## Automatic Retries
+
+All SDKs automatically retry on transient errors (429, 500, 502, 503, 504) with exponential backoff:
+
+```typescript
+const client = new OpenModex({
+  apiKey: 'omx_sk_...',
+  maxRetries: 3,    // default: 2
+  timeout: 60_000,  // default: 30000ms
+});
+```
+
+## Best Practices
+
+1. **Always catch errors** — don't let API failures crash your app
+2. **Use fallbacks** — configure fallback models for critical paths
+3. **Log the request_id** — include `response.openmodex.request_id` in error reports for support
+4. **Set appropriate timeouts** — longer for complex prompts, shorter for simple queries
+5. **Handle streaming errors** — streams can fail mid-response; buffer partial content

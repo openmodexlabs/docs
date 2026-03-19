@@ -1,0 +1,94 @@
+---
+title: "Create Embeddings"
+description: "POST /v1/embeddings — Generate vector embeddings for text."
+api: "POST /embeddings"
+---
+
+## Request Body
+
+<ParamField body="model" type="string" required>
+  Embedding model to use (e.g., `text-embedding-3-small`, `text-embedding-3-large`).
+</ParamField>
+
+<ParamField body="input" type="string | string[]" required>
+  The text(s) to embed. Can be a single string or an array of strings.
+</ParamField>
+
+<ParamField body="encoding_format" type="string" default="float">
+  The format of the embeddings. `float` or `base64`.
+</ParamField>
+
+<ParamField body="dimensions" type="integer">
+  The number of dimensions for the output embeddings (model-dependent).
+</ParamField>
+
+## Response
+
+```json
+{
+  "object": "list",
+  "data": [
+    {
+      "object": "embedding",
+      "embedding": [0.0023, -0.0094, 0.0156, ...],
+      "index": 0
+    }
+  ],
+  "model": "text-embedding-3-small",
+  "usage": {
+    "prompt_tokens": 8,
+    "total_tokens": 8
+  }
+}
+```
+
+## Example
+
+<CodeGroup>
+```bash cURL
+curl https://api.openmodex.com/v1/embeddings \
+  -H "Authorization: Bearer omx_sk_YOUR_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "model": "text-embedding-3-small",
+    "input": "OpenModex is a unified AI gateway."
+  }'
+```
+
+```typescript Node.js
+const result = await client.embeddings.create({
+  model: 'text-embedding-3-small',
+  input: 'OpenModex is a unified AI gateway.',
+});
+
+console.log(result.data[0].embedding);
+```
+
+```python Python
+result = client.embeddings.create(
+    model="text-embedding-3-small",
+    input="OpenModex is a unified AI gateway.",
+)
+
+print(result.data[0].embedding)
+```
+</CodeGroup>
+
+## Batch Embeddings
+
+You can embed multiple texts in a single request:
+
+```typescript
+const result = await client.embeddings.create({
+  model: 'text-embedding-3-small',
+  input: [
+    'First text to embed',
+    'Second text to embed',
+    'Third text to embed',
+  ],
+});
+
+// result.data[0].embedding -> vector for first text
+// result.data[1].embedding -> vector for second text
+// result.data[2].embedding -> vector for third text
+```

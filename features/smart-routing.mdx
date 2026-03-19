@@ -1,0 +1,106 @@
+---
+title: "Smart Routing"
+description: "Automatically route requests to the best model based on cost, latency, or quality."
+---
+
+## Overview
+
+OpenModex's intelligent routing engine automatically selects the optimal provider for each request. Instead of hardcoding a single provider, you can let OpenModex choose based on your priorities.
+
+## Routing Strategies
+
+### Cost Optimized
+
+Route to the cheapest provider that can fulfill the request:
+
+```typescript
+const response = await client.chat.completions.create({
+  model: 'gpt-4o',
+  messages: [{ role: 'user', content: 'Summarize this article...' }],
+  routing: {
+    strategy: 'cost_optimized',
+  },
+});
+```
+
+### Latency Optimized
+
+Route to the fastest available provider:
+
+```typescript
+const response = await client.chat.completions.create({
+  model: 'gpt-4o',
+  messages: [{ role: 'user', content: 'Quick answer needed...' }],
+  routing: {
+    strategy: 'latency_optimized',
+  },
+});
+```
+
+### Quality Optimized
+
+Route to the provider with the highest quality scores:
+
+```typescript
+const response = await client.chat.completions.create({
+  model: 'gpt-4o',
+  messages: [{ role: 'user', content: 'Write a detailed analysis...' }],
+  routing: {
+    strategy: 'quality_optimized',
+  },
+});
+```
+
+## Server-Side Fallbacks
+
+Define a fallback chain that executes automatically if the primary model fails:
+
+```typescript
+const response = await client.chat.completions.create({
+  model: 'gpt-4o',
+  messages: [{ role: 'user', content: 'Hello!' }],
+  routing: {
+    fallback: ['claude-3.5-sonnet', 'gemini-2.0-flash'],
+  },
+});
+```
+
+If `gpt-4o` is unavailable (5xx or rate limited), OpenModex automatically tries `claude-3.5-sonnet`, then `gemini-2.0-flash`.
+
+## Allow Upgrade
+
+Let OpenModex route to a more capable model when available at the same price tier:
+
+```typescript
+const response = await client.chat.completions.create({
+  model: 'gpt-4o-mini',
+  messages: [{ role: 'user', content: 'Hello!' }],
+  routing: {
+    allow_upgrade: true,
+  },
+});
+```
+
+## Circuit Breaker
+
+OpenModex monitors provider health in real-time. When a provider starts failing:
+
+1. **Healthy** — requests route normally
+2. **Degraded** — after consecutive failures, traffic is reduced
+3. **Open** — provider is temporarily removed from routing
+4. **Recovery** — periodic health checks restore the provider
+
+This happens automatically — you don't need to configure anything.
+
+## Check What Happened
+
+Every response includes routing metadata:
+
+```typescript
+const response = await client.chat.completions.create({...});
+
+console.log(response.openmodex?.provider);          // "openai"
+console.log(response.openmodex?.routing_strategy);   // "cost_optimized"
+console.log(response.openmodex?.fallback_used);      // false
+console.log(response.openmodex?.latency_ms);         // 850
+```
