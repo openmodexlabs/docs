@@ -8,11 +8,11 @@
   },
   "favicon": "/images/favicon.svg",
   "colors": {
-    "primary": "#6366F1",
-    "light": "#818CF8",
-    "dark": "#4F46E5",
+    "primary": "#2563EB",
+    "light": "#3B82F6",
+    "dark": "#18181B",
     "background": {
-      "dark": "#0F0F11"
+      "dark": "#09090B"
     }
   },
   "navbar": {
