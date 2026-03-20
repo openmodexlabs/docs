@@ -1021,7 +1021,7 @@
       "name": "Authorization"
     },
     "playground": {
-      "mode": "simple"
+      "display": "interactive"
     }
   },
   "seo": {

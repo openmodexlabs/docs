@@ -1,0 +1,153 @@
+---
+title: "Create Message"
+description: "POST /v1/messages — Anthropic-compatible message endpoint."
+api: "POST /messages"
+---
+
+<Note>
+  This endpoint provides Anthropic API compatibility. If you're migrating from Anthropic's Claude API, you can use this endpoint with minimal code changes.
+</Note>
+
+## Request Body
+
+<ParamField body="model" type="string" required>
+  Model ID to use (e.g., `claude-3.5-sonnet`, `gpt-4o`).
+</ParamField>
+
+<ParamField body="messages" type="array" required>
+  A list of messages in the conversation.
+  <Expandable title="Message object">
+    <ParamField body="role" type="string" required>
+      One of `user` or `assistant`.
+    </ParamField>
+    <ParamField body="content" type="string | array" required>
+      The content of the message.
+    </ParamField>
+  </Expandable>
+</ParamField>
+
+<ParamField body="max_tokens" type="integer" required>
+  The maximum number of tokens to generate.
+</ParamField>
+
+<ParamField body="system" type="string | array">
+  System prompt for the conversation.
+</ParamField>
+
+<ParamField body="temperature" type="number">
+  Sampling temperature between 0 and 1.
+</ParamField>
+
+<ParamField body="top_p" type="number">
+  Nucleus sampling parameter.
+</ParamField>
+
+<ParamField body="stream" type="boolean" default={false}>
+  If `true`, returns a stream of Server-Sent Events.
+</ParamField>
+
+<ParamField body="stop_sequences" type="string[]">
+  Custom stop sequences that will halt generation.
+</ParamField>
+
+<ParamField body="tools" type="array">
+  A list of tools the model may call.
+  <Expandable title="Tool object">
+    <ParamField body="name" type="string" required>
+      Tool name.
+    </ParamField>
+    <ParamField body="description" type="string">
+      Tool description.
+    </ParamField>
+    <ParamField body="input_schema" type="object" required>
+      JSON Schema defining the tool's input.
+    </ParamField>
+  </Expandable>
+</ParamField>
+
+<ParamField body="tool_choice" type="object">
+  Controls which tool is called.
+</ParamField>
+
+<ParamField body="metadata" type="object">
+  Optional metadata.
+  <Expandable title="Metadata object">
+    <ParamField body="user_id" type="string">
+      An external user identifier.
+    </ParamField>
+  </Expandable>
+</ParamField>
+
+<Warning>
+  The `top_k` parameter is not supported. The `routing` and `cache` OpenModex extensions are not available on this endpoint — use the `/chat/completions` endpoint instead.
+</Warning>
+
+## Response
+
+```json
+{
+  "id": "msg_abc123",
+  "type": "message",
+  "role": "assistant",
+  "content": [
+    {
+      "type": "text",
+      "text": "Hello! How can I help you today?"
+    }
+  ],
+  "model": "claude-3.5-sonnet",
+  "stop_reason": "end_turn",
+  "stop_sequence": null,
+  "usage": {
+    "input_tokens": 12,
+    "output_tokens": 9,
+    "cache_creation_input_tokens": 0,
+    "cache_read_input_tokens": 0
+  }
+}
+```
+
+## Example
+
+<CodeGroup>
+```bash cURL
+curl https://api.openmodex.com/v1/messages \
+  -H "Authorization: Bearer omx_sk_YOUR_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "model": "claude-3.5-sonnet",
+    "max_tokens": 1024,
+    "messages": [
+      {"role": "user", "content": "Hello!"}
+    ]
+  }'
+```
+
+```python Python (Anthropic SDK)
+from anthropic import Anthropic
+
+client = Anthropic(
+    api_key="omx_sk_YOUR_KEY",
+    base_url="https://api.openmodex.com/v1",
+)
+
+message = client.messages.create(
+    model="claude-3.5-sonnet",
+    max_tokens=1024,
+    messages=[
+        {"role": "user", "content": "Hello!"}
+    ],
+)
+
+print(message.content[0].text)
+```
+</CodeGroup>
+
+## Authentication
+
+This endpoint supports both authentication styles:
+
+| Header | Format |
+|--------|--------|
+| OpenAI style | `Authorization: Bearer omx_sk_...` |
+| Anthropic style | `x-api-key: omx_sk_...` |
