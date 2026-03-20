@@ -12,11 +12,11 @@
   },
   "servers": [
     {
-      "url": "https://api.openmodex.com/v1",
+      "url": "https://api.openmodex.com",
       "description": "Production"
     },
     {
-      "url": "https://api-sandbox.openmodex.com/v1",
+      "url": "https://api-sandbox.openmodex.com",
       "description": "Sandbox"
     }
   ],
@@ -51,7 +51,7 @@
     }
   ],
   "paths": {
-    "/chat/completions": {
+    "/v1/chat/completions": {
       "post": {
         "operationId": "createChatCompletion",
         "summary": "Create chat completion",
@@ -94,7 +94,7 @@
         }
       }
     },
-    "/completions": {
+    "/v1/completions": {
       "post": {
         "operationId": "createCompletion",
         "summary": "Create text completion",
@@ -132,7 +132,7 @@
         }
       }
     },
-    "/embeddings": {
+    "/v1/embeddings": {
       "post": {
         "operationId": "createEmbedding",
         "summary": "Create embeddings",
@@ -170,7 +170,7 @@
         }
       }
     },
-    "/models": {
+    "/v1/models": {
       "get": {
         "operationId": "listModels",
         "summary": "List all models",
@@ -192,7 +192,7 @@
         }
       }
     },
-    "/models/compare": {
+    "/v1/models/compare": {
       "get": {
         "operationId": "compareModels",
         "summary": "Compare models",
@@ -228,7 +228,7 @@
         }
       }
     },
-    "/models/{model_id}": {
+    "/v1/models/{model_id}": {
       "get": {
         "operationId": "retrieveModel",
         "summary": "Retrieve a specific model",
@@ -263,7 +263,7 @@
         }
       }
     },
-    "/messages": {
+    "/v1/messages": {
       "post": {
         "operationId": "createMessage",
         "summary": "Create message (Anthropic-compatible)",
