@@ -37,10 +37,6 @@
       {
         "label": "Dashboard",
         "href": "https://openmodex.com/dashboard"
-      },
-      {
-        "label": "Blog",
-        "href": "https://openmodex.com/blog"
       }
     ],
     "primary": {
