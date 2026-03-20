@@ -1,0 +1,106 @@
+---
+title: "Routage intelligent"
+description: "Routez automatiquement les requêtes vers le meilleur modèle en fonction du coût, de la latence ou de la qualité."
+---
+
+## Vue d'ensemble
+
+Le moteur de routage intelligent d'OpenModex sélectionne automatiquement le fournisseur optimal pour chaque requête. Au lieu de coder en dur un seul fournisseur, vous pouvez laisser OpenModex choisir en fonction de vos priorités.
+
+## Stratégies de routage
+
+### Optimisé en coût
+
+Route vers le fournisseur le moins cher capable de traiter la requête :
+
+```typescript
+const response = await client.chat.completions.create({
+  model: 'gpt-4o',
+  messages: [{ role: 'user', content: 'Summarize this article...' }],
+  routing: {
+    strategy: 'cost_optimized',
+  },
+});
+```
+
+### Optimisé en latence
+
+Route vers le fournisseur disponible le plus rapide :
+
+```typescript
+const response = await client.chat.completions.create({
+  model: 'gpt-4o',
+  messages: [{ role: 'user', content: 'Quick answer needed...' }],
+  routing: {
+    strategy: 'latency_optimized',
+  },
+});
+```
+
+### Optimisé en qualité
+
+Route vers le fournisseur avec les meilleurs scores de qualité :
+
+```typescript
+const response = await client.chat.completions.create({
+  model: 'gpt-4o',
+  messages: [{ role: 'user', content: 'Write a detailed analysis...' }],
+  routing: {
+    strategy: 'quality_optimized',
+  },
+});
+```
+
+## Basculements côté serveur
+
+Définissez une chaîne de basculement qui s'exécute automatiquement si le modèle principal échoue :
+
+```typescript
+const response = await client.chat.completions.create({
+  model: 'gpt-4o',
+  messages: [{ role: 'user', content: 'Hello!' }],
+  routing: {
+    fallback: ['claude-3.5-sonnet', 'gemini-2.0-flash'],
+  },
+});
+```
+
+Si `gpt-4o` est indisponible (5xx ou limite de débit), OpenModex essaie automatiquement `claude-3.5-sonnet`, puis `gemini-2.0-flash`.
+
+## Autoriser la mise à niveau
+
+Laissez OpenModex router vers un modèle plus performant lorsqu'il est disponible au même niveau de prix :
+
+```typescript
+const response = await client.chat.completions.create({
+  model: 'gpt-4o-mini',
+  messages: [{ role: 'user', content: 'Hello!' }],
+  routing: {
+    allow_upgrade: true,
+  },
+});
+```
+
+## Disjoncteur
+
+OpenModex surveille l'état de santé des fournisseurs en temps réel. Lorsqu'un fournisseur commence à échouer :
+
+1. **Sain** — les requêtes sont routées normalement
+2. **Dégradé** — après des échecs consécutifs, le trafic est réduit
+3. **Ouvert** — le fournisseur est temporairement retiré du routage
+4. **Récupération** — des vérifications de santé périodiques rétablissent le fournisseur
+
+Cela se produit automatiquement — vous n'avez rien à configurer.
+
+## Vérifier ce qui s'est passé
+
+Chaque réponse inclut des métadonnées de routage :
+
+```typescript
+const response = await client.chat.completions.create({...});
+
+console.log(response.openmodex?.provider);          // "openai"
+console.log(response.openmodex?.routing_strategy);   // "cost_optimized"
+console.log(response.openmodex?.fallback_used);      // false
+console.log(response.openmodex?.latency_ms);         // 850
+```

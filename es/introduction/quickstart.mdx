@@ -1,0 +1,154 @@
+---
+title: "Inicio Rápido"
+description: "Realice su primera llamada API a OpenModex en menos de 2 minutos."
+---
+
+## 1. Obtenga Su Clave API
+
+Regístrese en [openmodex.com](https://openmodex.com) y cree una clave API desde el [panel de control](https://openmodex.com/dashboard/api-keys).
+
+Su clave tendrá este formato: `omx_sk_xxxxxxxxxxxxxxxx`
+
+## 2. Realice Su Primera Solicitud
+
+<CodeGroup>
+```bash cURL
+curl https://api.openmodex.com/v1/chat/completions \
+  -H "Authorization: Bearer omx_sk_YOUR_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "model": "gpt-4o",
+    "messages": [{"role": "user", "content": "Hello!"}]
+  }'
+```
+
+```typescript Node.js
+import OpenModex from '@openmodex/sdk';
+
+const client = new OpenModex({ apiKey: 'omx_sk_YOUR_KEY' });
+
+const response = await client.chat.completions.create({
+  model: 'gpt-4o',
+  messages: [{ role: 'user', content: 'Hello!' }],
+});
+
+console.log(response.choices[0].message.content);
+```
+
+```python Python
+from openmodex import OpenModex
+
+client = OpenModex(api_key="omx_sk_YOUR_KEY")
+
+response = client.chat.completions.create(
+    model="gpt-4o",
+    messages=[{"role": "user", "content": "Hello!"}],
+)
+
+print(response.choices[0].message.content)
+```
+
+```go Go
+package main
+
+import (
+    "context"
+    "fmt"
+    openmodex "github.com/openmodexlabs/openmodex-sdk-go"
+)
+
+func main() {
+    client := openmodex.NewClient("omx_sk_YOUR_KEY")
+
+    resp, _ := client.Chat.Completions.Create(context.Background(), &openmodex.ChatCompletionParams{
+        Model:    "gpt-4o",
+        Messages: []openmodex.ChatMessage{{Role: "user", Content: "Hello!"}},
+    })
+
+    fmt.Println(resp.Choices[0].Message.Content)
+}
+```
+</CodeGroup>
+
+## 3. Pruebe el Streaming
+
+Obtenga respuestas en tiempo real token por token:
+
+<CodeGroup>
+```bash cURL
+curl https://api.openmodex.com/v1/chat/completions \
+  -H "Authorization: Bearer omx_sk_YOUR_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "model": "gpt-4o",
+    "messages": [{"role": "user", "content": "Write a haiku about code."}],
+    "stream": true
+  }'
+```
+
+```typescript Node.js
+const stream = await client.chat.completions.create({
+  model: 'gpt-4o',
+  messages: [{ role: 'user', content: 'Write a haiku about code.' }],
+  stream: true,
+});
+
+for await (const chunk of stream) {
+  process.stdout.write(chunk.choices[0]?.delta?.content ?? '');
+}
+```
+
+```python Python
+stream = client.chat.completions.create(
+    model="gpt-4o",
+    messages=[{"role": "user", "content": "Write a haiku about code."}],
+    stream=True,
+)
+
+for chunk in stream:
+    content = chunk.choices[0].delta.content
+    if content:
+        print(content, end="", flush=True)
+```
+</CodeGroup>
+
+## 4. Pruebe un Modelo Diferente
+
+Cambie de modelo modificando un parámetro — no se necesitan cambios de código:
+
+```typescript
+// Use Claude
+const response1 = await client.chat.completions.create({
+  model: 'claude-3.5-sonnet',
+  messages: [{ role: 'user', content: 'Explain quantum computing.' }],
+});
+
+// Use Gemini
+const response2 = await client.chat.completions.create({
+  model: 'gemini-2.0-flash',
+  messages: [{ role: 'user', content: 'Explain quantum computing.' }],
+});
+
+// Use DeepSeek
+const response3 = await client.chat.completions.create({
+  model: 'deepseek-chat',
+  messages: [{ role: 'user', content: 'Explain quantum computing.' }],
+});
+```
+
+## ¿Qué Sigue?
+
+<CardGroup cols={2}>
+  <Card title="Autenticación" icon="key" href="/es/introduction/authentication">
+    Aprenda sobre la autenticación con clave API y la seguridad.
+  </Card>
+  <Card title="Enrutamiento Inteligente" icon="route" href="/es/features/smart-routing">
+    Enrute automáticamente al mejor modelo para cada solicitud.
+  </Card>
+  <Card title="Instalar un SDK" icon="download" href="/es/sdks/overview">
+    Obtenga clientes con tipado seguro para su lenguaje.
+  </Card>
+  <Card title="Referencia de API" icon="book" href="/es/api-reference/overview">
+    Explore todos los endpoints disponibles.
+  </Card>
+</CardGroup>

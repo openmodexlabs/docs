@@ -1,0 +1,107 @@
+---
+title: "Python SDK"
+description: "OpenModex API 的官方 Python SDK。"
+---
+
+## 安装
+
+```bash
+pip install openmodex
+```
+
+需要 **Python 3.8+**。
+
+## 快速开始
+
+```python
+from openmodex import OpenModex
+
+client = OpenModex(api_key="omx_sk_YOUR_KEY")
+
+response = client.chat.completions.create(
+    model="gpt-4o",
+    messages=[{"role": "user", "content": "Hello!"}],
+)
+
+print(response.choices[0].message.content)
+```
+
+## 异步支持
+
+```python
+from openmodex import AsyncOpenModex
+
+client = AsyncOpenModex(api_key="omx_sk_YOUR_KEY")
+
+response = await client.chat.completions.create(
+    model="gpt-4o",
+    messages=[{"role": "user", "content": "Hello!"}],
+)
+```
+
+## 流式传输
+
+```python
+# Sync streaming
+stream = client.chat.completions.create(
+    model="gpt-4o",
+    messages=[{"role": "user", "content": "Write a story."}],
+    stream=True,
+)
+
+for chunk in stream:
+    content = chunk.choices[0].delta.content
+    if content:
+        print(content, end="", flush=True)
+
+# Async streaming
+async for chunk in await async_client.chat.completions.create(
+    model="gpt-4o",
+    messages=[{"role": "user", "content": "Write a story."}],
+    stream=True,
+):
+    content = chunk.choices[0].delta.content
+    if content:
+        print(content, end="", flush=True)
+```
+
+## 嵌入
+
+```python
+result = client.embeddings.create(
+    model="text-embedding-3-small",
+    input="Hello world",
+)
+
+print(result.data[0].embedding)
+```
+
+## 模型
+
+```python
+# List models
+models = client.models.list()
+
+# Get model details
+model = client.models.retrieve("openai/gpt-4o")
+
+# Compare models
+comparison = client.models.compare(["openai/gpt-4o", "anthropic/claude-3.5-sonnet"])
+```
+
+## 错误处理
+
+```python
+from openmodex import OpenModex, APIError
+
+try:
+    response = client.chat.completions.create(...)
+except APIError as e:
+    print(f"Status: {e.status_code}")
+    print(f"Message: {e.message}")
+```
+
+## 链接
+
+- [PyPI](https://pypi.org/project/openmodex/)
+- [GitHub](https://github.com/openmodexlabs/openmodex-sdk-python)

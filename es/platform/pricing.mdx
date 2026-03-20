@@ -1,0 +1,95 @@
+---
+title: "Precios"
+description: "Precios transparentes de pago por uso con costos de modelo pass-through."
+---
+
+## Cómo Funcionan los Precios
+
+OpenModex utiliza precios de **pago por uso**. Solo se le factura por los tokens que consume, a tarifas pass-through transparentes.
+
+<Info>
+  OpenModex cobra la misma tarifa por token que el proveedor subyacente. No hay recargos ocultos en los costos de modelo.
+</Info>
+
+## Niveles de Suscripción
+
+| | Free | Pro | Enterprise |
+|--|:---:|:---:|:---:|
+| **Precio** | $0/mes | $29/mes | Personalizado |
+| **Solicitudes/min** | 30 | 120 | 300+ |
+| **Tokens/min** | 60,000 | 500,000 | Personalizado |
+| **Modelos** | Todos | Todos | Todos + Personalizado |
+| **Enrutamiento Inteligente** | Básico | Completo | Completo + Personalizado |
+| **Caché de Prompts** | — | Incluido | Incluido |
+| **Respaldos** | 1 nivel | Ilimitados | Ilimitados |
+| **BYOK** | — | Incluido | Incluido |
+| **Soporte** | Comunidad | Email | Dedicado |
+| **Analíticas** | Básicas | Completas | Completas + Exportación |
+| **Gestión de Equipos** | — | Hasta 5 | Ilimitados |
+
+## Precios por Token
+
+Los costos de modelo se pasan a tarifas del proveedor. Consulte los precios en tiempo real a través de la [API de Modelos](/es/api-reference/models-list) o el [Panel de Control](https://openmodex.com/dashboard).
+
+### Modelos Populares
+
+| Modelo | Entrada (por 1M tokens) | Salida (por 1M tokens) |
+|-------|---------------------:|----------------------:|
+| `gpt-4o` | $2.50 | $10.00 |
+| `gpt-4o-mini` | $0.15 | $0.60 |
+| `claude-3.5-sonnet` | $3.00 | $15.00 |
+| `claude-3-haiku` | $0.25 | $1.25 |
+| `gemini-2.0-flash` | $0.10 | $0.40 |
+| `gemini-1.5-pro` | $1.25 | $5.00 |
+| `deepseek-chat` | $0.14 | $0.28 |
+| `mistral-large` | $2.00 | $6.00 |
+| `text-embedding-3-small` | $0.02 | — |
+
+### Respuestas en Caché
+
+El almacenamiento en caché de prompts reduce significativamente los costos:
+
+| | Estándar | En Caché |
+|--|--------:|-------:|
+| Tokens de entrada | 100% | ~50% |
+| Tokens de salida | 100% | $0 |
+| Latencia | Normal | <10ms |
+
+## Seguimiento de Costos
+
+Cada respuesta de API incluye datos de costos:
+
+```json
+{
+  "usage": {
+    "prompt_tokens": 150,
+    "completion_tokens": 50,
+    "total_tokens": 200,
+    "cost_usd": 0.001
+  }
+}
+```
+
+## Saldo y Pagos
+
+- **Añada fondos** mediante tarjeta de crédito (Stripe) o criptomonedas
+- **Consulte el saldo** y el historial de transacciones en el [Panel de Control](https://openmodex.com/dashboard)
+- **Configure alertas** para notificaciones de saldo bajo
+- **Recarga automática** disponible en los niveles Pro y Enterprise
+
+## Consejos para Optimización de Costos
+
+<CardGroup cols={2}>
+  <Card title="Use Enrutamiento Inteligente" icon="route" href="/es/features/smart-routing">
+    Deje que OpenModex elija el modelo más económico que cumpla su umbral de calidad.
+  </Card>
+  <Card title="Habilite el Caché" icon="bolt" href="/es/features/prompt-caching">
+    Almacene en caché prompts repetidos para eliminar llamadas API redundantes.
+  </Card>
+  <Card title="Dimensione los Modelos Correctamente" icon="gauge" href="/es/guides/best-practices">
+    Use modelos más pequeños para tareas simples — `gpt-4o-mini` es 15 veces más barato que `gpt-4o`.
+  </Card>
+  <Card title="Traiga Su Propia Clave" icon="key" href="/es/guides/byok">
+    Use sus propias claves de proveedor para descuentos por volumen.
+  </Card>
+</CardGroup>

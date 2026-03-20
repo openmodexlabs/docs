@@ -1,0 +1,56 @@
+---
+title: "Khóa API"
+description: "Tạo, quản lý và xoay khóa API OpenModex của bạn."
+---
+
+## Tạo Khóa
+
+1. Truy cập [bảng điều khiển Khóa API](https://openmodex.com/dashboard/api-keys)
+2. Nhấp **Create New Key**
+3. Đặt tên mô tả (ví dụ: "Production", "Development")
+4. Sao chép khóa ngay lập tức — khóa sẽ không được hiển thị lại
+
+<Warning>
+  Khóa API của bạn chỉ được hiển thị một lần khi tạo. Hãy lưu trữ an toàn. Nếu bạn mất khóa, hãy tạo khóa mới.
+</Warning>
+
+## Quản Lý Khóa
+
+Từ bảng điều khiển, bạn có thể:
+
+- **Xem mức sử dụng** — xem số lượng yêu cầu và chi phí theo từng khóa
+- **Đổi tên** — cập nhật nhãn của khóa
+- **Xoay** — tạo giá trị khóa mới trong khi giữ nguyên cấu hình
+- **Thu hồi** — vô hiệu hóa vĩnh viễn một khóa
+
+## Xoay Khóa
+
+Để xoay khóa mà không bị gián đoạn:
+
+1. Tạo khóa mới
+2. Cập nhật ứng dụng của bạn để sử dụng khóa mới
+3. Xác minh khóa mới hoạt động trong môi trường sản xuất
+4. Thu hồi khóa cũ
+
+## Giới Hạn Tốc Độ
+
+Giới hạn tốc độ được áp dụng theo từng khóa API:
+
+| Gói | Yêu cầu mỗi phút | Token mỗi phút |
+|------|--------------------:|------------------:|
+| Free | 30 | 60.000 |
+| Pro | 120 | 500.000 |
+| Enterprise | 300+ | Tùy chỉnh |
+
+Khi bạn vượt quá giới hạn tốc độ, bạn sẽ nhận được phản hồi `429 Too Many Requests` với header `Retry-After`.
+
+## Sử Dụng BYOK (Mang Khóa Riêng)
+
+OpenModex cũng hỗ trợ sử dụng khóa API nhà cung cấp của riêng bạn để truy cập trực tiếp:
+
+1. Truy cập **Settings → Provider Keys** trong bảng điều khiển
+2. Thêm khóa API nhà cung cấp của bạn (ví dụ: OpenAI, Anthropic)
+3. Khóa được mã hóa khi lưu trữ bằng mã hóa phong bì AWS KMS
+4. Các yêu cầu sẽ được định tuyến sử dụng khóa nhà cung cấp của bạn khi có sẵn
+
+Điều này mang lại cho bạn các lợi ích về định tuyến và giám sát của OpenModex trong khi sử dụng thỏa thuận nhà cung cấp của riêng bạn.

@@ -1,0 +1,106 @@
+---
+title: "Modèles pris en charge"
+description: "Tous les modèles et fournisseurs d'IA disponibles via la passerelle OpenModex."
+---
+
+## Vue d'ensemble
+
+OpenModex donne accès à plus de 100 modèles de 6 fournisseurs d'IA majeurs via une seule API. Tous les modèles sont accessibles via le même endpoint compatible OpenAI.
+
+<Tip>
+  Utilisez l'[API Models](/fr/api-reference/models-list) pour obtenir les tarifs et la disponibilité en temps réel, ou l'[API Compare](/fr/api-reference/models-compare) pour évaluer les modèles côte à côte.
+</Tip>
+
+## OpenAI
+
+| Modèle | Contexte | Idéal pour | Fonctionnalités |
+|-------|--------:|----------|----------|
+| `gpt-4o` | 128K | Usage général, vision | Streaming, Function Calling, JSON Mode, Vision |
+| `gpt-4o-mini` | 128K | Tâches économiques | Streaming, Function Calling, JSON Mode |
+| `o1` | 200K | Raisonnement complexe | Chain-of-thought |
+| `o3` | 200K | Raisonnement avancé | Chain-of-thought |
+| `gpt-4-turbo` | 128K | Compatibilité héritée | Streaming, Function Calling, Vision |
+
+## Anthropic
+
+| Modèle | Contexte | Idéal pour | Fonctionnalités |
+|-------|--------:|----------|----------|
+| `claude-3.5-sonnet` | 200K | Code, analyse, long contexte | Streaming, Tool Use |
+| `claude-3-opus` | 200K | Tâches complexes, recherche | Streaming, Tool Use |
+| `claude-3-haiku` | 200K | Rapide, économique | Streaming, Tool Use |
+
+## Google
+
+| Modèle | Contexte | Idéal pour | Fonctionnalités |
+|-------|--------:|----------|----------|
+| `gemini-2.0-flash` | 1M | Rapidité, multimodal | Streaming, Function Calling, Vision |
+| `gemini-1.5-pro` | 2M | Longs documents, analyse | Streaming, Function Calling, Vision |
+| `gemini-1.5-flash` | 1M | Équilibre vitesse et qualité | Streaming, Function Calling |
+
+## DeepSeek
+
+| Modèle | Contexte | Idéal pour | Fonctionnalités |
+|-------|--------:|----------|----------|
+| `deepseek-chat` | 128K | Usage général, économies | Streaming |
+| `deepseek-reasoner` | 128K | Raisonnement, mathématiques, code | Streaming, Chain-of-thought |
+
+## Mistral
+
+| Modèle | Contexte | Idéal pour | Fonctionnalités |
+|-------|--------:|----------|----------|
+| `mistral-large` | 128K | Entreprise, multilingue | Streaming, Function Calling |
+| `mistral-small` | 128K | Économique, rapide | Streaming |
+| `codestral` | 32K | Génération de code | Streaming |
+
+## Qwen
+
+| Modèle | Contexte | Idéal pour | Fonctionnalités |
+|-------|--------:|----------|----------|
+| `qwen-max` | 128K | Langue chinoise, usage général | Streaming |
+| `qwen2.5-72b` | 128K | Poids ouverts, polyvalent | Streaming |
+| `qwen2.5-coder` | 128K | Génération de code | Streaming |
+
+## Modèles d'embeddings
+
+| Modèle | Dimensions | Fournisseur | Idéal pour |
+|-------|----------:|----------|----------|
+| `text-embedding-3-small` | 1536 | OpenAI | Embeddings économiques |
+| `text-embedding-3-large` | 3072 | OpenAI | Embeddings haute précision |
+| `text-embedding-ada-002` | 1536 | OpenAI | Compatibilité héritée |
+
+## Choisir un modèle
+
+Utilisez les stratégies de routage ou consultez ce guide rapide :
+
+| Priorité | Recommandé |
+|----------|-------------|
+| **Le moins cher** | `gpt-4o-mini`, `deepseek-chat`, `gemini-2.0-flash` |
+| **Le plus rapide** | `gemini-2.0-flash`, `gpt-4o-mini`, `claude-3-haiku` |
+| **Meilleure qualité** | `gpt-4o`, `claude-3.5-sonnet`, `gemini-1.5-pro` |
+| **Meilleur en code** | `claude-3.5-sonnet`, `deepseek-reasoner`, `codestral` |
+| **Plus long contexte** | `gemini-1.5-pro` (2M), `gemini-2.0-flash` (1M) |
+| **Meilleur raisonnement** | `o3`, `o1`, `deepseek-reasoner` |
+
+Ou laissez OpenModex décider automatiquement :
+
+```typescript
+const response = await client.chat.completions.create({
+  model: 'auto',
+  messages: [{ role: 'user', content: 'Hello!' }],
+  routing: { strategy: 'cost_optimized' },
+});
+```
+
+## Données en temps réel sur les modèles
+
+Pour les tarifs, la disponibilité et les scores de qualité en temps réel :
+
+```bash
+# List all models with pricing
+curl https://api.openmodex.com/v1/models \
+  -H "Authorization: Bearer omx_sk_YOUR_KEY"
+
+# Compare specific models
+curl "https://api.openmodex.com/v1/models/compare?models=openai/gpt-4o,anthropic/claude-3.5-sonnet" \
+  -H "Authorization: Bearer omx_sk_YOUR_KEY"
+```

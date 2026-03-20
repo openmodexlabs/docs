@@ -1,0 +1,69 @@
+---
+title: "프롬프트 캐싱"
+description: "반복 프롬프트를 캐시하여 지연 시간과 비용을 절감합니다."
+---
+
+## 개요
+
+프롬프트 캐싱은 동일한 요청에 대한 응답을 저장하여 새로운 API 호출 없이 캐시된 결과를 즉시 반환합니다. 다음과 같은 상황에 이상적입니다:
+
+- 반복 쿼리 (FAQ 봇, 자주 묻는 질문)
+- 개발 및 테스트
+- 예측 가능한 입력을 가진 고트래픽 엔드포인트
+
+## 캐싱 활성화
+
+요청에 `cache` 파라미터를 추가하세요:
+
+```typescript
+const response = await client.chat.completions.create({
+  model: 'gpt-4o',
+  messages: [{ role: 'user', content: 'What is 2+2?' }],
+  cache: {
+    enabled: true,
+    ttl: 3600, // cache for 1 hour
+  },
+});
+
+console.log(response.openmodex?.cache_hit); // true on subsequent requests
+```
+
+## 작동 방식
+
+1. OpenModex가 요청을 해싱합니다 (모델 + 메시지 + 파라미터)
+2. 캐시된 응답이 존재하고 만료되지 않았으면 즉시 반환됩니다
+3. 캐시가 없으면 요청이 제공업체로 전송되고 응답이 캐시됩니다
+
+## 캐시 키
+
+캐시 키는 다음으로 계산됩니다:
+- 모델명
+- 메시지 배열 (내용 및 역할)
+- temperature, max_tokens 및 기타 생성 파라미터
+
+이 파라미터 중 하나라도 변경하면 다른 캐시 키가 생성됩니다.
+
+## TTL (유효 시간)
+
+| 설정 | 값 |
+|---------|-------|
+| 기본 TTL | 300초 (5분) |
+| 최소 TTL | 60초 |
+| 최대 TTL | 86400초 (24시간) |
+
+## 비용 절감
+
+캐시 응답은 훨씬 저렴합니다:
+- **캐시된 입력 토큰**은 일반 요금의 약 50%로 청구됩니다
+- **캐시 응답에는 출력 토큰 비용이 없습니다**
+- **제로 지연 시간** — 응답이 10ms 이내에 반환됩니다
+
+## 캐시 상태 확인
+
+```typescript
+const response = await client.chat.completions.create({...});
+
+if (response.openmodex?.cache_hit) {
+  console.log('Served from cache!');
+}
+```

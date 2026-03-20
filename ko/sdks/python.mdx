@@ -1,0 +1,107 @@
+---
+title: "Python SDK"
+description: "OpenModex API용 공식 Python SDK입니다."
+---
+
+## 설치
+
+```bash
+pip install openmodex
+```
+
+**Python 3.8+**이 필요합니다.
+
+## 빠른 시작
+
+```python
+from openmodex import OpenModex
+
+client = OpenModex(api_key="omx_sk_YOUR_KEY")
+
+response = client.chat.completions.create(
+    model="gpt-4o",
+    messages=[{"role": "user", "content": "Hello!"}],
+)
+
+print(response.choices[0].message.content)
+```
+
+## 비동기 지원
+
+```python
+from openmodex import AsyncOpenModex
+
+client = AsyncOpenModex(api_key="omx_sk_YOUR_KEY")
+
+response = await client.chat.completions.create(
+    model="gpt-4o",
+    messages=[{"role": "user", "content": "Hello!"}],
+)
+```
+
+## 스트리밍
+
+```python
+# Sync streaming
+stream = client.chat.completions.create(
+    model="gpt-4o",
+    messages=[{"role": "user", "content": "Write a story."}],
+    stream=True,
+)
+
+for chunk in stream:
+    content = chunk.choices[0].delta.content
+    if content:
+        print(content, end="", flush=True)
+
+# Async streaming
+async for chunk in await async_client.chat.completions.create(
+    model="gpt-4o",
+    messages=[{"role": "user", "content": "Write a story."}],
+    stream=True,
+):
+    content = chunk.choices[0].delta.content
+    if content:
+        print(content, end="", flush=True)
+```
+
+## 임베딩
+
+```python
+result = client.embeddings.create(
+    model="text-embedding-3-small",
+    input="Hello world",
+)
+
+print(result.data[0].embedding)
+```
+
+## 모델
+
+```python
+# List models
+models = client.models.list()
+
+# Get model details
+model = client.models.retrieve("openai/gpt-4o")
+
+# Compare models
+comparison = client.models.compare(["openai/gpt-4o", "anthropic/claude-3.5-sonnet"])
+```
+
+## 오류 처리
+
+```python
+from openmodex import OpenModex, APIError
+
+try:
+    response = client.chat.completions.create(...)
+except APIError as e:
+    print(f"Status: {e.status_code}")
+    print(f"Message: {e.message}")
+```
+
+## 링크
+
+- [PyPI](https://pypi.org/project/openmodex/)
+- [GitHub](https://github.com/openmodexlabs/openmodex-sdk-python)

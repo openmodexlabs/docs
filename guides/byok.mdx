@@ -1,0 +1,86 @@
+---
+title: "Bring Your Own Key (BYOK)"
+description: "Use your own provider API keys with OpenModex for volume discounts and custom agreements."
+---
+
+## Overview
+
+BYOK lets you use your own provider API keys (OpenAI, Anthropic, etc.) while still benefiting from OpenModex's routing, monitoring, fallbacks, and unified billing.
+
+This is ideal when:
+
+- You have **volume discounts** or enterprise agreements with providers
+- You need to use a **specific provider account** for compliance
+- You want **direct billing** with the provider for certain models
+
+## Setup
+
+<Steps>
+  <Step title="Go to Provider Keys">
+    Open the [Dashboard](https://openmodex.com/dashboard) → **Settings** → **Provider Keys**.
+  </Step>
+  <Step title="Add a Provider Key">
+    Click **Add Key**, select the provider, and paste your API key.
+  </Step>
+  <Step title="Verify">
+    OpenModex will validate the key with a test request. Once verified, requests for that provider will use your key.
+  </Step>
+</Steps>
+
+## Security
+
+<Info>
+  All provider keys are encrypted at rest using **AWS KMS envelope encryption** (AES-256). OpenModex never logs or exposes your provider keys.
+</Info>
+
+- Keys are encrypted immediately on submission
+- Only the key prefix is stored for identification (e.g., `sk-...abc`)
+- Decryption happens in-memory only at request time
+- Keys are never included in logs, analytics, or API responses
+
+## How Routing Works with BYOK
+
+When you have a BYOK key configured for a provider:
+
+1. Requests targeting that provider use **your key** instead of OpenModex's shared pool
+2. You're billed directly by the provider — OpenModex does not charge for model tokens
+3. You still pay the OpenModex subscription fee for platform features
+4. Routing, caching, fallbacks, and monitoring still work normally
+
+### Mixed Configuration
+
+You can configure BYOK for some providers and use OpenModex-managed keys for others:
+
+```
+OpenAI     → Your key (BYOK)
+Anthropic  → OpenModex managed
+Google     → Your key (BYOK)
+DeepSeek   → OpenModex managed
+```
+
+In this case:
+- GPT-4o requests use your OpenAI key (billed by OpenAI)
+- Claude requests use OpenModex's key (billed by OpenModex)
+- Fallbacks between BYOK and managed providers work seamlessly
+
+## Managing Keys
+
+From the Provider Keys dashboard:
+
+| Action | Description |
+|--------|-------------|
+| **Add** | Add a new provider key |
+| **Test** | Verify the key works with a test request |
+| **Rotate** | Replace the key value (updates encryption) |
+| **Remove** | Delete the key; requests revert to OpenModex-managed |
+
+## Supported Providers
+
+| Provider | Key Format | BYOK Support |
+|----------|-----------|:---:|
+| OpenAI | `sk-...` | Supported |
+| Anthropic | `sk-ant-...` | Supported |
+| Google | Service Account JSON | Supported |
+| DeepSeek | `sk-...` | Supported |
+| Mistral | `...` | Supported |
+| Qwen | `sk-...` | Supported |

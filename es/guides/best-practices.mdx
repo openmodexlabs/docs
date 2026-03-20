@@ -1,0 +1,94 @@
+---
+title: "Mejores Prácticas"
+description: "Consejos para sacar el máximo provecho de OpenModex."
+---
+
+## Elija el Modelo Correcto
+
+No todas las tareas necesitan el modelo más costoso:
+
+| Caso de Uso | Modelo Recomendado | Por Qué |
+|----------|-------------------|-----|
+| Q&A simple, clasificación | `gpt-4o-mini`, `gemini-2.0-flash` | Rápido y económico |
+| Razonamiento complejo | `gpt-4o`, `claude-3.5-sonnet` | Mayor calidad |
+| Generación de código | `claude-3.5-sonnet`, `deepseek-chat` | Mejor en código |
+| Documentos largos | `claude-3.5-sonnet`, `gemini-1.5-pro` | Contexto amplio |
+| Sensible al costo | `deepseek-chat`, `gpt-4o-mini` | Menor costo |
+
+## Use Enrutamiento Inteligente
+
+Deje que OpenModex elija el mejor modelo en lugar de codificarlo:
+
+```typescript
+// Don't do this
+if (isSimpleQuery) {
+  model = 'gpt-4o-mini';
+} else {
+  model = 'gpt-4o';
+}
+
+// Do this instead
+const response = await client.chat.completions.create({
+  model: 'gpt-4o',
+  messages,
+  routing: { strategy: 'cost_optimized' },
+});
+```
+
+## Siempre Configure Respaldos
+
+Para aplicaciones en producción, siempre configure respaldos:
+
+```typescript
+const client = new OpenModex({
+  apiKey: 'omx_sk_...',
+  fallbackModels: ['claude-3.5-sonnet', 'gemini-2.0-flash'],
+});
+```
+
+## Use Streaming para Interfaces de Chat
+
+El streaming mejora drásticamente la experiencia del usuario:
+
+```typescript
+// Bad — user waits 3-10 seconds staring at a spinner
+const response = await client.chat.completions.create({
+  model: 'gpt-4o',
+  messages,
+});
+
+// Good — user sees text appearing in real-time
+const stream = await client.chat.completions.create({
+  model: 'gpt-4o',
+  messages,
+  stream: true,
+});
+```
+
+## Habilite el Caché para Consultas Repetidas
+
+Si tiene prompts predecibles o repetidos, habilite el caché:
+
+```typescript
+const response = await client.chat.completions.create({
+  model: 'gpt-4o',
+  messages: [{ role: 'user', content: 'What are your business hours?' }],
+  cache: { enabled: true, ttl: 3600 },
+});
+```
+
+## Establezca Timeouts Apropiados
+
+```typescript
+const client = new OpenModex({
+  apiKey: 'omx_sk_...',
+  timeout: 60_000, // 60 seconds for complex tasks
+});
+```
+
+## Monitoree Su Uso
+
+- Consulte el [panel de control](https://openmodex.com/dashboard) para analíticas de uso
+- Rastree costos por modelo, por clave API
+- Configure alertas para patrones de gasto inusuales
+- Use el campo `openmodex.cost_usd` en las respuestas para rastrear costos por solicitud

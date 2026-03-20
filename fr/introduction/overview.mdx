@@ -1,0 +1,77 @@
+---
+title: "Qu'est-ce qu'OpenModex ?"
+description: "Une API, plus de 100 modèles d'IA. Routage intelligent, basculements automatiques et facturation unifiée."
+---
+
+## La passerelle IA universelle
+
+OpenModex est une passerelle API unifiée qui vous donne accès à plus de 100 grands modèles de langage de tous les principaux fournisseurs via une seule API compatible OpenAI.
+
+Au lieu de gérer plusieurs clés API, différents SDK et une facturation séparée pour chaque fournisseur d'IA, OpenModex vous permet de :
+
+- **Utiliser une seule clé API** pour accéder à OpenAI, Anthropic, Google Gemini, DeepSeek, Mistral, Qwen et bien d'autres
+- **Changer de modèle instantanément** — modifiez un seul paramètre, pas tout votre code
+- **Router intelligemment** — laissez OpenModex choisir le meilleur modèle en fonction du coût, de la latence ou de la qualité
+- **Gérer les pannes avec élégance** — les basculements automatiques garantissent le fonctionnement de votre application même lorsque les fournisseurs sont en panne
+- **Économiser de l'argent** — mise en cache des prompts, routage optimisé en coût et tarification transparente
+
+## Comment ça fonctionne
+
+<Steps>
+  <Step title="Obtenez votre clé API">
+    Inscrivez-vous sur [openmodex.com](https://openmodex.com) et créez une clé API depuis votre tableau de bord.
+  </Step>
+  <Step title="Pointez votre code vers OpenModex">
+    Remplacez l'URL de base de votre fournisseur par `https://api.openmodex.com/v1`. Si vous utilisez déjà le SDK OpenAI, c'est un changement d'une seule ligne.
+  </Step>
+  <Step title="Choisissez n'importe quel modèle">
+    Utilisez n'importe quel modèle pris en charge par son nom — `gpt-4o`, `claude-3.5-sonnet`, `gemini-2.0-flash`, `deepseek-chat` et bien d'autres.
+  </Step>
+</Steps>
+
+## Compatible OpenAI
+
+Si vous utilisez déjà l'API OpenAI, passer à OpenModex est trivial :
+
+```typescript
+import OpenAI from 'openai';
+
+const client = new OpenAI({
+  apiKey: 'omx_sk_...',                      // your OpenModex key
+  baseURL: 'https://api.openmodex.com/v1',   // point to OpenModex
+});
+
+// Everything else stays the same
+const response = await client.chat.completions.create({
+  model: 'gpt-4o',  // or any other model
+  messages: [{ role: 'user', content: 'Hello!' }],
+});
+```
+
+## Fournisseurs pris en charge
+
+| Fournisseur | Modèles | Points forts |
+|----------|--------|-----------|
+| **OpenAI** | GPT-4o, GPT-4o-mini, o1, o3 | Standard de l'industrie |
+| **Anthropic** | Claude 3.5 Sonnet, Claude 3 Opus | Idéal pour les longs contextes |
+| **Google** | Gemini 2.0 Flash, Gemini 1.5 Pro | Multimodal + rapidité |
+| **DeepSeek** | DeepSeek-V3, DeepSeek-R1 | Raisonnement économique |
+| **Mistral** | Mistral Large, Mistral Small | IA européenne |
+| **Qwen** | Qwen2.5, Qwen-Max | Optimisation pour la langue chinoise |
+
+## Étapes suivantes
+
+<CardGroup cols={2}>
+  <Card title="Démarrage rapide" icon="rocket" href="/fr/introduction/quickstart">
+    Effectuez votre premier appel API en moins de 2 minutes.
+  </Card>
+  <Card title="Référence API" icon="code" href="/fr/api-reference/overview">
+    Explorez la documentation complète de l'API.
+  </Card>
+  <Card title="SDK" icon="puzzle-piece" href="/fr/sdks/overview">
+    SDK officiels pour Node.js, Python, Go et React.
+  </Card>
+  <Card title="Routage intelligent" icon="route" href="/fr/features/smart-routing">
+    Découvrez comment le routage intelligent réduit les coûts et améliore la fiabilité.
+  </Card>
+</CardGroup>

@@ -1,0 +1,69 @@
+---
+title: "提示词缓存"
+description: "缓存重复的提示词以降低延迟和成本。"
+---
+
+## 概述
+
+提示词缓存会存储相同请求的响应，无需发起新的 API 调用即可立即返回缓存结果。适用于以下场景：
+
+- 重复查询（FAQ 机器人、常见问题）
+- 开发和测试
+- 具有可预测输入的高流量端点
+
+## 启用缓存
+
+在请求中添加 `cache` 参数：
+
+```typescript
+const response = await client.chat.completions.create({
+  model: 'gpt-4o',
+  messages: [{ role: 'user', content: 'What is 2+2?' }],
+  cache: {
+    enabled: true,
+    ttl: 3600, // cache for 1 hour
+  },
+});
+
+console.log(response.openmodex?.cache_hit); // true on subsequent requests
+```
+
+## 工作原理
+
+1. OpenModex 对请求进行哈希（模型 + 消息 + 参数）
+2. 如果存在未过期的缓存响应，则立即返回
+3. 如果没有缓存，请求会发送到供应商，响应被缓存
+
+## 缓存键
+
+缓存键由以下内容计算：
+- 模型名称
+- 消息数组（内容和角色）
+- temperature、max_tokens 和其他生成参数
+
+更改任何这些参数都会产生不同的缓存键。
+
+## TTL（生存时间）
+
+| 设置 | 值 |
+|---------|-------|
+| 默认 TTL | 300 秒（5 分钟） |
+| 最小 TTL | 60 秒 |
+| 最大 TTL | 86400 秒（24 小时） |
+
+## 成本节省
+
+缓存响应显著降低费用：
+- **缓存的输入 token** 按正常费率的约 50% 计费
+- **无输出 token 成本** 用于缓存响应
+- **零延迟** — 响应在 <10ms 内返回
+
+## 检查缓存状态
+
+```typescript
+const response = await client.chat.completions.create({...});
+
+if (response.openmodex?.cache_hit) {
+  console.log('Served from cache!');
+}
+```

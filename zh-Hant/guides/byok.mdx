@@ -1,0 +1,86 @@
+---
+title: "自帶金鑰 (BYOK)"
+description: "使用您自己的供應商 API 金鑰搭配 OpenModex，享受批量折扣和自訂合約。"
+---
+
+## 概覽
+
+BYOK 讓您使用自己的供應商 API 金鑰（OpenAI、Anthropic 等），同時仍可受益於 OpenModex 的路由、監控、容錯備援和統一計費功能。
+
+這非常適合以下情況：
+
+- 您與供應商有**批量折扣**或企業合約
+- 您需要使用**特定供應商帳戶**以符合合規要求
+- 您希望對某些模型與供應商進行**直接計費**
+
+## 設定
+
+<Steps>
+  <Step title="前往供應商金鑰">
+    開啟[控制台](https://openmodex.com/dashboard) → **Settings** → **Provider Keys**。
+  </Step>
+  <Step title="新增供應商金鑰">
+    點擊 **Add Key**，選擇供應商，然後貼上您的 API 金鑰。
+  </Step>
+  <Step title="驗證">
+    OpenModex 將透過測試請求驗證金鑰。驗證通過後，該供應商的請求將使用您的金鑰。
+  </Step>
+</Steps>
+
+## 安全性
+
+<Info>
+  所有供應商金鑰都使用 **AWS KMS 信封加密**（AES-256）在靜態狀態下加密。OpenModex 絕不會記錄或暴露您的供應商金鑰。
+</Info>
+
+- 金鑰在提交時立即加密
+- 僅儲存金鑰前綴用於識別（例如 `sk-...abc`）
+- 解密僅在請求時於記憶體中進行
+- 金鑰絕不會出現在日誌、分析或 API 回應中
+
+## BYOK 下的路由運作方式
+
+當您為某個供應商設定了 BYOK 金鑰時：
+
+1. 指向該供應商的請求使用**您的金鑰**，而非 OpenModex 的共用池
+2. 費用由供應商直接向您收取 — OpenModex 不收取模型 token 費用
+3. 您仍需支付 OpenModex 訂閱費用以使用平台功能
+4. 路由、快取、容錯備援和監控仍正常運作
+
+### 混合設定
+
+您可以為部分供應商設定 BYOK，其他供應商使用 OpenModex 託管金鑰：
+
+```
+OpenAI     → Your key (BYOK)
+Anthropic  → OpenModex managed
+Google     → Your key (BYOK)
+DeepSeek   → OpenModex managed
+```
+
+在此情況下：
+- GPT-4o 請求使用您的 OpenAI 金鑰（由 OpenAI 計費）
+- Claude 請求使用 OpenModex 的金鑰（由 OpenModex 計費）
+- BYOK 和託管供應商之間的容錯備援無縫運作
+
+## 管理金鑰
+
+從供應商金鑰控制台：
+
+| 操作 | 說明 |
+|--------|-------------|
+| **新增** | 新增供應商金鑰 |
+| **測試** | 透過測試請求驗證金鑰是否有效 |
+| **輪換** | 替換金鑰值（更新加密） |
+| **移除** | 刪除金鑰；請求將恢復為 OpenModex 託管 |
+
+## 支援的供應商
+
+| 供應商 | 金鑰格式 | BYOK 支援 |
+|----------|-----------|:---:|
+| OpenAI | `sk-...` | 支援 |
+| Anthropic | `sk-ant-...` | 支援 |
+| Google | Service Account JSON | 支援 |
+| DeepSeek | `sk-...` | 支援 |
+| Mistral | `...` | 支援 |
+| Qwen | `sk-...` | 支援 |

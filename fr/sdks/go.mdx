@@ -1,0 +1,100 @@
+---
+title: "SDK Go"
+description: "SDK officiel Go pour l'API OpenModex."
+---
+
+## Installation
+
+```bash
+go get github.com/openmodexlabs/openmodex-sdk-go
+```
+
+Nécessite **Go 1.21+**.
+
+## Démarrage rapide
+
+```go
+package main
+
+import (
+    "context"
+    "fmt"
+    openmodex "github.com/openmodexlabs/openmodex-sdk-go"
+)
+
+func main() {
+    client := openmodex.NewClient("omx_sk_YOUR_KEY")
+
+    resp, err := client.Chat.Completions.Create(context.Background(), &openmodex.ChatCompletionParams{
+        Model:    "gpt-4o",
+        Messages: []openmodex.ChatMessage{
+            {Role: "user", Content: "Hello!"},
+        },
+    })
+    if err != nil {
+        panic(err)
+    }
+
+    fmt.Println(resp.Choices[0].Message.Content)
+}
+```
+
+## Configuration
+
+```go
+client := openmodex.NewClient("omx_sk_...",
+    openmodex.WithBaseURL("https://api.openmodex.com/v1"),
+    openmodex.WithTimeout(60 * time.Second),
+    openmodex.WithMaxRetries(3),
+    openmodex.WithFallbackModels("claude-3.5-sonnet", "gemini-2.0-flash"),
+)
+```
+
+## Streaming
+
+```go
+stream, err := client.Chat.Completions.CreateStream(ctx, &openmodex.ChatCompletionParams{
+    Model:    "gpt-4o",
+    Messages: []openmodex.ChatMessage{
+        {Role: "user", Content: "Write a poem."},
+    },
+})
+if err != nil {
+    panic(err)
+}
+
+for chunk, err := range stream.Iter() {
+    if err != nil {
+        break
+    }
+    fmt.Print(chunk.Choices[0].Delta.Content)
+}
+```
+
+## Alias de modèles
+
+Le SDK Go prend en charge des alias de modèles pratiques :
+
+```go
+// Route to the cheapest available model
+resp, _ := client.Chat.Completions.Create(ctx, &openmodex.ChatCompletionParams{
+    Model: "@cheapest",
+    Messages: messages,
+})
+
+// Other aliases: @auto, @fastest, @best
+```
+
+## Presets
+
+```go
+// Use built-in presets for common configurations
+client := openmodex.NewClient("omx_sk_...", openmodex.CostSaver)
+client := openmodex.NewClient("omx_sk_...", openmodex.LowLatency)
+client := openmodex.NewClient("omx_sk_...", openmodex.HighQuality)
+```
+
+## Liens
+
+- [pkg.go.dev](https://pkg.go.dev/github.com/openmodexlabs/openmodex-sdk-go)
+- [GitHub](https://github.com/openmodexlabs/openmodex-sdk-go)

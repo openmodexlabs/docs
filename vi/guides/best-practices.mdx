@@ -1,0 +1,94 @@
+---
+title: "Phương pháp tốt nhất"
+description: "Mẹo để tận dụng tối đa OpenModex."
+---
+
+## Chọn Đúng Mô Hình
+
+Không phải mọi tác vụ đều cần mô hình đắt nhất:
+
+| Trường hợp sử dụng | Mô hình đề xuất | Lý do |
+|----------|-------------------|-----|
+| Hỏi đáp đơn giản, phân loại | `gpt-4o-mini`, `gemini-2.0-flash` | Nhanh và rẻ |
+| Suy luận phức tạp | `gpt-4o`, `claude-3.5-sonnet` | Chất lượng cao hơn |
+| Tạo mã nguồn | `claude-3.5-sonnet`, `deepseek-chat` | Tốt nhất về lập trình |
+| Tài liệu dài | `claude-3.5-sonnet`, `gemini-1.5-pro` | Ngữ cảnh lớn |
+| Nhạy cảm về chi phí | `deepseek-chat`, `gpt-4o-mini` | Chi phí thấp nhất |
+
+## Sử Dụng Định Tuyến Thông Minh
+
+Để OpenModex chọn mô hình tốt nhất thay vì cố định:
+
+```typescript
+// Don't do this
+if (isSimpleQuery) {
+  model = 'gpt-4o-mini';
+} else {
+  model = 'gpt-4o';
+}
+
+// Do this instead
+const response = await client.chat.completions.create({
+  model: 'gpt-4o',
+  messages,
+  routing: { strategy: 'cost_optimized' },
+});
+```
+
+## Luôn Cấu Hình Chuyển Đổi Dự Phòng
+
+Đối với ứng dụng sản xuất, luôn thiết lập chuyển đổi dự phòng:
+
+```typescript
+const client = new OpenModex({
+  apiKey: 'omx_sk_...',
+  fallbackModels: ['claude-3.5-sonnet', 'gemini-2.0-flash'],
+});
+```
+
+## Sử Dụng Streaming Cho Giao Diện Chat
+
+Streaming cải thiện đáng kể trải nghiệm người dùng:
+
+```typescript
+// Bad — user waits 3-10 seconds staring at a spinner
+const response = await client.chat.completions.create({
+  model: 'gpt-4o',
+  messages,
+});
+
+// Good — user sees text appearing in real-time
+const stream = await client.chat.completions.create({
+  model: 'gpt-4o',
+  messages,
+  stream: true,
+});
+```
+
+## Bật Bộ Nhớ Đệm Cho Truy Vấn Lặp Lại
+
+Nếu bạn có các prompt có thể dự đoán hoặc lặp lại, hãy bật bộ nhớ đệm:
+
+```typescript
+const response = await client.chat.completions.create({
+  model: 'gpt-4o',
+  messages: [{ role: 'user', content: 'What are your business hours?' }],
+  cache: { enabled: true, ttl: 3600 },
+});
+```
+
+## Đặt Thời Gian Chờ Phù Hợp
+
+```typescript
+const client = new OpenModex({
+  apiKey: 'omx_sk_...',
+  timeout: 60_000, // 60 seconds for complex tasks
+});
+```
+
+## Giám Sát Mức Sử Dụng
+
+- Kiểm tra [bảng điều khiển](https://openmodex.com/dashboard) để xem phân tích sử dụng
+- Theo dõi chi phí theo mô hình, theo khóa API
+- Thiết lập cảnh báo cho các mẫu chi tiêu bất thường
+- Sử dụng trường `openmodex.cost_usd` trong phản hồi để theo dõi chi phí theo từng yêu cầu

@@ -1,0 +1,77 @@
+---
+title: "自动故障转移"
+description: "即使 AI 供应商宕机，也能保持应用正常运行。"
+---
+
+## 概述
+
+故障转移功能通过在主模型失败时自动切换到备用模型来确保应用的可靠性。OpenModex 支持服务端和客户端两种故障转移方式。
+
+## 服务端故障转移
+
+按请求配置。OpenModex 在服务端处理故障切换：
+
+```typescript
+const response = await client.chat.completions.create({
+  model: 'gpt-4o',
+  messages: [{ role: 'user', content: 'Hello!' }],
+  routing: {
+    fallback: ['claude-3.5-sonnet', 'gemini-2.0-flash'],
+  },
+});
+```
+
+**工作原理：**
+1. 尝试 `gpt-4o`
+2. 如果失败（5xx、速率限制、超时） → 尝试 `claude-3.5-sonnet`
+3. 如果也失败 → 尝试 `gemini-2.0-flash`
+4. 如果全部失败 → 返回错误
+
+## 客户端故障转移
+
+在 SDK 客户端上配置。适用于所有请求：
+
+<CodeGroup>
+```typescript Node.js
+import OpenModex from '@openmodex/sdk';
+
+const client = new OpenModex({
+  apiKey: 'omx_sk_...',
+  fallbackModels: ['claude-3.5-sonnet', 'gemini-2.0-flash'],
+});
+
+// If the requested model fails, the SDK automatically retries
+// with each fallback model
+const response = await client.chat.completions.create({
+  model: 'gpt-4o',
+  messages: [{ role: 'user', content: 'Hello!' }],
+});
+```
+
+```go Go
+client := openmodex.NewClient("omx_sk_...",
+    openmodex.WithFallbackModels("claude-3.5-sonnet", "gemini-2.0-flash"),
+)
+```
+</CodeGroup>
+
+## 触发条件
+
+以下情况会触发故障转移：
+- **5xx 错误** — 供应商的服务器错误
+- **429 错误** — 超出速率限制
+- **超时** — 请求未在规定时间内完成
+- **网络错误** — 连接失败
+
+以下情况**不会**触发故障转移：
+- **4xx 错误**（429 除外） — 这些表示您的请求存在问题
+- **成功响应** — 即使内容不符合预期
+
+## 检查是否使用了故障转移
+
+```typescript
+const response = await client.chat.completions.create({...});
+
+console.log(response.openmodex?.model_used);     // actual model that responded
+console.log(response.openmodex?.fallback_used);   // true if fallback was used
+```

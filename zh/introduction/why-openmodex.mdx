@@ -1,0 +1,69 @@
+---
+title: "为什么选择 OpenModex？"
+description: "OpenModex 解决的问题以及团队选择统一 AI 网关的原因。"
+---
+
+## 问题所在
+
+如今使用 AI 模型进行开发意味着要应对碎片化的基础设施：
+
+- **多套 SDK** — OpenAI、Anthropic、Google 等各自拥有不同的客户端库、认证流程和响应格式
+- **供应商锁定** — 切换模型意味着重写集成代码
+- **无可靠性保障** — 当供应商宕机时，您的应用也会宕机
+- **隐性成本** — 分散在各供应商的账单使成本优化变得不可能
+- **无路由智能** — 即使存在更便宜或更快的选项，您也只能硬编码使用某个模型
+
+## OpenModex 如何解决这些问题
+
+<CardGroup cols={2}>
+  <Card title="一个 API，所有模型" icon="plug">
+    通过单一的 OpenAI 兼容端点访问来自 OpenAI、Anthropic、Google、DeepSeek、Mistral 和 Qwen 的 100 多个模型。
+  </Card>
+  <Card title="零锁定" icon="arrows-rotate">
+    只需更改一个字符串参数即可切换模型。您的代码、SDK、基础设施 — 其他一切都不需要改变。
+  </Card>
+  <Card title="内置可靠性" icon="shield-check">
+    自动故障转移、熔断器和健康监控确保您的应用在供应商故障时仍能正常运行。
+  </Card>
+  <Card title="成本智能" icon="chart-line">
+    智能路由、提示词缓存和按请求成本追踪帮助您在不牺牲质量的前提下优化支出。
+  </Card>
+</CardGroup>
+
+## 谁在使用 OpenModex
+
+### 初创公司和产品团队
+
+无需构建供应商抽象层即可快速交付 AI 功能。从一个模型开始，轻松进行 A/B 测试，并在无需重新架构的情况下扩展。
+
+### 平台和基础设施团队
+
+在整个组织中集中管理 AI API 访问。强制执行速率限制，按团队追踪成本，并维护单一集成点。
+
+### 代理商和咨询公司
+
+构建不依赖单一供应商的客户项目。为每个用例推荐最佳模型，并在行业格局变化时即时切换。
+
+## 核心差异化优势
+
+| | 直接 API | 其他网关 | OpenModex |
+|--|:---:|:---:|:---:|
+| OpenAI 兼容 API | — | 部分 | 完全 |
+| 智能路由（成本/延迟/质量） | — | 基础 | 高级 |
+| 自动故障转移 + 熔断器 | — | 有限 | 内置 |
+| 提示词缓存 | — | — | 内置 |
+| 模型对比 API | — | — | 内置 |
+| 透明定价 | — | 不固定 | 透传 |
+| BYOK（自带密钥） | — | — | 支持 |
+| 官方 SDK（Node、Python、Go、React） | — | 部分 | 完全 |
+
+## 开始使用
+
+<CardGroup cols={2}>
+  <Card title="快速开始" icon="rocket" href="/zh/introduction/quickstart">
+    在 2 分钟内完成您的第一次 API 调用。
+  </Card>
+  <Card title="架构" icon="sitemap" href="/zh/platform/architecture">
+    了解 OpenModex 的底层工作原理。
+  </Card>
+</CardGroup>

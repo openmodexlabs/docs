@@ -1,0 +1,86 @@
+---
+title: "Xác thực"
+description: "Xác thực các yêu cầu API của bạn bằng Bearer token."
+---
+
+## Khóa API
+
+Tất cả các yêu cầu API đều yêu cầu một khóa API được truyền trong header `Authorization`:
+
+```bash
+Authorization: Bearer omx_sk_YOUR_API_KEY
+```
+
+Khóa API được tạo và quản lý trong [bảng điều khiển](https://openmodex.com/dashboard/api-keys) của bạn.
+
+## Định Dạng Khóa
+
+Khóa API của OpenModex tuân theo định dạng:
+
+```
+omx_sk_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+```
+
+- `omx_` — tiền tố OpenModex
+- `sk_` — định danh khóa bí mật
+- Theo sau là một chuỗi ký tự chữ và số ngẫu nhiên
+
+## Cách Sử Dụng
+
+<CodeGroup>
+```bash cURL
+curl https://api.openmodex.com/v1/chat/completions \
+  -H "Authorization: Bearer omx_sk_YOUR_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{"model": "gpt-4o", "messages": [{"role": "user", "content": "Hi"}]}'
+```
+
+```typescript Node.js
+import OpenModex from '@openmodex/sdk';
+
+// Pass directly
+const client = new OpenModex({ apiKey: 'omx_sk_YOUR_KEY' });
+
+// Or use environment variable (auto-detected)
+// OPENMODEX_API_KEY=omx_sk_YOUR_KEY
+const client = new OpenModex();
+```
+
+```python Python
+from openmodex import OpenModex
+
+# Pass directly
+client = OpenModex(api_key="omx_sk_YOUR_KEY")
+
+# Or use environment variable (auto-detected)
+# OPENMODEX_API_KEY=omx_sk_YOUR_KEY
+client = OpenModex()
+```
+</CodeGroup>
+
+## Biến Môi Trường
+
+Tất cả các SDK chính thức tự động đọc biến môi trường `OPENMODEX_API_KEY`:
+
+```bash
+export OPENMODEX_API_KEY=omx_sk_YOUR_KEY
+```
+
+## Các Phương Pháp Bảo Mật Tốt Nhất
+
+<Warning>
+  Không bao giờ để lộ khóa API trong mã phía client, kho lưu trữ công khai hoặc các yêu cầu trình duyệt. Khóa API có quyền thanh toán và phải được giữ bí mật.
+</Warning>
+
+- **Sử dụng biến môi trường** — không bao giờ cố định khóa trong mã nguồn
+- **Xoay khóa thường xuyên** — tạo khóa mới và thu hồi khóa cũ từ bảng điều khiển
+- **Sử dụng khóa riêng biệt** cho môi trường phát triển và sản xuất
+- **Đặt quyền hạn** — hạn chế khóa cho các mô hình cụ thể hoặc giới hạn tốc độ khi có thể
+
+## Phản Hồi Lỗi
+
+| Trạng thái | Ý nghĩa |
+|--------|---------|
+| `401 Unauthorized` | Khóa API thiếu hoặc không hợp lệ |
+| `403 Forbidden` | Khóa không có quyền cho thao tác này |
+| `429 Too Many Requests` | Vượt quá giới hạn tốc độ |

@@ -1,0 +1,95 @@
+---
+title: "Pricing"
+description: "Transparent, pay-as-you-go pricing with pass-through model costs."
+---
+
+## How Pricing Works
+
+OpenModex uses **pay-as-you-go** pricing. You're billed only for the tokens you consume, at transparent pass-through rates.
+
+<Info>
+  OpenModex charges the same per-token rate as the underlying provider. There are no hidden markups on model costs.
+</Info>
+
+## Subscription Tiers
+
+| | Free | Pro | Enterprise |
+|--|:---:|:---:|:---:|
+| **Price** | $0/mo | $29/mo | Custom |
+| **Requests/min** | 30 | 120 | 300+ |
+| **Tokens/min** | 60,000 | 500,000 | Custom |
+| **Models** | All | All | All + Custom |
+| **Smart Routing** | Basic | Full | Full + Custom |
+| **Prompt Caching** | — | Included | Included |
+| **Fallbacks** | 1 level | Unlimited | Unlimited |
+| **BYOK** | — | Included | Included |
+| **Support** | Community | Email | Dedicated |
+| **Analytics** | Basic | Full | Full + Export |
+| **Team Management** | — | Up to 5 | Unlimited |
+
+## Token Pricing
+
+Model costs are passed through at provider rates. Check real-time pricing via the [Models API](/api-reference/models-list) or the [Dashboard](https://openmodex.com/dashboard).
+
+### Popular Models
+
+| Model | Input (per 1M tokens) | Output (per 1M tokens) |
+|-------|---------------------:|----------------------:|
+| `gpt-4o` | $2.50 | $10.00 |
+| `gpt-4o-mini` | $0.15 | $0.60 |
+| `claude-3.5-sonnet` | $3.00 | $15.00 |
+| `claude-3-haiku` | $0.25 | $1.25 |
+| `gemini-2.0-flash` | $0.10 | $0.40 |
+| `gemini-1.5-pro` | $1.25 | $5.00 |
+| `deepseek-chat` | $0.14 | $0.28 |
+| `mistral-large` | $2.00 | $6.00 |
+| `text-embedding-3-small` | $0.02 | — |
+
+### Cached Responses
+
+Prompt caching reduces costs significantly:
+
+| | Standard | Cached |
+|--|--------:|-------:|
+| Input tokens | 100% | ~50% |
+| Output tokens | 100% | $0 |
+| Latency | Normal | <10ms |
+
+## Cost Tracking
+
+Every API response includes cost data:
+
+```json
+{
+  "usage": {
+    "prompt_tokens": 150,
+    "completion_tokens": 50,
+    "total_tokens": 200,
+    "cost_usd": 0.001
+  }
+}
+```
+
+## Balance & Payments
+
+- **Add funds** via credit card (Stripe) or cryptocurrency
+- **View balance** and transaction history in the [Dashboard](https://openmodex.com/dashboard)
+- **Set alerts** for low-balance notifications
+- **Auto-recharge** available on Pro and Enterprise tiers
+
+## Cost Optimization Tips
+
+<CardGroup cols={2}>
+  <Card title="Use Smart Routing" icon="route" href="/features/smart-routing">
+    Let OpenModex pick the cheapest model that meets your quality threshold.
+  </Card>
+  <Card title="Enable Caching" icon="bolt" href="/features/prompt-caching">
+    Cache repeated prompts to eliminate redundant API calls.
+  </Card>
+  <Card title="Right-size Models" icon="gauge" href="/guides/best-practices">
+    Use smaller models for simple tasks — `gpt-4o-mini` is 15x cheaper than `gpt-4o`.
+  </Card>
+  <Card title="Bring Your Own Key" icon="key" href="/guides/byok">
+    Use your own provider keys for volume discounts.
+  </Card>
+</CardGroup>

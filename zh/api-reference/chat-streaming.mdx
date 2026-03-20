@@ -1,0 +1,144 @@
+---
+title: "流式传输"
+description: "POST /v1/chat/completions — 实时流式传输聊天补全响应。"
+---
+
+## 概述
+
+设置 `stream: true` 以 Server-Sent Events (SSE) 形式接收响应。每个事件包含一个部分响应块，允许您在内容生成时实时显示。
+
+## 流格式
+
+流发送包含 JSON 对象的 `data:` 行：
+
+```
+data: {"id":"chatcmpl-abc","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"role":"assistant"},"finish_reason":null}]}
+
+data: {"id":"chatcmpl-abc","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"content":"Hello"},"finish_reason":null}]}
+
+data: {"id":"chatcmpl-abc","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"content":"!"},"finish_reason":null}]}
+
+data: {"id":"chatcmpl-abc","object":"chat.completion.chunk","choices":[{"index":0,"delta":{},"finish_reason":"stop"}]}
+
+data: [DONE]
+```
+
+## 块对象
+
+每个块包含：
+
+| 字段 | 类型 | 描述 |
+|-------|------|-------------|
+| `id` | string | 在一个响应的所有块中共享 |
+| `object` | string | 始终为 `chat.completion.chunk` |
+| `created` | integer | Unix 时间戳 |
+| `model` | string | 生成响应的模型 |
+| `choices[].delta.role` | string | 仅在第一个块中出现 |
+| `choices[].delta.content` | string | Token 内容（可能为空） |
+| `choices[].finish_reason` | string \| null | `stop`、`length` 或流式传输期间为 `null` |
+
+## 示例
+
+<CodeGroup>
+```bash cURL
+curl https://api.openmodex.com/v1/chat/completions \
+  -H "Authorization: Bearer omx_sk_YOUR_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "model": "gpt-4o",
+    "messages": [{"role": "user", "content": "Write a poem about the sea."}],
+    "stream": true
+  }'
+```
+
+```typescript Node.js
+import OpenModex from '@openmodex/sdk';
+
+const client = new OpenModex({ apiKey: 'omx_sk_YOUR_KEY' });
+
+const stream = await client.chat.completions.create({
+  model: 'gpt-4o',
+  messages: [{ role: 'user', content: 'Write a poem about the sea.' }],
+  stream: true,
+});
+
+for await (const chunk of stream) {
+  const content = chunk.choices[0]?.delta?.content;
+  if (content) process.stdout.write(content);
+}
+```
+
+```python Python
+from openmodex import OpenModex
+
+client = OpenModex(api_key="omx_sk_YOUR_KEY")
+
+stream = client.chat.completions.create(
+    model="gpt-4o",
+    messages=[{"role": "user", "content": "Write a poem about the sea."}],
+    stream=True,
+)
+
+for chunk in stream:
+    content = chunk.choices[0].delta.content
+    if content:
+        print(content, end="", flush=True)
+```
+
+```tsx React
+import { useChat } from '@openmodex/react';
+
+function Chat() {
+  const { messages, input, setInput, sendMessage, isLoading, stop } = useChat({
+    apiKey: 'omx_sk_YOUR_KEY',
+    model: 'gpt-4o',
+  });
+
+  return (
+    <div>
+      {messages.map((m) => (
+        <p key={m.id}><b>{m.role}:</b> {m.content}</p>
+      ))}
+      <input value={input} onChange={(e) => setInput(e.target.value)} />
+      <button onClick={() => sendMessage()} disabled={isLoading}>Send</button>
+      {isLoading && <button onClick={stop}>Stop</button>}
+    </div>
+  );
+}
+```
+</CodeGroup>
+
+## 中止流
+
+您可以取消正在进行的流：
+
+<CodeGroup>
+```typescript Node.js
+const stream = await client.chat.completions.create({
+  model: 'gpt-4o',
+  messages: [{ role: 'user', content: 'Write a long story...' }],
+  stream: true,
+});
+
+// Abort after 2 seconds
+setTimeout(() => stream.abort(), 2000);
+
+for await (const chunk of stream) {
+  process.stdout.write(chunk.choices[0]?.delta?.content ?? '');
+}
+```
+
+```python Python
+stream = client.chat.completions.create(
+    model="gpt-4o",
+    messages=[{"role": "user", "content": "Write a long story..."}],
+    stream=True,
+)
+
+for chunk in stream:
+    content = chunk.choices[0].delta.content
+    if content:
+        print(content, end="", flush=True)
+    # Call stream.close() to abort
+```
+</CodeGroup>

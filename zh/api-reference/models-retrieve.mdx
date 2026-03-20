@@ -1,0 +1,70 @@
+---
+title: "获取模型详情"
+description: "GET /v1/models/:id — 获取特定模型的详细信息。"
+api: "GET /models/{model_id}"
+---
+
+## 路径参数
+
+<ParamField path="model_id" type="string" required>
+  模型 ID（例如 `openai/gpt-4o`）。
+</ParamField>
+
+## 响应
+
+```json
+{
+  "id": "openai/gpt-4o",
+  "object": "model",
+  "name": "GPT-4o",
+  "provider": "openai",
+  "description": "Most capable GPT-4 model with vision capabilities",
+  "category": ["chat", "vision"],
+  "context_length": 128000,
+  "max_output_tokens": 16384,
+  "modalities": {
+    "input": ["text", "image"],
+    "output": ["text"]
+  },
+  "features": ["streaming", "function_calling", "json_mode", "vision"],
+  "license": "proprietary",
+  "pricing": {
+    "official_input_per_m": 2.50,
+    "official_output_per_m": 10.00,
+    "openmodex_input_per_m": 2.50,
+    "openmodex_output_per_m": 10.00,
+    "cached_input_per_m": 1.25,
+    "currency": "USD"
+  },
+  "performance": {
+    "availability": 99.9,
+    "latency_p50_ms": 800,
+    "latency_p99_ms": 3500
+  },
+  "quality_scores": {
+    "overall": 92,
+    "code": 90,
+    "math": 88,
+    "reasoning": 91
+  }
+}
+```
+
+## 示例
+
+<CodeGroup>
+```bash cURL
+curl https://api.openmodex.com/v1/models/openai/gpt-4o \
+  -H "Authorization: Bearer omx_sk_YOUR_KEY"
+```
+
+```typescript Node.js
+const model = await client.models.retrieve('openai/gpt-4o');
+console.log(model.pricing, model.quality_scores);
+```
+
+```python Python
+model = client.models.retrieve("openai/gpt-4o")
+print(model.pricing, model.quality_scores)
+```
+</CodeGroup>

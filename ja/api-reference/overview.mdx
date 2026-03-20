@@ -1,0 +1,98 @@
+---
+title: "API概要"
+description: "OpenModex APIリファレンス — 拡張機能を備えたOpenAI互換エンドポイント。"
+---
+
+## ベースURL
+
+```
+https://api.openmodex.com/v1
+```
+
+すべてのAPIエンドポイントはOpenAI互換です。すでにOpenAI APIを使用している場合は、ベースURLとAPIキーを変更するだけで切り替えられます。
+
+## 認証
+
+`Authorization`ヘッダーにAPIキーを含めてください：
+
+```
+Authorization: Bearer omx_sk_YOUR_API_KEY
+```
+
+## エンドポイント
+
+| メソッド | エンドポイント | 説明 |
+|--------|----------|-------------|
+| `POST` | `/chat/completions` | チャット補完を作成 |
+| `POST` | `/completions` | テキスト補完を作成（レガシー） |
+| `POST` | `/embeddings` | エンベディングを作成 |
+| `GET` | `/models` | 利用可能なモデルを一覧表示 |
+| `GET` | `/models/:id` | モデルを取得 |
+| `GET` | `/models/compare` | モデルを並列比較 |
+
+## リクエスト形式
+
+すべての`POST`リクエストは`Content-Type: application/json`のJSONボディを受け付けます。
+
+## レスポンス形式
+
+すべてのレスポンスはJSONで返されます。成功したレスポンスはデータを直接含みます。エラーレスポンスは以下の形式に従います：
+
+```json
+{
+  "error": {
+    "message": "Human-readable error message",
+    "type": "invalid_request_error",
+    "code": "invalid_api_key"
+  }
+}
+```
+
+## HTTPステータスコード
+
+| コード | 説明 |
+|------|-------------|
+| `200` | 成功 |
+| `400` | 不正なリクエスト — パラメータを確認してください |
+| `401` | 認証エラー — APIキーが無効または不足 |
+| `403` | 禁止 — 権限が不十分 |
+| `404` | 見つからない — エンドポイントまたはモデルが無効 |
+| `429` | レート制限 — 速度を落とすかプランをアップグレードしてください |
+| `500` | サーバーエラー — バックオフしてリトライしてください |
+| `502` | 不正なゲートウェイ — アップストリームプロバイダーエラー |
+| `503` | サービス利用不可 — 一時的な停止 |
+
+## OpenModexレスポンスメタデータ
+
+すべてのレスポンスには、ルーティングとパフォーマンスのメタデータを含むオプションの`openmodex`フィールドが含まれます：
+
+```json
+{
+  "id": "chatcmpl-abc123",
+  "choices": [...],
+  "usage": {...},
+  "openmodex": {
+    "request_id": "req_abc123",
+    "model_used": "gpt-4o-2024-08-06",
+    "provider": "openai",
+    "cache_hit": false,
+    "routing_strategy": "cost_optimized",
+    "fallback_used": false,
+    "latency_ms": 1250
+  }
+}
+```
+
+## べき等性
+
+`POST`リクエストでは、`Idempotency-Key`ヘッダーを渡すことで、同じリクエストが二重に処理されないようにできます：
+
+```bash
+curl https://api.openmodex.com/v1/chat/completions \
+  -H "Authorization: Bearer omx_sk_..." \
+  -H "Idempotency-Key: my-unique-key-123" \
+  -H "Content-Type: application/json" \
+  -d '...'
+```
+
+べき等性キーは24時間有効です。

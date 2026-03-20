@@ -1,0 +1,106 @@
+---
+title: "Định tuyến thông minh"
+description: "Tự động định tuyến yêu cầu đến mô hình tốt nhất dựa trên chi phí, độ trễ hoặc chất lượng."
+---
+
+## Tổng Quan
+
+Công cụ định tuyến thông minh của OpenModex tự động chọn nhà cung cấp tối ưu cho mỗi yêu cầu. Thay vì cố định một nhà cung cấp duy nhất, bạn có thể để OpenModex lựa chọn dựa trên ưu tiên của bạn.
+
+## Chiến Lược Định Tuyến
+
+### Tối Ưu Chi Phí
+
+Định tuyến đến nhà cung cấp rẻ nhất có thể đáp ứng yêu cầu:
+
+```typescript
+const response = await client.chat.completions.create({
+  model: 'gpt-4o',
+  messages: [{ role: 'user', content: 'Summarize this article...' }],
+  routing: {
+    strategy: 'cost_optimized',
+  },
+});
+```
+
+### Tối Ưu Độ Trễ
+
+Định tuyến đến nhà cung cấp nhanh nhất có sẵn:
+
+```typescript
+const response = await client.chat.completions.create({
+  model: 'gpt-4o',
+  messages: [{ role: 'user', content: 'Quick answer needed...' }],
+  routing: {
+    strategy: 'latency_optimized',
+  },
+});
+```
+
+### Tối Ưu Chất Lượng
+
+Định tuyến đến nhà cung cấp có điểm chất lượng cao nhất:
+
+```typescript
+const response = await client.chat.completions.create({
+  model: 'gpt-4o',
+  messages: [{ role: 'user', content: 'Write a detailed analysis...' }],
+  routing: {
+    strategy: 'quality_optimized',
+  },
+});
+```
+
+## Chuyển Đổi Dự Phòng Phía Máy Chủ
+
+Xác định chuỗi dự phòng tự động thực thi nếu mô hình chính gặp lỗi:
+
+```typescript
+const response = await client.chat.completions.create({
+  model: 'gpt-4o',
+  messages: [{ role: 'user', content: 'Hello!' }],
+  routing: {
+    fallback: ['claude-3.5-sonnet', 'gemini-2.0-flash'],
+  },
+});
+```
+
+Nếu `gpt-4o` không khả dụng (lỗi 5xx hoặc giới hạn tốc độ), OpenModex tự động thử `claude-3.5-sonnet`, sau đó `gemini-2.0-flash`.
+
+## Cho Phép Nâng Cấp
+
+Cho phép OpenModex định tuyến đến một mô hình mạnh hơn khi có sẵn ở cùng mức giá:
+
+```typescript
+const response = await client.chat.completions.create({
+  model: 'gpt-4o-mini',
+  messages: [{ role: 'user', content: 'Hello!' }],
+  routing: {
+    allow_upgrade: true,
+  },
+});
+```
+
+## Bộ Ngắt Mạch
+
+OpenModex giám sát sức khỏe nhà cung cấp theo thời gian thực. Khi một nhà cung cấp bắt đầu gặp lỗi:
+
+1. **Khỏe mạnh** — yêu cầu được định tuyến bình thường
+2. **Suy giảm** — sau các lỗi liên tiếp, lưu lượng bị giảm
+3. **Mở** — nhà cung cấp tạm thời bị loại khỏi định tuyến
+4. **Phục hồi** — các kiểm tra sức khỏe định kỳ khôi phục nhà cung cấp
+
+Điều này xảy ra tự động — bạn không cần cấu hình gì.
+
+## Kiểm Tra Kết Quả
+
+Mỗi phản hồi đều bao gồm siêu dữ liệu định tuyến:
+
+```typescript
+const response = await client.chat.completions.create({...});
+
+console.log(response.openmodex?.provider);          // "openai"
+console.log(response.openmodex?.routing_strategy);   // "cost_optimized"
+console.log(response.openmodex?.fallback_used);      // false
+console.log(response.openmodex?.latency_ms);         // 850
+```

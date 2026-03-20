@@ -1,0 +1,138 @@
+---
+title: "React 훅"
+description: "AI 기반 인터페이스를 구축하기 위한 React 훅 — useChat, useCompletion, useModels."
+---
+
+## 설치
+
+```bash
+npm install @openmodex/react
+```
+
+**React 18+**이 필요합니다.
+
+## useChat
+
+스트리밍, 메시지 기록, 중단 지원이 포함된 완전한 기능의 채팅 훅입니다.
+
+```tsx
+import { useChat } from '@openmodex/react';
+
+function ChatApp() {
+  const { messages, input, setInput, sendMessage, isLoading, stop, error } = useChat({
+    apiKey: 'omx_sk_...',
+    model: 'gpt-4o',
+    system: 'You are a helpful assistant.',
+    onFinish: (message) => console.log('Done:', message.content),
+    onError: (error) => console.error(error),
+  });
+
+  return (
+    <div>
+      <div>
+        {messages.map((m) => (
+          <div key={m.id}>
+            <strong>{m.role}:</strong> {m.content}
+          </div>
+        ))}
+      </div>
+
+      <form onSubmit={(e) => { e.preventDefault(); sendMessage(); }}>
+        <input
+          value={input}
+          onChange={(e) => setInput(e.target.value)}
+          placeholder="Type a message..."
+        />
+        <button type="submit" disabled={isLoading}>Send</button>
+        {isLoading && <button onClick={stop}>Stop</button>}
+      </form>
+
+      {error && <p style={{ color: 'red' }}>{error.message}</p>}
+    </div>
+  );
+}
+```
+
+### 옵션
+
+| 옵션 | 타입 | 기본값 | 설명 |
+|--------|------|---------|-------------|
+| `apiKey` | `string` | — | API 키 |
+| `baseURL` | `string` | `https://api.openmodex.com/v1` | API URL |
+| `model` | `string` | `gpt-4o` | 사용할 모델 |
+| `initialMessages` | `ChatMessage[]` | `[]` | 대화 사전 설정 |
+| `initialInput` | `string` | `''` | 초기 입력 값 |
+| `system` | `string` | — | 시스템 프롬프트 |
+| `onFinish` | `(message) => void` | — | 완료 시 호출 |
+| `onError` | `(error) => void` | — | 오류 시 호출 |
+
+### 반환값
+
+| 속성 | 타입 | 설명 |
+|----------|------|-------------|
+| `messages` | `ChatMessage[]` | 모든 메시지 |
+| `setMessages` | `Dispatch` | 메시지 설정 |
+| `input` | `string` | 현재 입력 |
+| `setInput` | `Dispatch` | 입력 업데이트 |
+| `sendMessage` | `(content?) => Promise` | 메시지 전송 |
+| `isLoading` | `boolean` | 로딩 상태 |
+| `error` | `Error \| null` | 마지막 오류 |
+| `stop` | `() => void` | 스트림 중단 |
+
+## useCompletion
+
+스트리밍이 포함된 단일 턴 완성입니다.
+
+```tsx
+import { useCompletion } from '@openmodex/react';
+
+function CompletionApp() {
+  const { completion, input, setInput, complete, isLoading, stop } = useCompletion({
+    apiKey: 'omx_sk_...',
+    model: 'gpt-4o',
+  });
+
+  return (
+    <div>
+      <input value={input} onChange={(e) => setInput(e.target.value)} />
+      <button onClick={() => complete()} disabled={isLoading}>Complete</button>
+      {isLoading && <button onClick={stop}>Stop</button>}
+      <p>{completion}</p>
+    </div>
+  );
+}
+```
+
+## useModels
+
+사용 가능한 모델을 가져옵니다.
+
+```tsx
+import { useModels } from '@openmodex/react';
+
+function ModelList() {
+  const { models, isLoading, error, refetch } = useModels({
+    apiKey: 'omx_sk_...',
+  });
+
+  if (isLoading) return <p>Loading models...</p>;
+  if (error) return <p>Error: {error.message}</p>;
+
+  return (
+    <ul>
+      {models.map((m) => (
+        <li key={m.id}>
+          <strong>{m.name}</strong> — {m.provider}
+          <br />
+          <small>{m.description}</small>
+        </li>
+      ))}
+    </ul>
+  );
+}
+```
+
+## 링크
+
+- [npm](https://www.npmjs.com/package/@openmodex/react)
+- [GitHub](https://github.com/openmodexlabs/openmodex-packages/tree/main/packages/react)

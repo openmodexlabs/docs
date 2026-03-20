@@ -1,0 +1,94 @@
+---
+title: "エンベディングの作成"
+description: "POST /v1/embeddings — テキストのベクトルエンベディングを生成します。"
+api: "POST /embeddings"
+---
+
+## リクエストボディ
+
+<ParamField body="model" type="string" required>
+  使用するエンベディングモデル（例：`text-embedding-3-small`、`text-embedding-3-large`）。
+</ParamField>
+
+<ParamField body="input" type="string | string[]" required>
+  エンベディングするテキスト。単一の文字列または文字列の配列。
+</ParamField>
+
+<ParamField body="encoding_format" type="string" default="float">
+  エンベディングの形式。`float`または`base64`。
+</ParamField>
+
+<ParamField body="dimensions" type="integer">
+  出力エンベディングの次元数（モデルに依存）。
+</ParamField>
+
+## レスポンス
+
+```json
+{
+  "object": "list",
+  "data": [
+    {
+      "object": "embedding",
+      "embedding": [0.0023, -0.0094, 0.0156, ...],
+      "index": 0
+    }
+  ],
+  "model": "text-embedding-3-small",
+  "usage": {
+    "prompt_tokens": 8,
+    "total_tokens": 8
+  }
+}
+```
+
+## 使用例
+
+<CodeGroup>
+```bash cURL
+curl https://api.openmodex.com/v1/embeddings \
+  -H "Authorization: Bearer omx_sk_YOUR_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "model": "text-embedding-3-small",
+    "input": "OpenModex is a unified AI gateway."
+  }'
+```
+
+```typescript Node.js
+const result = await client.embeddings.create({
+  model: 'text-embedding-3-small',
+  input: 'OpenModex is a unified AI gateway.',
+});
+
+console.log(result.data[0].embedding);
+```
+
+```python Python
+result = client.embeddings.create(
+    model="text-embedding-3-small",
+    input="OpenModex is a unified AI gateway.",
+)
+
+print(result.data[0].embedding)
+```
+</CodeGroup>
+
+## バッチエンベディング
+
+1回のリクエストで複数のテキストをエンベディングできます：
+
+```typescript
+const result = await client.embeddings.create({
+  model: 'text-embedding-3-small',
+  input: [
+    'First text to embed',
+    'Second text to embed',
+    'Third text to embed',
+  ],
+});
+
+// result.data[0].embedding -> vector for first text
+// result.data[1].embedding -> vector for second text
+// result.data[2].embedding -> vector for third text
+```

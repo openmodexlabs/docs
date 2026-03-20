@@ -1,0 +1,57 @@
+---
+title: "Facturación y Costos"
+description: "Comprenda cómo funciona la facturación de OpenModex."
+---
+
+## Cómo Funciona la Facturación
+
+OpenModex usa un modelo de pago por uso. Se le factura según:
+
+- **Tokens de entrada** — los tokens en su prompt/mensajes
+- **Tokens de salida** — los tokens generados por el modelo
+- **Precios del modelo** — cada modelo tiene su propia tarifa por token
+
+## Precios
+
+OpenModex transfiere los precios del proveedor con márgenes transparentes. Consulte los precios actuales:
+
+- [Página de precios](https://openmodex.com/pricing)
+- [API de Modelos](/es/api-reference/models-list) — incluye precios por modelo
+
+## Seguimiento de Costos
+
+Cada respuesta incluye información de costos:
+
+```json
+{
+  "usage": {
+    "prompt_tokens": 150,
+    "completion_tokens": 50,
+    "total_tokens": 200,
+    "cost_usd": 0.001
+  }
+}
+```
+
+## Analíticas del Panel de Control
+
+El [panel de control](https://openmodex.com/dashboard) proporciona:
+
+- **Gasto en tiempo real** — saldo actual y tasa de consumo
+- **Desglose por modelo** — costo y uso por modelo
+- **Tendencias diarias** — gasto a lo largo del tiempo
+- **Analíticas por clave** — rastree costos por clave API
+
+## Ahorrar Dinero
+
+1. **Use enrutamiento optimizado por costo** — deje que OpenModex elija el modelo más económico
+2. **Habilite el caché** — evite pagar por consultas repetidas
+3. **Elija modelos más pequeños** — `gpt-4o-mini` es 10 veces más barato que `gpt-4o`
+4. **Establezca max_tokens** — limite la longitud de salida para controlar costos
+5. **Use BYOK** — traiga sus propias claves de proveedor para descuentos por volumen
+
+## Saldo y Pagos
+
+- Añada fondos mediante **tarjeta de crédito** (Stripe) o **criptomonedas**
+- Consulte el saldo y el historial de transacciones en el panel de control
+- Configure alertas de saldo bajo para evitar interrupciones del servicio

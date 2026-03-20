@@ -1,0 +1,144 @@
+---
+title: "ストリーミング"
+description: "POST /v1/chat/completions — チャット補完レスポンスをリアルタイムでストリーミングします。"
+---
+
+## 概要
+
+`stream: true`を設定すると、Server-Sent Events（SSE）としてレスポンスを受信します。各イベントには部分的なレスポンスチャンクが含まれ、生成されるコンテンツをリアルタイムで表示できます。
+
+## ストリーム形式
+
+ストリームはJSONオブジェクトを含む`data:`行を送信します：
+
+```
+data: {"id":"chatcmpl-abc","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"role":"assistant"},"finish_reason":null}]}
+
+data: {"id":"chatcmpl-abc","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"content":"Hello"},"finish_reason":null}]}
+
+data: {"id":"chatcmpl-abc","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"content":"!"},"finish_reason":null}]}
+
+data: {"id":"chatcmpl-abc","object":"chat.completion.chunk","choices":[{"index":0,"delta":{},"finish_reason":"stop"}]}
+
+data: [DONE]
+```
+
+## チャンクオブジェクト
+
+各チャンクには以下が含まれます：
+
+| フィールド | 型 | 説明 |
+|-------|------|-------------|
+| `id` | string | 1つのレスポンス内のすべてのチャンクで共有 |
+| `object` | string | 常に`chat.completion.chunk` |
+| `created` | integer | Unixタイムスタンプ |
+| `model` | string | レスポンスを生成したモデル |
+| `choices[].delta.role` | string | 最初のチャンクにのみ存在 |
+| `choices[].delta.content` | string | トークンコンテンツ（空の場合あり） |
+| `choices[].finish_reason` | string \| null | ストリーミング中は`stop`、`length`、または`null` |
+
+## 使用例
+
+<CodeGroup>
+```bash cURL
+curl https://api.openmodex.com/v1/chat/completions \
+  -H "Authorization: Bearer omx_sk_YOUR_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "model": "gpt-4o",
+    "messages": [{"role": "user", "content": "Write a poem about the sea."}],
+    "stream": true
+  }'
+```
+
+```typescript Node.js
+import OpenModex from '@openmodex/sdk';
+
+const client = new OpenModex({ apiKey: 'omx_sk_YOUR_KEY' });
+
+const stream = await client.chat.completions.create({
+  model: 'gpt-4o',
+  messages: [{ role: 'user', content: 'Write a poem about the sea.' }],
+  stream: true,
+});
+
+for await (const chunk of stream) {
+  const content = chunk.choices[0]?.delta?.content;
+  if (content) process.stdout.write(content);
+}
+```
+
+```python Python
+from openmodex import OpenModex
+
+client = OpenModex(api_key="omx_sk_YOUR_KEY")
+
+stream = client.chat.completions.create(
+    model="gpt-4o",
+    messages=[{"role": "user", "content": "Write a poem about the sea."}],
+    stream=True,
+)
+
+for chunk in stream:
+    content = chunk.choices[0].delta.content
+    if content:
+        print(content, end="", flush=True)
+```
+
+```tsx React
+import { useChat } from '@openmodex/react';
+
+function Chat() {
+  const { messages, input, setInput, sendMessage, isLoading, stop } = useChat({
+    apiKey: 'omx_sk_YOUR_KEY',
+    model: 'gpt-4o',
+  });
+
+  return (
+    <div>
+      {messages.map((m) => (
+        <p key={m.id}><b>{m.role}:</b> {m.content}</p>
+      ))}
+      <input value={input} onChange={(e) => setInput(e.target.value)} />
+      <button onClick={() => sendMessage()} disabled={isLoading}>Send</button>
+      {isLoading && <button onClick={stop}>Stop</button>}
+    </div>
+  );
+}
+```
+</CodeGroup>
+
+## ストリームの中断
+
+進行中のストリームをキャンセルできます：
+
+<CodeGroup>
+```typescript Node.js
+const stream = await client.chat.completions.create({
+  model: 'gpt-4o',
+  messages: [{ role: 'user', content: 'Write a long story...' }],
+  stream: true,
+});
+
+// Abort after 2 seconds
+setTimeout(() => stream.abort(), 2000);
+
+for await (const chunk of stream) {
+  process.stdout.write(chunk.choices[0]?.delta?.content ?? '');
+}
+```
+
+```python Python
+stream = client.chat.completions.create(
+    model="gpt-4o",
+    messages=[{"role": "user", "content": "Write a long story..."}],
+    stream=True,
+)
+
+for chunk in stream:
+    content = chunk.choices[0].delta.content
+    if content:
+        print(content, end="", flush=True)
+    # Call stream.close() to abort
+```
+</CodeGroup>

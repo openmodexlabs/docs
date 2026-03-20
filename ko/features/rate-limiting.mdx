@@ -1,0 +1,65 @@
+---
+title: "요청 제한"
+description: "API 요청 제한을 이해하고 처리하세요."
+---
+
+## 요청 제한
+
+요청 제한은 구독 티어에 따라 API 키별로 적용됩니다:
+
+| 티어 | 분당 요청 | 분당 토큰 |
+|------|-------------:|-----------:|
+| Free | 30 | 60,000 |
+| Pro | 120 | 500,000 |
+| Enterprise | 300+ | 커스텀 |
+
+## 요청 제한 헤더
+
+모든 응답에는 요청 제한 헤더가 포함됩니다:
+
+```
+X-RateLimit-Limit: 120
+X-RateLimit-Remaining: 115
+X-RateLimit-Reset: 1700000060
+```
+
+| 헤더 | 설명 |
+|--------|-------------|
+| `X-RateLimit-Limit` | 윈도우당 최대 요청 수 |
+| `X-RateLimit-Remaining` | 윈도우 내 남은 요청 수 |
+| `X-RateLimit-Reset` | 윈도우가 리셋되는 Unix 타임스탬프 |
+
+## 429 오류 처리
+
+요청 제한에 도달하면 `429 Too Many Requests` 응답을 받게 됩니다:
+
+```json
+{
+  "error": {
+    "message": "Rate limit exceeded. Please retry after 2 seconds.",
+    "type": "rate_limit_error",
+    "code": "rate_limit_exceeded"
+  }
+}
+```
+
+## 자동 재시도
+
+모든 공식 SDK는 429 오류에 대해 지수 백오프로 자동 재시도합니다:
+
+```typescript
+const client = new OpenModex({
+  apiKey: 'omx_sk_...',
+  maxRetries: 3, // default: 2
+});
+```
+
+재시도 지연은 다음을 따릅니다: `min(500ms × 2^attempt, 5000ms)`
+
+## 모범 사례
+
+1. **지수 백오프를 사용하세요** — SDK가 자동으로 처리합니다
+2. **남은 쿼터를 모니터링하세요** — `X-RateLimit-Remaining` 헤더를 확인하세요
+3. **스트리밍을 사용하세요** — 스트리밍 요청은 응답 길이에 관계없이 하나의 요청으로 계산됩니다
+4. **티어를 업그레이드하세요** — 지속적으로 제한에 도달한다면 업그레이드를 고려하세요
+5. **부하를 분산하세요** — 서로 다른 서비스에 여러 API 키를 사용하세요

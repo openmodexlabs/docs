@@ -1,0 +1,119 @@
+---
+title: "從 OpenAI 遷移"
+description: "在幾分鐘內從 OpenAI API 切換到 OpenModex。"
+---
+
+## 概覽
+
+OpenModex 完全相容 OpenAI API。遷移通常只需更改兩行程式碼：基底 URL 和 API 金鑰。
+
+## 方案 1：使用 OpenAI SDK（最快）
+
+如果您已在使用 OpenAI SDK，只需更改設定：
+
+<CodeGroup>
+```typescript Node.js
+import OpenAI from 'openai';
+
+const client = new OpenAI({
+  apiKey: 'omx_sk_YOUR_KEY',                   // ← OpenModex key
+  baseURL: 'https://api.openmodex.com/v1',     // ← OpenModex URL
+});
+
+// All existing code works unchanged
+const response = await client.chat.completions.create({
+  model: 'gpt-4o',
+  messages: [{ role: 'user', content: 'Hello!' }],
+});
+```
+
+```python Python
+from openai import OpenAI
+
+client = OpenAI(
+    api_key="omx_sk_YOUR_KEY",                   # ← OpenModex key
+    base_url="https://api.openmodex.com/v1",     # ← OpenModex URL
+)
+
+# All existing code works unchanged
+response = client.chat.completions.create(
+    model="gpt-4o",
+    messages=[{"role": "user", "content": "Hello!"}],
+)
+```
+</CodeGroup>
+
+## 方案 2：使用 OpenModex SDK
+
+若要使用路由、快取、容錯備援和模型比較功能：
+
+<CodeGroup>
+```typescript Node.js
+// Before (OpenAI)
+import OpenAI from 'openai';
+const client = new OpenAI({ apiKey: 'sk-...' });
+
+// After (OpenModex)
+import OpenModex from '@openmodex/sdk';
+const client = new OpenModex({ apiKey: 'omx_sk_...' });
+
+// API calls are identical
+const response = await client.chat.completions.create({
+  model: 'gpt-4o',
+  messages: [{ role: 'user', content: 'Hello!' }],
+});
+```
+
+```python Python
+# Before (OpenAI)
+from openai import OpenAI
+client = OpenAI(api_key="sk-...")
+
+# After (OpenModex)
+from openmodex import OpenModex
+client = OpenModex(api_key="omx_sk_...")
+
+# API calls are identical
+response = client.chat.completions.create(
+    model="gpt-4o",
+    messages=[{"role": "user", "content": "Hello!"}],
+)
+```
+</CodeGroup>
+
+## 方案 3：環境變數
+
+如需零程式碼遷移，只需設定環境變數：
+
+```bash
+# Replace
+export OPENAI_API_KEY=sk-...
+export OPENAI_BASE_URL=https://api.openai.com/v1
+
+# With
+export OPENAI_API_KEY=omx_sk_...
+export OPENAI_BASE_URL=https://api.openmodex.com/v1
+```
+
+## 遷移後的優勢
+
+遷移後，您將獲得以下功能：
+
+| 功能 | OpenAI 直連 | OpenModex |
+|---------|:---:|:---:|
+| OpenAI 模型 | ✅ | ✅ |
+| Anthropic、Google 等 | ❌ | ✅ |
+| 自動容錯備援 | ❌ | ✅ |
+| 智慧路由 | ❌ | ✅ |
+| 提示快取 | ❌ | ✅ |
+| 模型比較 | ❌ | ✅ |
+| 統一計費 | ❌ | ✅ |
+| 使用量分析 | 基礎 | ✅ |
+
+## 相容性說明
+
+- 所有 OpenAI 聊天補全參數都受支援
+- 串流運作方式完全相同（SSE 格式）
+- 函數呼叫 / 工具使用完全支援
+- 回應格式相同 — 您的解析程式碼無需更改
+- `openmodex` 中繼資料欄位是附加的，不會破壞現有程式碼

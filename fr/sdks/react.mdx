@@ -1,0 +1,138 @@
+---
+title: "Hooks React"
+description: "Hooks React pour construire des interfaces alimentées par l'IA — useChat, useCompletion, useModels."
+---
+
+## Installation
+
+```bash
+npm install @openmodex/react
+```
+
+Nécessite **React 18+**.
+
+## useChat
+
+Hook de chat complet avec streaming, historique des messages et support d'annulation.
+
+```tsx
+import { useChat } from '@openmodex/react';
+
+function ChatApp() {
+  const { messages, input, setInput, sendMessage, isLoading, stop, error } = useChat({
+    apiKey: 'omx_sk_...',
+    model: 'gpt-4o',
+    system: 'You are a helpful assistant.',
+    onFinish: (message) => console.log('Done:', message.content),
+    onError: (error) => console.error(error),
+  });
+
+  return (
+    <div>
+      <div>
+        {messages.map((m) => (
+          <div key={m.id}>
+            <strong>{m.role}:</strong> {m.content}
+          </div>
+        ))}
+      </div>
+
+      <form onSubmit={(e) => { e.preventDefault(); sendMessage(); }}>
+        <input
+          value={input}
+          onChange={(e) => setInput(e.target.value)}
+          placeholder="Type a message..."
+        />
+        <button type="submit" disabled={isLoading}>Send</button>
+        {isLoading && <button onClick={stop}>Stop</button>}
+      </form>
+
+      {error && <p style={{ color: 'red' }}>{error.message}</p>}
+    </div>
+  );
+}
+```
+
+### Options
+
+| Option | Type | Défaut | Description |
+|--------|------|---------|-------------|
+| `apiKey` | `string` | — | Clé API |
+| `baseURL` | `string` | `https://api.openmodex.com/v1` | URL de l'API |
+| `model` | `string` | `gpt-4o` | Modèle à utiliser |
+| `initialMessages` | `ChatMessage[]` | `[]` | Pré-remplir la conversation |
+| `initialInput` | `string` | `''` | Valeur initiale de l'input |
+| `system` | `string` | — | Prompt système |
+| `onFinish` | `(message) => void` | — | Appelé à la fin |
+| `onError` | `(error) => void` | — | Appelé en cas d'erreur |
+
+### Retours
+
+| Propriété | Type | Description |
+|----------|------|-------------|
+| `messages` | `ChatMessage[]` | Tous les messages |
+| `setMessages` | `Dispatch` | Définir les messages |
+| `input` | `string` | Input actuel |
+| `setInput` | `Dispatch` | Mettre à jour l'input |
+| `sendMessage` | `(content?) => Promise` | Envoyer un message |
+| `isLoading` | `boolean` | État de chargement |
+| `error` | `Error \| null` | Dernière erreur |
+| `stop` | `() => void` | Annuler le flux |
+
+## useCompletion
+
+Complétion à tour unique avec streaming.
+
+```tsx
+import { useCompletion } from '@openmodex/react';
+
+function CompletionApp() {
+  const { completion, input, setInput, complete, isLoading, stop } = useCompletion({
+    apiKey: 'omx_sk_...',
+    model: 'gpt-4o',
+  });
+
+  return (
+    <div>
+      <input value={input} onChange={(e) => setInput(e.target.value)} />
+      <button onClick={() => complete()} disabled={isLoading}>Complete</button>
+      {isLoading && <button onClick={stop}>Stop</button>}
+      <p>{completion}</p>
+    </div>
+  );
+}
+```
+
+## useModels
+
+Récupérer les modèles disponibles.
+
+```tsx
+import { useModels } from '@openmodex/react';
+
+function ModelList() {
+  const { models, isLoading, error, refetch } = useModels({
+    apiKey: 'omx_sk_...',
+  });
+
+  if (isLoading) return <p>Chargement des modèles...</p>;
+  if (error) return <p>Erreur : {error.message}</p>;
+
+  return (
+    <ul>
+      {models.map((m) => (
+        <li key={m.id}>
+          <strong>{m.name}</strong> — {m.provider}
+          <br />
+          <small>{m.description}</small>
+        </li>
+      ))}
+    </ul>
+  );
+}
+```
+
+## Liens
+
+- [npm](https://www.npmjs.com/package/@openmodex/react)
+- [GitHub](https://github.com/openmodexlabs/openmodex-packages/tree/main/packages/react)

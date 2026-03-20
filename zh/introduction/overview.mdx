@@ -1,0 +1,77 @@
+---
+title: "什么是 OpenModex？"
+description: "一个 API，100+ AI 模型。智能路由、自动故障转移和统一计费。"
+---
+
+## 通用 AI 网关
+
+OpenModex 是一个统一的 API 网关，通过单一的 OpenAI 兼容 API，为您提供来自所有主要供应商的 100 多个大语言模型的访问。
+
+无需管理多个 API 密钥、不同的 SDK 和每个 AI 供应商的独立计费，OpenModex 让您可以：
+
+- **使用一个 API 密钥** 访问 OpenAI、Anthropic、Google Gemini、DeepSeek、Mistral、Qwen 等
+- **即时切换模型** — 只需更改一个参数，无需重构整个代码库
+- **智能路由** — 让 OpenModex 根据成本、延迟或质量选择最佳模型
+- **优雅降级** — 自动故障转移确保您的应用在供应商宕机时依然正常运行
+- **节省费用** — 提示词缓存、成本优化路由和透明定价
+
+## 工作原理
+
+<Steps>
+  <Step title="获取您的 API 密钥">
+    在 [openmodex.com](https://openmodex.com) 注册并从控制面板创建 API 密钥。
+  </Step>
+  <Step title="将代码指向 OpenModex">
+    将供应商的 base URL 替换为 `https://api.openmodex.com/v1`。如果您已经在使用 OpenAI SDK，只需更改一行代码。
+  </Step>
+  <Step title="选择任意模型">
+    按名称使用任何受支持的模型 — `gpt-4o`、`claude-3.5-sonnet`、`gemini-2.0-flash`、`deepseek-chat` 等。
+  </Step>
+</Steps>
+
+## 兼容 OpenAI
+
+如果您已经在使用 OpenAI API，切换到 OpenModex 非常简单：
+
+```typescript
+import OpenAI from 'openai';
+
+const client = new OpenAI({
+  apiKey: 'omx_sk_...',                      // your OpenModex key
+  baseURL: 'https://api.openmodex.com/v1',   // point to OpenModex
+});
+
+// Everything else stays the same
+const response = await client.chat.completions.create({
+  model: 'gpt-4o',  // or any other model
+  messages: [{ role: 'user', content: 'Hello!' }],
+});
+```
+
+## 支持的供应商
+
+| 供应商 | 模型 | 亮点 |
+|----------|--------|-----------|
+| **OpenAI** | GPT-4o, GPT-4o-mini, o1, o3 | 行业标准 |
+| **Anthropic** | Claude 3.5 Sonnet, Claude 3 Opus | 最佳长上下文支持 |
+| **Google** | Gemini 2.0 Flash, Gemini 1.5 Pro | 多模态 + 速度 |
+| **DeepSeek** | DeepSeek-V3, DeepSeek-R1 | 高性价比推理 |
+| **Mistral** | Mistral Large, Mistral Small | 欧洲 AI |
+| **Qwen** | Qwen2.5, Qwen-Max | 中文语言优化 |
+
+## 后续步骤
+
+<CardGroup cols={2}>
+  <Card title="快速开始" icon="rocket" href="/zh/introduction/quickstart">
+    在 2 分钟内完成您的第一次 API 调用。
+  </Card>
+  <Card title="API 参考" icon="code" href="/zh/api-reference/overview">
+    浏览完整的 API 文档。
+  </Card>
+  <Card title="SDK" icon="puzzle-piece" href="/zh/sdks/overview">
+    提供 Node.js、Python、Go 和 React 的官方 SDK。
+  </Card>
+  <Card title="智能路由" icon="route" href="/zh/features/smart-routing">
+    了解智能路由如何节省成本并提升可靠性。
+  </Card>
+</CardGroup>

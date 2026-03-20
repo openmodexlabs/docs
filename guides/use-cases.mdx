@@ -1,0 +1,173 @@
+---
+title: "Use Cases"
+description: "Common patterns and use cases for building with OpenModex."
+---
+
+## AI-Powered Chat Applications
+
+Build conversational interfaces that stream responses in real-time and switch models per conversation.
+
+```typescript
+import OpenModex from '@openmodex/sdk';
+
+const client = new OpenModex({
+  apiKey: process.env.OPENMODEX_API_KEY,
+  fallbackModels: ['claude-3.5-sonnet', 'gemini-2.0-flash'],
+});
+
+// Use GPT-4o for complex questions, mini for simple ones
+const stream = await client.chat.completions.create({
+  model: isComplexQuery ? 'gpt-4o' : 'gpt-4o-mini',
+  messages: conversationHistory,
+  stream: true,
+});
+
+for await (const chunk of stream) {
+  process.stdout.write(chunk.choices[0]?.delta?.content ?? '');
+}
+```
+
+**Why OpenModex:** Automatic fallbacks keep the chat available even when a provider has issues. Streaming works identically across all providers.
+
+---
+
+## RAG (Retrieval-Augmented Generation)
+
+Combine embeddings for search with chat completions for generation.
+
+```typescript
+// 1. Create embeddings for your knowledge base
+const embedding = await client.embeddings.create({
+  model: 'text-embedding-3-small',
+  input: userQuery,
+});
+
+// 2. Search your vector database
+const relevantDocs = await vectorDB.search(embedding.data[0].embedding);
+
+// 3. Generate an answer with context
+const response = await client.chat.completions.create({
+  model: 'gpt-4o',
+  messages: [
+    { role: 'system', content: `Answer based on this context:\n${relevantDocs}` },
+    { role: 'user', content: userQuery },
+  ],
+  routing: { strategy: 'quality_optimized' },
+});
+```
+
+**Why OpenModex:** Use cheap embedding models and expensive generation models in the same API call flow. Routing ensures you get the best quality for the generation step.
+
+---
+
+## Content Generation Pipeline
+
+Generate content at scale with cost-optimized routing.
+
+```typescript
+// Generate 1000 product descriptions cost-efficiently
+const descriptions = await Promise.all(
+  products.map(async (product) => {
+    const response = await client.chat.completions.create({
+      model: 'gpt-4o-mini', // cost-effective for structured tasks
+      messages: [
+        { role: 'system', content: 'Write a 100-word product description.' },
+        { role: 'user', content: JSON.stringify(product) },
+      ],
+      routing: { strategy: 'cost_optimized' },
+      cache: { enabled: true, ttl: 86400 }, // cache for 24h
+    });
+    return response.choices[0].message.content;
+  })
+);
+```
+
+**Why OpenModex:** Cost-optimized routing and prompt caching drastically reduce costs for batch workloads. Automatic retries handle transient failures.
+
+---
+
+## Code Assistant
+
+Build code generation tools with the best code-specialized models.
+
+```typescript
+const response = await client.chat.completions.create({
+  model: 'claude-3.5-sonnet', // best at code
+  messages: [
+    { role: 'system', content: 'You are a senior software engineer.' },
+    { role: 'user', content: `Review this code and suggest improvements:\n${code}` },
+  ],
+  routing: {
+    fallback: ['deepseek-chat', 'gpt-4o'], // code-capable fallbacks
+  },
+});
+```
+
+**Why OpenModex:** Easily test which model produces the best code for your use case. Fallbacks to other code-capable models ensure availability.
+
+---
+
+## Multi-Model A/B Testing
+
+Compare model outputs for the same prompt to evaluate quality.
+
+```typescript
+// Compare responses from different models
+const comparison = await client.models.compare([
+  'openai/gpt-4o',
+  'anthropic/claude-3.5-sonnet',
+  'google/gemini-2.0-flash',
+]);
+
+// Run the same prompt against multiple models
+const results = await Promise.all(
+  ['gpt-4o', 'claude-3.5-sonnet', 'gemini-2.0-flash'].map(async (model) => {
+    const response = await client.chat.completions.create({
+      model,
+      messages: [{ role: 'user', content: testPrompt }],
+    });
+    return {
+      model,
+      content: response.choices[0].message.content,
+      cost: response.usage?.cost_usd,
+      latency: response.openmodex?.latency_ms,
+    };
+  })
+);
+```
+
+**Why OpenModex:** One API key, one SDK, one billing account. Compare cost, quality, and latency across providers without managing separate integrations.
+
+---
+
+## Real-Time React Chat UI
+
+Build interactive AI chat interfaces with the React hooks.
+
+```tsx
+import { useChat } from '@openmodex/react';
+
+function SupportChat() {
+  const { messages, input, setInput, sendMessage, isLoading, stop } = useChat({
+    apiKey: process.env.NEXT_PUBLIC_OPENMODEX_KEY,
+    model: 'gpt-4o-mini',
+    system: 'You are a helpful customer support agent for Acme Corp.',
+  });
+
+  return (
+    <div className="chat-container">
+      {messages.map((m) => (
+        <div key={m.id} className={`message ${m.role}`}>
+          {m.content}
+        </div>
+      ))}
+      <form onSubmit={(e) => { e.preventDefault(); sendMessage(); }}>
+        <input value={input} onChange={(e) => setInput(e.target.value)} />
+        <button disabled={isLoading}>Send</button>
+      </form>
+    </div>
+  );
+}
+```
+
+**Why OpenModex:** The `@openmodex/react` hooks handle streaming, message state, and abort support out of the box.

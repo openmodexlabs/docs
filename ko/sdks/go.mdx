@@ -1,0 +1,100 @@
+---
+title: "Go SDK"
+description: "OpenModex API용 공식 Go SDK입니다."
+---
+
+## 설치
+
+```bash
+go get github.com/openmodexlabs/openmodex-sdk-go
+```
+
+**Go 1.21+**이 필요합니다.
+
+## 빠른 시작
+
+```go
+package main
+
+import (
+    "context"
+    "fmt"
+    openmodex "github.com/openmodexlabs/openmodex-sdk-go"
+)
+
+func main() {
+    client := openmodex.NewClient("omx_sk_YOUR_KEY")
+
+    resp, err := client.Chat.Completions.Create(context.Background(), &openmodex.ChatCompletionParams{
+        Model:    "gpt-4o",
+        Messages: []openmodex.ChatMessage{
+            {Role: "user", Content: "Hello!"},
+        },
+    })
+    if err != nil {
+        panic(err)
+    }
+
+    fmt.Println(resp.Choices[0].Message.Content)
+}
+```
+
+## 설정
+
+```go
+client := openmodex.NewClient("omx_sk_...",
+    openmodex.WithBaseURL("https://api.openmodex.com/v1"),
+    openmodex.WithTimeout(60 * time.Second),
+    openmodex.WithMaxRetries(3),
+    openmodex.WithFallbackModels("claude-3.5-sonnet", "gemini-2.0-flash"),
+)
+```
+
+## 스트리밍
+
+```go
+stream, err := client.Chat.Completions.CreateStream(ctx, &openmodex.ChatCompletionParams{
+    Model:    "gpt-4o",
+    Messages: []openmodex.ChatMessage{
+        {Role: "user", Content: "Write a poem."},
+    },
+})
+if err != nil {
+    panic(err)
+}
+
+for chunk, err := range stream.Iter() {
+    if err != nil {
+        break
+    }
+    fmt.Print(chunk.Choices[0].Delta.Content)
+}
+```
+
+## 모델 별칭
+
+Go SDK는 편리한 모델 별칭을 지원합니다:
+
+```go
+// Route to the cheapest available model
+resp, _ := client.Chat.Completions.Create(ctx, &openmodex.ChatCompletionParams{
+    Model: "@cheapest",
+    Messages: messages,
+})
+
+// Other aliases: @auto, @fastest, @best
+```
+
+## 프리셋
+
+```go
+// Use built-in presets for common configurations
+client := openmodex.NewClient("omx_sk_...", openmodex.CostSaver)
+client := openmodex.NewClient("omx_sk_...", openmodex.LowLatency)
+client := openmodex.NewClient("omx_sk_...", openmodex.HighQuality)
+```
+
+## 링크
+
+- [pkg.go.dev](https://pkg.go.dev/github.com/openmodexlabs/openmodex-sdk-go)
+- [GitHub](https://github.com/openmodexlabs/openmodex-sdk-go)

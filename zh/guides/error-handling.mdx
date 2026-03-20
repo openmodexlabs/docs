@@ -1,0 +1,94 @@
+---
+title: "错误处理"
+description: "在应用程序中优雅地处理 API 错误。"
+---
+
+## 错误响应格式
+
+所有 API 错误返回一致的 JSON 格式：
+
+```json
+{
+  "error": {
+    "message": "Human-readable error description",
+    "type": "error_type",
+    "code": "error_code"
+  }
+}
+```
+
+## 错误类型
+
+| 状态码 | 类型 | 触发条件 |
+|--------|------|------|
+| `400` | `invalid_request_error` | 参数缺失或无效 |
+| `401` | `authentication_error` | API 密钥无效或缺失 |
+| `403` | `permission_error` | 密钥权限不足 |
+| `404` | `not_found_error` | 端点或模型无效 |
+| `429` | `rate_limit_error` | 请求过多 |
+| `500` | `server_error` | 内部服务器错误 |
+| `502` | `upstream_error` | 供应商返回错误 |
+| `503` | `service_unavailable` | 临时中断 |
+
+## SDK 错误处理
+
+<CodeGroup>
+```typescript Node.js
+import OpenModex, { APIError } from '@openmodex/sdk';
+
+try {
+  const response = await client.chat.completions.create({...});
+} catch (err) {
+  if (err instanceof APIError) {
+    console.log(err.statusCode);     // 429
+    console.log(err.message);        // "Rate limit exceeded"
+    console.log(err.code);           // "rate_limit_exceeded"
+
+    if (err.isRateLimited) {
+      // Wait and retry
+    } else if (err.isAuthError) {
+      // Check API key
+    } else if (err.isServerError) {
+      // Retry with backoff
+    }
+  }
+}
+```
+
+```python Python
+from openmodex import OpenModex, APIError
+
+try:
+    response = client.chat.completions.create(...)
+except APIError as e:
+    print(e.status_code)   # 429
+    print(e.message)       # "Rate limit exceeded"
+
+    if e.status_code == 429:
+        # Wait and retry
+        pass
+    elif e.status_code == 401:
+        # Check API key
+        pass
+```
+</CodeGroup>
+
+## 自动重试
+
+所有 SDK 会自动对瞬时错误（429、500、502、503、504）使用指数退避策略进行重试：
+
+```typescript
+const client = new OpenModex({
+  apiKey: 'omx_sk_...',
+  maxRetries: 3,    // default: 2
+  timeout: 60_000,  // default: 30000ms
+});
+```
+
+## 最佳实践
+
+1. **始终捕获错误** — 不要让 API 故障导致应用崩溃
+2. **使用故障转移** — 为关键路径配置备用模型
+3. **记录 request_id** — 在错误报告中包含 `response.openmodex.request_id` 以便获取支持
+4. **设置适当的超时** — 复杂提示词设置较长时间，简单查询设置较短时间
+5. **处理流式错误** — 流式传输可能在响应过程中失败；请缓冲部分内容

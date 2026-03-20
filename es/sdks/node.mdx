@@ -1,0 +1,128 @@
+---
+title: "SDK de Node.js"
+description: "SDK oficial de Node.js / TypeScript para la API de OpenModex."
+---
+
+## Instalación
+
+```bash
+npm install @openmodex/sdk
+```
+
+Requiere **Node.js 18+**.
+
+## Inicio Rápido
+
+```typescript
+import OpenModex from '@openmodex/sdk';
+
+const client = new OpenModex({
+  apiKey: process.env.OPENMODEX_API_KEY,
+});
+
+const response = await client.chat.completions.create({
+  model: 'gpt-4o',
+  messages: [{ role: 'user', content: 'Hello!' }],
+});
+
+console.log(response.choices[0].message.content);
+```
+
+## Configuración
+
+```typescript
+const client = new OpenModex({
+  apiKey: 'omx_sk_...',
+  baseURL: 'https://api.openmodex.com/v1',  // default
+  timeout: 60_000,                           // default: 30000
+  maxRetries: 3,                             // default: 2
+  defaultModel: 'gpt-4o',
+  fallbackModels: ['claude-3.5-sonnet'],
+});
+```
+
+| Opción | Tipo | Predeterminado | Descripción |
+|--------|------|---------|-------------|
+| `apiKey` | `string` | env `OPENMODEX_API_KEY` | Clave API |
+| `baseURL` | `string` | `https://api.openmodex.com/v1` | URL base de la API |
+| `timeout` | `number` | `30000` | Timeout de solicitud (ms) |
+| `maxRetries` | `number` | `2` | Cantidad de reintentos automáticos |
+| `defaultModel` | `string` | — | Modelo predeterminado |
+| `fallbackModels` | `string[]` | `[]` | Cadena de modelos de respaldo |
+| `defaultHeaders` | `object` | `{}` | Encabezados personalizados |
+| `fetch` | `typeof fetch` | `globalThis.fetch` | Fetch personalizado |
+
+## Chat Completions
+
+```typescript
+const response = await client.chat.completions.create({
+  model: 'gpt-4o',
+  messages: [
+    { role: 'system', content: 'You are a helpful assistant.' },
+    { role: 'user', content: 'What is TypeScript?' },
+  ],
+  temperature: 0.7,
+  max_tokens: 500,
+});
+```
+
+## Streaming
+
+```typescript
+const stream = await client.chat.completions.create({
+  model: 'gpt-4o',
+  messages: [{ role: 'user', content: 'Write a poem.' }],
+  stream: true,
+});
+
+for await (const chunk of stream) {
+  process.stdout.write(chunk.choices[0]?.delta?.content ?? '');
+}
+
+// Abort a stream
+stream.abort();
+```
+
+## Embeddings
+
+```typescript
+const result = await client.embeddings.create({
+  model: 'text-embedding-3-small',
+  input: 'Hello world',
+});
+```
+
+## Modelos
+
+```typescript
+// List all models
+const models = await client.models.list();
+
+// Get model details
+const model = await client.models.retrieve('openai/gpt-4o');
+
+// Compare models
+const comparison = await client.models.compare(['openai/gpt-4o', 'anthropic/claude-3.5-sonnet']);
+```
+
+## Manejo de Errores
+
+```typescript
+import { APIError } from '@openmodex/sdk';
+
+try {
+  await client.chat.completions.create({...});
+} catch (err) {
+  if (err instanceof APIError) {
+    console.log(err.statusCode, err.message);
+    console.log(err.isRateLimited);   // true if 429
+    console.log(err.isAuthError);     // true if 401
+    console.log(err.isServerError);   // true if 5xx
+  }
+}
+```
+
+## Enlaces
+
+- [npm](https://www.npmjs.com/package/@openmodex/sdk)
+- [GitHub](https://github.com/openmodexlabs/openmodex-packages/tree/main/packages/sdk)

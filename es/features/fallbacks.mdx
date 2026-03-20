@@ -1,0 +1,77 @@
+---
+title: "Respaldos Automáticos"
+description: "Mantenga su aplicación funcionando incluso cuando los proveedores de IA caen."
+---
+
+## Descripción General
+
+Los respaldos aseguran que su aplicación se mantenga confiable al cambiar automáticamente a un modelo alternativo cuando el principal falla. OpenModex soporta respaldos tanto del lado del servidor como del lado del cliente.
+
+## Respaldos del Lado del Servidor
+
+Configurados por solicitud. OpenModex maneja la conmutación en el servidor:
+
+```typescript
+const response = await client.chat.completions.create({
+  model: 'gpt-4o',
+  messages: [{ role: 'user', content: 'Hello!' }],
+  routing: {
+    fallback: ['claude-3.5-sonnet', 'gemini-2.0-flash'],
+  },
+});
+```
+
+**Cómo funciona:**
+1. Intentar con `gpt-4o`
+2. Si falla (5xx, límite de velocidad, timeout) → intentar con `claude-3.5-sonnet`
+3. Si eso falla → intentar con `gemini-2.0-flash`
+4. Si todos fallan → devolver error
+
+## Respaldos del Lado del Cliente
+
+Configurados en el cliente SDK. Se aplican a todas las solicitudes:
+
+<CodeGroup>
+```typescript Node.js
+import OpenModex from '@openmodex/sdk';
+
+const client = new OpenModex({
+  apiKey: 'omx_sk_...',
+  fallbackModels: ['claude-3.5-sonnet', 'gemini-2.0-flash'],
+});
+
+// If the requested model fails, the SDK automatically retries
+// with each fallback model
+const response = await client.chat.completions.create({
+  model: 'gpt-4o',
+  messages: [{ role: 'user', content: 'Hello!' }],
+});
+```
+
+```go Go
+client := openmodex.NewClient("omx_sk_...",
+    openmodex.WithFallbackModels("claude-3.5-sonnet", "gemini-2.0-flash"),
+)
+```
+</CodeGroup>
+
+## Cuándo se Activan los Respaldos
+
+Los respaldos se activan por:
+- **Errores 5xx** — errores del servidor del proveedor
+- **Errores 429** — límite de velocidad excedido
+- **Timeouts** — la solicitud no se completó a tiempo
+- **Errores de red** — fallos de conexión
+
+Los respaldos **no** se activan por:
+- **Errores 4xx** (excepto 429) — estos indican un problema con su solicitud
+- **Respuestas exitosas** — incluso si el contenido es inesperado
+
+## Verificar Si Se Usó un Respaldo
+
+```typescript
+const response = await client.chat.completions.create({...});
+
+console.log(response.openmodex?.model_used);     // actual model that responded
+console.log(response.openmodex?.fallback_used);   // true if fallback was used
+```

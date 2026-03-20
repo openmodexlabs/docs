@@ -1,0 +1,65 @@
+---
+title: "Giới hạn tốc độ"
+description: "Hiểu và xử lý giới hạn tốc độ API."
+---
+
+## Giới Hạn Tốc Độ
+
+Giới hạn tốc độ được áp dụng theo từng khóa API dựa trên gói đăng ký của bạn:
+
+| Gói | Yêu cầu/phút | Token/phút |
+|------|-------------:|-----------:|
+| Free | 30 | 60.000 |
+| Pro | 120 | 500.000 |
+| Enterprise | 300+ | Tùy chỉnh |
+
+## Header Giới Hạn Tốc Độ
+
+Mỗi phản hồi đều bao gồm các header giới hạn tốc độ:
+
+```
+X-RateLimit-Limit: 120
+X-RateLimit-Remaining: 115
+X-RateLimit-Reset: 1700000060
+```
+
+| Header | Mô tả |
+|--------|-------------|
+| `X-RateLimit-Limit` | Số yêu cầu tối đa mỗi cửa sổ |
+| `X-RateLimit-Remaining` | Số yêu cầu còn lại trong cửa sổ |
+| `X-RateLimit-Reset` | Dấu thời gian Unix khi cửa sổ được đặt lại |
+
+## Xử Lý Lỗi 429
+
+Khi bị giới hạn tốc độ, bạn sẽ nhận được phản hồi `429 Too Many Requests`:
+
+```json
+{
+  "error": {
+    "message": "Rate limit exceeded. Please retry after 2 seconds.",
+    "type": "rate_limit_error",
+    "code": "rate_limit_exceeded"
+  }
+}
+```
+
+## Thử Lại Tự Động
+
+Tất cả SDK chính thức tự động thử lại khi gặp lỗi 429 với cơ chế tăng thời gian chờ theo hàm mũ:
+
+```typescript
+const client = new OpenModex({
+  apiKey: 'omx_sk_...',
+  maxRetries: 3, // default: 2
+});
+```
+
+Thời gian chờ thử lại tuân theo: `min(500ms × 2^attempt, 5000ms)`
+
+## Phương Pháp Tốt Nhất
+
+1. **Sử dụng tăng thời gian chờ theo hàm mũ** — các SDK xử lý điều này tự động
+2. **Giám sát hạn mức còn lại** — kiểm tra header `X-RateLimit-Remaining`
+3. **Sử dụng streaming** — yêu cầu streaming được tính là một yêu cầu bất kể độ dài phản hồi
+4. **Nâng cấp gói** — nếu bạn liên tục đạt giới hạn, hãy cân nhắc nâng cấp
+5. **Phân phối tải** — sử dụng nhiều khóa API cho các dịch vụ khác nhau

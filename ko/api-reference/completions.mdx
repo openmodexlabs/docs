@@ -1,0 +1,75 @@
+---
+title: "완성 생성"
+description: "POST /v1/completions — 텍스트 완성을 생성합니다 (레거시)."
+api: "POST /completions"
+---
+
+<Note>
+  이것은 레거시 엔드포인트입니다. 대부분의 사용 사례에서는 [채팅 완성](/ko/api-reference/chat-completions)을 사용하세요.
+</Note>
+
+## 요청 본문
+
+<ParamField body="model" type="string" required>
+  사용할 모델 ID입니다.
+</ParamField>
+
+<ParamField body="prompt" type="string | string[]" required>
+  완성을 생성할 프롬프트입니다.
+</ParamField>
+
+<ParamField body="max_tokens" type="integer" default={16}>
+  생성할 최대 토큰 수입니다.
+</ParamField>
+
+<ParamField body="temperature" type="number" default={1}>
+  0에서 2 사이의 샘플링 온도입니다.
+</ParamField>
+
+<ParamField body="top_p" type="number" default={1}>
+  핵 샘플링 파라미터입니다.
+</ParamField>
+
+<ParamField body="stop" type="string | string[]">
+  정지 시퀀스입니다.
+</ParamField>
+
+<ParamField body="suffix" type="string">
+  완성 후에 추가할 텍스트입니다.
+</ParamField>
+
+## 응답
+
+```json
+{
+  "id": "cmpl-abc123",
+  "object": "text_completion",
+  "created": 1700000000,
+  "model": "gpt-3.5-turbo-instruct",
+  "choices": [
+    {
+      "index": 0,
+      "text": " a time, in a land far away...",
+      "finish_reason": "length"
+    }
+  ],
+  "usage": {
+    "prompt_tokens": 5,
+    "completion_tokens": 10,
+    "total_tokens": 15
+  }
+}
+```
+
+## 예제
+
+```bash
+curl https://api.openmodex.com/v1/completions \
+  -H "Authorization: Bearer omx_sk_YOUR_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "model": "gpt-3.5-turbo-instruct",
+    "prompt": "Once upon",
+    "max_tokens": 100
+  }'
+```

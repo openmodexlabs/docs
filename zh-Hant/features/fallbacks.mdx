@@ -1,0 +1,77 @@
+---
+title: "自動容錯備援"
+description: "即使 AI 供應商中斷，也能保持您的應用程式正常運行。"
+---
+
+## 概覽
+
+容錯備援透過在主要模型失敗時自動切換到替代模型，確保您的應用程式保持可靠。OpenModex 支援伺服器端和用戶端容錯備援。
+
+## 伺服器端容錯備援
+
+按請求設定。OpenModex 在伺服器端處理故障轉移：
+
+```typescript
+const response = await client.chat.completions.create({
+  model: 'gpt-4o',
+  messages: [{ role: 'user', content: 'Hello!' }],
+  routing: {
+    fallback: ['claude-3.5-sonnet', 'gemini-2.0-flash'],
+  },
+});
+```
+
+**運作方式：**
+1. 嘗試 `gpt-4o`
+2. 如果失敗（5xx、速率限制、逾時）→ 嘗試 `claude-3.5-sonnet`
+3. 如果也失敗 → 嘗試 `gemini-2.0-flash`
+4. 如果全部失敗 → 回傳錯誤
+
+## 用戶端容錯備援
+
+在 SDK 用戶端上設定。適用於所有請求：
+
+<CodeGroup>
+```typescript Node.js
+import OpenModex from '@openmodex/sdk';
+
+const client = new OpenModex({
+  apiKey: 'omx_sk_...',
+  fallbackModels: ['claude-3.5-sonnet', 'gemini-2.0-flash'],
+});
+
+// If the requested model fails, the SDK automatically retries
+// with each fallback model
+const response = await client.chat.completions.create({
+  model: 'gpt-4o',
+  messages: [{ role: 'user', content: 'Hello!' }],
+});
+```
+
+```go Go
+client := openmodex.NewClient("omx_sk_...",
+    openmodex.WithFallbackModels("claude-3.5-sonnet", "gemini-2.0-flash"),
+)
+```
+</CodeGroup>
+
+## 容錯備援觸發時機
+
+容錯備援會在以下情況觸發：
+- **5xx 錯誤** — 供應商的伺服器錯誤
+- **429 錯誤** — 超過速率限制
+- **逾時** — 請求未在時間內完成
+- **網路錯誤** — 連線失敗
+
+容錯備援**不會**在以下情況觸發：
+- **4xx 錯誤**（429 除外）— 這表示您的請求有問題
+- **成功回應** — 即使內容不如預期
+
+## 檢查是否使用了容錯備援
+
+```typescript
+const response = await client.chat.completions.create({...});
+
+console.log(response.openmodex?.model_used);     // actual model that responded
+console.log(response.openmodex?.fallback_used);   // true if fallback was used
+```

@@ -1,0 +1,94 @@
+---
+title: "Xử lý lỗi"
+description: "Xử lý lỗi API một cách linh hoạt trong ứng dụng của bạn."
+---
+
+## Định Dạng Phản Hồi Lỗi
+
+Tất cả lỗi API đều trả về định dạng JSON nhất quán:
+
+```json
+{
+  "error": {
+    "message": "Human-readable error description",
+    "type": "error_type",
+    "code": "error_code"
+  }
+}
+```
+
+## Các Loại Lỗi
+
+| Trạng thái | Loại | Khi nào |
+|--------|------|------|
+| `400` | `invalid_request_error` | Tham số thiếu hoặc không hợp lệ |
+| `401` | `authentication_error` | Khóa API không hợp lệ hoặc thiếu |
+| `403` | `permission_error` | Khóa thiếu quyền hạn |
+| `404` | `not_found_error` | Endpoint hoặc mô hình không hợp lệ |
+| `429` | `rate_limit_error` | Quá nhiều yêu cầu |
+| `500` | `server_error` | Lỗi máy chủ nội bộ |
+| `502` | `upstream_error` | Nhà cung cấp trả về lỗi |
+| `503` | `service_unavailable` | Gián đoạn tạm thời |
+
+## Xử Lý Lỗi Trong SDK
+
+<CodeGroup>
+```typescript Node.js
+import OpenModex, { APIError } from '@openmodex/sdk';
+
+try {
+  const response = await client.chat.completions.create({...});
+} catch (err) {
+  if (err instanceof APIError) {
+    console.log(err.statusCode);     // 429
+    console.log(err.message);        // "Rate limit exceeded"
+    console.log(err.code);           // "rate_limit_exceeded"
+
+    if (err.isRateLimited) {
+      // Wait and retry
+    } else if (err.isAuthError) {
+      // Check API key
+    } else if (err.isServerError) {
+      // Retry with backoff
+    }
+  }
+}
+```
+
+```python Python
+from openmodex import OpenModex, APIError
+
+try:
+    response = client.chat.completions.create(...)
+except APIError as e:
+    print(e.status_code)   # 429
+    print(e.message)       # "Rate limit exceeded"
+
+    if e.status_code == 429:
+        # Wait and retry
+        pass
+    elif e.status_code == 401:
+        # Check API key
+        pass
+```
+</CodeGroup>
+
+## Thử Lại Tự Động
+
+Tất cả SDK tự động thử lại khi gặp lỗi tạm thời (429, 500, 502, 503, 504) với cơ chế tăng thời gian chờ theo hàm mũ:
+
+```typescript
+const client = new OpenModex({
+  apiKey: 'omx_sk_...',
+  maxRetries: 3,    // default: 2
+  timeout: 60_000,  // default: 30000ms
+});
+```
+
+## Phương Pháp Tốt Nhất
+
+1. **Luôn bắt lỗi** — không để lỗi API làm sập ứng dụng của bạn
+2. **Sử dụng chuyển đổi dự phòng** — cấu hình mô hình dự phòng cho các luồng quan trọng
+3. **Ghi nhật ký request_id** — bao gồm `response.openmodex.request_id` trong báo cáo lỗi để hỗ trợ
+4. **Đặt thời gian chờ phù hợp** — dài hơn cho prompt phức tạp, ngắn hơn cho truy vấn đơn giản
+5. **Xử lý lỗi streaming** — luồng có thể gặp lỗi giữa chừng; hãy đệm nội dung một phần

@@ -1,0 +1,63 @@
+---
+title: "SDK概要"
+description: "Node.js、Python、Go、React、CLI向けの公式SDK。"
+---
+
+## 公式SDK
+
+OpenModexはすべての主要プラットフォーム向けの公式SDKを提供しています：
+
+<CardGroup cols={2}>
+  <Card title="Node.js / TypeScript" icon="js" href="/ja/sdks/node">
+    `npm install @openmodex/sdk`
+  </Card>
+  <Card title="Python" icon="python" href="/ja/sdks/python">
+    `pip install openmodex`
+  </Card>
+  <Card title="Go" icon="golang" href="/ja/sdks/go">
+    `go get github.com/openmodexlabs/openmodex-sdk-go`
+  </Card>
+  <Card title="React" icon="react" href="/ja/sdks/react">
+    `npm install @openmodex/react`
+  </Card>
+</CardGroup>
+
+## 機能マトリックス
+
+| 機能 | Node.js | Python | Go |
+|---------|:-------:|:------:|:--:|
+| チャット補完 | ✅ | ✅ | ✅ |
+| ストリーミング | ✅ | ✅ | ✅ |
+| エンベディング | ✅ | ✅ | ✅ |
+| モデル一覧 | ✅ | ✅ | ✅ |
+| モデル比較 | ✅ | ✅ | ✅ |
+| クライアントサイドフォールバック | ✅ | ✅ | ✅ |
+| ルーティング設定 | ✅ | ✅ | ✅ |
+| キャッシュ設定 | ✅ | ✅ | ✅ |
+| 自動リトライ | ✅ | ✅ | ✅ |
+| 非同期サポート | ✅ | ✅ | ✅ |
+| TypeScript型定義 | ✅ | — | — |
+
+## OpenAI SDK互換性
+
+すでにOpenAI SDKを使用していますか？ベースURLを変更するだけでOpenModexと使用できます：
+
+<CodeGroup>
+```typescript Node.js
+import OpenAI from 'openai';
+
+const client = new OpenAI({
+  apiKey: 'omx_sk_...',
+  baseURL: 'https://api.openmodex.com/v1',
+});
+```
+
+```python Python
+from openai import OpenAI
+
+client = OpenAI(
+    api_key="omx_sk_...",
+    base_url="https://api.openmodex.com/v1",
+)
+```
+</CodeGroup>

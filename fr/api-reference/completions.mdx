@@ -1,0 +1,75 @@
+---
+title: "Créer une complétion"
+description: "POST /v1/completions — Créer une complétion de texte (hérité)."
+api: "POST /completions"
+---
+
+<Note>
+  Ceci est un endpoint hérité. Pour la plupart des cas d'utilisation, utilisez [Chat Completions](/fr/api-reference/chat-completions) à la place.
+</Note>
+
+## Corps de la requête
+
+<ParamField body="model" type="string" required>
+  Identifiant du modèle à utiliser.
+</ParamField>
+
+<ParamField body="prompt" type="string | string[]" required>
+  Le(s) prompt(s) pour lesquels générer des complétions.
+</ParamField>
+
+<ParamField body="max_tokens" type="integer" default={16}>
+  Nombre maximum de tokens à générer.
+</ParamField>
+
+<ParamField body="temperature" type="number" default={1}>
+  Température d'échantillonnage entre 0 et 2.
+</ParamField>
+
+<ParamField body="top_p" type="number" default={1}>
+  Paramètre d'échantillonnage par noyau.
+</ParamField>
+
+<ParamField body="stop" type="string | string[]">
+  Séquence(s) d'arrêt.
+</ParamField>
+
+<ParamField body="suffix" type="string">
+  Texte à ajouter après la complétion.
+</ParamField>
+
+## Réponse
+
+```json
+{
+  "id": "cmpl-abc123",
+  "object": "text_completion",
+  "created": 1700000000,
+  "model": "gpt-3.5-turbo-instruct",
+  "choices": [
+    {
+      "index": 0,
+      "text": " a time, in a land far away...",
+      "finish_reason": "length"
+    }
+  ],
+  "usage": {
+    "prompt_tokens": 5,
+    "completion_tokens": 10,
+    "total_tokens": 15
+  }
+}
+```
+
+## Exemple
+
+```bash
+curl https://api.openmodex.com/v1/completions \
+  -H "Authorization: Bearer omx_sk_YOUR_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "model": "gpt-3.5-turbo-instruct",
+    "prompt": "Once upon",
+    "max_tokens": 100
+  }'
+```

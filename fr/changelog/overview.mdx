@@ -1,0 +1,60 @@
+---
+title: "Journal des modifications"
+description: "Dernières mises à jour, nouvelles fonctionnalités et améliorations de la plateforme OpenModex."
+---
+
+## Mars 2026
+
+### v1.4.0 — API de comparaison de modèles
+
+<Info>Publié le 15 mars 2026</Info>
+
+- **Nouveau :** endpoint `GET /v1/models/compare` pour l'évaluation côte à côte des modèles
+- **Nouveau :** scores de qualité (global, code, mathématiques, raisonnement) dans les réponses de modèles
+- **Nouveau :** métriques de performance (latence p50/p99, disponibilité) par modèle
+- **Amélioré :** la liste des modèles inclut désormais la répartition des tarifs (tarifs officiels vs OpenModex)
+
+### v1.3.0 — Support BYOK
+
+<Info>Publié le 1er mars 2026</Info>
+
+- **Nouveau :** Bring Your Own Key — utilisez vos propres clés API fournisseur
+- **Nouveau :** chiffrement par enveloppe AWS KMS pour le stockage des clés fournisseur
+- **Nouveau :** gestion des clés fournisseur dans le tableau de bord
+- **Amélioré :** le moteur de routage gère les configurations mixtes BYOK + gérées
+
+---
+
+## Février 2026
+
+### v1.2.0 — Hooks React
+
+<Info>Publié le 15 février 2026</Info>
+
+- **Nouveau :** package `@openmodex/react` avec les hooks `useChat`, `useCompletion`, `useModels`
+- **Nouveau :** support intégré du streaming et de l'annulation dans les hooks React
+- **Amélioré :** le SDK TypeScript exporte désormais tous les types
+
+### v1.1.0 — Mise en cache des prompts
+
+<Info>Publié le 1er février 2026</Info>
+
+- **Nouveau :** mise en cache côté serveur des prompts avec TTL configurable (60s à 24h)
+- **Nouveau :** champ `cache_hit` dans les métadonnées de réponse
+- **Amélioré :** les réponses en cache sont facturées à 50 % du tarif d'entrée, sans coût de sortie
+
+---
+
+## Janvier 2026
+
+### v1.0.0 — Disponibilité générale
+
+<Info>Publié le 15 janvier 2026</Info>
+
+- **Lancement :** passerelle API OpenModex — API compatible OpenAI pour plus de 100 modèles
+- **Lancement :** routage intelligent (stratégies coût, latence, qualité)
+- **Lancement :** basculements automatiques avec disjoncteur
+- **Lancement :** SDK officiels pour Node.js, Python et Go
+- **Lancement :** outil CLI (`@openmodex/cli`)
+- **Lancement :** tableau de bord avec analyses d'utilisation et facturation
+- Fournisseurs : OpenAI, Anthropic, Google Gemini, DeepSeek, Mistral, Qwen

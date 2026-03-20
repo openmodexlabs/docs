@@ -1,0 +1,77 @@
+---
+title: "OpenModex란?"
+description: "하나의 API로 100개 이상의 AI 모델을 이용하세요. 지능형 라우팅, 자동 폴백, 통합 결제를 제공합니다."
+---
+
+## 범용 AI 게이트웨이
+
+OpenModex는 단일 OpenAI 호환 API를 통해 모든 주요 제공업체의 100개 이상의 대형 언어 모델에 접근할 수 있는 통합 API 게이트웨이입니다.
+
+각 AI 제공업체별로 여러 API 키, 서로 다른 SDK, 별도의 결제를 관리하는 대신 OpenModex를 사용하면 다음과 같은 이점을 누릴 수 있습니다:
+
+- **하나의 API 키로** OpenAI, Anthropic, Google Gemini, DeepSeek, Mistral, Qwen 등에 접근
+- **모델을 즉시 전환** — 전체 코드베이스가 아닌 하나의 파라미터만 변경
+- **지능형 라우팅** — 비용, 지연 시간 또는 품질을 기반으로 OpenModex가 최적의 모델을 선택
+- **우아한 실패 처리** — 자동 폴백으로 제공업체에 장애가 발생해도 앱이 정상 동작
+- **비용 절감** — 프롬프트 캐싱, 비용 최적화 라우팅, 투명한 가격 정책
+
+## 작동 방식
+
+<Steps>
+  <Step title="API 키 받기">
+    [openmodex.com](https://openmodex.com)에서 가입하고 대시보드에서 API 키를 생성하세요.
+  </Step>
+  <Step title="코드를 OpenModex로 연결">
+    제공업체의 기본 URL을 `https://api.openmodex.com/v1`로 변경하세요. 이미 OpenAI SDK를 사용 중이라면 한 줄만 수정하면 됩니다.
+  </Step>
+  <Step title="원하는 모델 선택">
+    지원되는 모든 모델을 이름으로 사용하세요 — `gpt-4o`, `claude-3.5-sonnet`, `gemini-2.0-flash`, `deepseek-chat` 등 다양한 모델을 사용할 수 있습니다.
+  </Step>
+</Steps>
+
+## OpenAI 호환
+
+이미 OpenAI API를 사용하고 있다면, OpenModex로의 전환은 매우 간단합니다:
+
+```typescript
+import OpenAI from 'openai';
+
+const client = new OpenAI({
+  apiKey: 'omx_sk_...',                      // your OpenModex key
+  baseURL: 'https://api.openmodex.com/v1',   // point to OpenModex
+});
+
+// Everything else stays the same
+const response = await client.chat.completions.create({
+  model: 'gpt-4o',  // or any other model
+  messages: [{ role: 'user', content: 'Hello!' }],
+});
+```
+
+## 지원 제공업체
+
+| 제공업체 | 모델 | 특징 |
+|----------|--------|-----------|
+| **OpenAI** | GPT-4o, GPT-4o-mini, o1, o3 | 업계 표준 |
+| **Anthropic** | Claude 3.5 Sonnet, Claude 3 Opus | 긴 컨텍스트에 최적 |
+| **Google** | Gemini 2.0 Flash, Gemini 1.5 Pro | 멀티모달 + 속도 |
+| **DeepSeek** | DeepSeek-V3, DeepSeek-R1 | 비용 효율적 추론 |
+| **Mistral** | Mistral Large, Mistral Small | 유럽 AI |
+| **Qwen** | Qwen2.5, Qwen-Max | 중국어 최적화 |
+
+## 다음 단계
+
+<CardGroup cols={2}>
+  <Card title="빠른 시작" icon="rocket" href="/ko/introduction/quickstart">
+    2분 안에 첫 번째 API 호출을 해보세요.
+  </Card>
+  <Card title="API 레퍼런스" icon="code" href="/ko/api-reference/overview">
+    전체 API 문서를 살펴보세요.
+  </Card>
+  <Card title="SDK" icon="puzzle-piece" href="/ko/sdks/overview">
+    Node.js, Python, Go, React용 공식 SDK입니다.
+  </Card>
+  <Card title="스마트 라우팅" icon="route" href="/ko/features/smart-routing">
+    지능형 라우팅이 어떻게 비용을 절감하고 안정성을 향상시키는지 알아보세요.
+  </Card>
+</CardGroup>

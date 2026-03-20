@@ -1,0 +1,94 @@
+---
+title: "모범 사례"
+description: "OpenModex를 최대한 활용하기 위한 팁입니다."
+---
+
+## 적절한 모델 선택
+
+모든 작업에 가장 비싼 모델이 필요한 것은 아닙니다:
+
+| 사용 사례 | 추천 모델 | 이유 |
+|----------|-------------------|-----|
+| 간단한 Q&A, 분류 | `gpt-4o-mini`, `gemini-2.0-flash` | 빠르고 저렴함 |
+| 복잡한 추론 | `gpt-4o`, `claude-3.5-sonnet` | 높은 품질 |
+| 코드 생성 | `claude-3.5-sonnet`, `deepseek-chat` | 코드에 최적 |
+| 긴 문서 | `claude-3.5-sonnet`, `gemini-1.5-pro` | 대용량 컨텍스트 |
+| 비용 민감 | `deepseek-chat`, `gpt-4o-mini` | 최저 비용 |
+
+## 스마트 라우팅 사용
+
+하드코딩하는 대신 OpenModex가 최적의 모델을 선택하게 하세요:
+
+```typescript
+// Don't do this
+if (isSimpleQuery) {
+  model = 'gpt-4o-mini';
+} else {
+  model = 'gpt-4o';
+}
+
+// Do this instead
+const response = await client.chat.completions.create({
+  model: 'gpt-4o',
+  messages,
+  routing: { strategy: 'cost_optimized' },
+});
+```
+
+## 항상 폴백 설정
+
+프로덕션 애플리케이션에서는 항상 폴백을 설정하세요:
+
+```typescript
+const client = new OpenModex({
+  apiKey: 'omx_sk_...',
+  fallbackModels: ['claude-3.5-sonnet', 'gemini-2.0-flash'],
+});
+```
+
+## 채팅 UI에는 스트리밍 사용
+
+스트리밍은 사용자 경험을 크게 개선합니다:
+
+```typescript
+// Bad — user waits 3-10 seconds staring at a spinner
+const response = await client.chat.completions.create({
+  model: 'gpt-4o',
+  messages,
+});
+
+// Good — user sees text appearing in real-time
+const stream = await client.chat.completions.create({
+  model: 'gpt-4o',
+  messages,
+  stream: true,
+});
+```
+
+## 반복 쿼리에 캐싱 활성화
+
+예측 가능하거나 반복되는 프롬프트가 있다면 캐싱을 활성화하세요:
+
+```typescript
+const response = await client.chat.completions.create({
+  model: 'gpt-4o',
+  messages: [{ role: 'user', content: 'What are your business hours?' }],
+  cache: { enabled: true, ttl: 3600 },
+});
+```
+
+## 적절한 타임아웃 설정
+
+```typescript
+const client = new OpenModex({
+  apiKey: 'omx_sk_...',
+  timeout: 60_000, // 60 seconds for complex tasks
+});
+```
+
+## 사용량 모니터링
+
+- [대시보드](https://openmodex.com/dashboard)에서 사용량 분석을 확인하세요
+- 모델별, API 키별 비용을 추적하세요
+- 비정상적인 지출 패턴에 대한 알림을 설정하세요
+- 응답의 `openmodex.cost_usd` 필드를 사용하여 요청별 비용을 추적하세요

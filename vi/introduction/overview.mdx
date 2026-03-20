@@ -1,0 +1,77 @@
+---
+title: "OpenModex là gì?"
+description: "Một API, hơn 100 mô hình AI. Định tuyến thông minh, chuyển đổi dự phòng tự động và thanh toán hợp nhất."
+---
+
+## Cổng AI Toàn Cầu
+
+OpenModex là một cổng API hợp nhất cung cấp cho bạn quyền truy cập vào hơn 100 mô hình ngôn ngữ lớn từ tất cả các nhà cung cấp hàng đầu thông qua một API duy nhất, tương thích với OpenAI.
+
+Thay vì quản lý nhiều khóa API, các SDK khác nhau và thanh toán riêng biệt cho từng nhà cung cấp AI, OpenModex cho phép bạn:
+
+- **Sử dụng một khóa API** để truy cập OpenAI, Anthropic, Google Gemini, DeepSeek, Mistral, Qwen và nhiều hơn nữa
+- **Chuyển đổi mô hình ngay lập tức** — thay đổi một tham số, không phải toàn bộ mã nguồn của bạn
+- **Định tuyến thông minh** — để OpenModex chọn mô hình tốt nhất dựa trên chi phí, độ trễ hoặc chất lượng
+- **Xử lý lỗi linh hoạt** — chuyển đổi dự phòng tự động đảm bảo ứng dụng của bạn luôn hoạt động ngay cả khi nhà cung cấp gặp sự cố
+- **Tiết kiệm chi phí** — bộ nhớ đệm prompt, định tuyến tối ưu chi phí và giá minh bạch
+
+## Cách Hoạt Động
+
+<Steps>
+  <Step title="Nhận khóa API của bạn">
+    Đăng ký tại [openmodex.com](https://openmodex.com) và tạo khóa API từ bảng điều khiển của bạn.
+  </Step>
+  <Step title="Trỏ mã nguồn của bạn đến OpenModex">
+    Thay thế URL gốc của nhà cung cấp bằng `https://api.openmodex.com/v1`. Nếu bạn đã sử dụng OpenAI SDK, chỉ cần thay đổi một dòng.
+  </Step>
+  <Step title="Chọn bất kỳ mô hình nào">
+    Sử dụng bất kỳ mô hình được hỗ trợ nào theo tên — `gpt-4o`, `claude-3.5-sonnet`, `gemini-2.0-flash`, `deepseek-chat` và nhiều hơn nữa.
+  </Step>
+</Steps>
+
+## Tương Thích OpenAI
+
+Nếu bạn đã sử dụng OpenAI API, việc chuyển sang OpenModex rất đơn giản:
+
+```typescript
+import OpenAI from 'openai';
+
+const client = new OpenAI({
+  apiKey: 'omx_sk_...',                      // your OpenModex key
+  baseURL: 'https://api.openmodex.com/v1',   // point to OpenModex
+});
+
+// Everything else stays the same
+const response = await client.chat.completions.create({
+  model: 'gpt-4o',  // or any other model
+  messages: [{ role: 'user', content: 'Hello!' }],
+});
+```
+
+## Nhà Cung Cấp Được Hỗ Trợ
+
+| Nhà cung cấp | Mô hình | Điểm nổi bật |
+|----------|--------|-----------|
+| **OpenAI** | GPT-4o, GPT-4o-mini, o1, o3 | Tiêu chuẩn ngành |
+| **Anthropic** | Claude 3.5 Sonnet, Claude 3 Opus | Tốt nhất cho ngữ cảnh dài |
+| **Google** | Gemini 2.0 Flash, Gemini 1.5 Pro | Đa phương thức + tốc độ |
+| **DeepSeek** | DeepSeek-V3, DeepSeek-R1 | Suy luận tiết kiệm chi phí |
+| **Mistral** | Mistral Large, Mistral Small | AI châu Âu |
+| **Qwen** | Qwen2.5, Qwen-Max | Tối ưu hóa tiếng Trung |
+
+## Bước Tiếp Theo
+
+<CardGroup cols={2}>
+  <Card title="Bắt đầu nhanh" icon="rocket" href="/vi/introduction/quickstart">
+    Thực hiện lệnh gọi API đầu tiên trong chưa đầy 2 phút.
+  </Card>
+  <Card title="Tham chiếu API" icon="code" href="/vi/api-reference/overview">
+    Khám phá tài liệu API đầy đủ.
+  </Card>
+  <Card title="SDK" icon="puzzle-piece" href="/vi/sdks/overview">
+    SDK chính thức cho Node.js, Python, Go và React.
+  </Card>
+  <Card title="Định tuyến thông minh" icon="route" href="/vi/features/smart-routing">
+    Tìm hiểu cách định tuyến thông minh tiết kiệm chi phí và cải thiện độ tin cậy.
+  </Card>
+</CardGroup>

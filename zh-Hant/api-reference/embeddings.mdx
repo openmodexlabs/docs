@@ -1,0 +1,94 @@
+---
+title: "建立嵌入"
+description: "POST /v1/embeddings — 為文字生成向量嵌入。"
+api: "POST /embeddings"
+---
+
+## 請求主體
+
+<ParamField body="model" type="string" required>
+  要使用的嵌入模型（例如 `text-embedding-3-small`、`text-embedding-3-large`）。
+</ParamField>
+
+<ParamField body="input" type="string | string[]" required>
+  要嵌入的文字。可以是單一字串或字串陣列。
+</ParamField>
+
+<ParamField body="encoding_format" type="string" default="float">
+  嵌入的格式。`float` 或 `base64`。
+</ParamField>
+
+<ParamField body="dimensions" type="integer">
+  輸出嵌入的維度數（取決於模型）。
+</ParamField>
+
+## 回應
+
+```json
+{
+  "object": "list",
+  "data": [
+    {
+      "object": "embedding",
+      "embedding": [0.0023, -0.0094, 0.0156, ...],
+      "index": 0
+    }
+  ],
+  "model": "text-embedding-3-small",
+  "usage": {
+    "prompt_tokens": 8,
+    "total_tokens": 8
+  }
+}
+```
+
+## 範例
+
+<CodeGroup>
+```bash cURL
+curl https://api.openmodex.com/v1/embeddings \
+  -H "Authorization: Bearer omx_sk_YOUR_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "model": "text-embedding-3-small",
+    "input": "OpenModex is a unified AI gateway."
+  }'
+```
+
+```typescript Node.js
+const result = await client.embeddings.create({
+  model: 'text-embedding-3-small',
+  input: 'OpenModex is a unified AI gateway.',
+});
+
+console.log(result.data[0].embedding);
+```
+
+```python Python
+result = client.embeddings.create(
+    model="text-embedding-3-small",
+    input="OpenModex is a unified AI gateway.",
+)
+
+print(result.data[0].embedding)
+```
+</CodeGroup>
+
+## 批次嵌入
+
+您可以在單一請求中嵌入多段文字：
+
+```typescript
+const result = await client.embeddings.create({
+  model: 'text-embedding-3-small',
+  input: [
+    'First text to embed',
+    'Second text to embed',
+    'Third text to embed',
+  ],
+});
+
+// result.data[0].embedding -> vector for first text
+// result.data[1].embedding -> vector for second text
+// result.data[2].embedding -> vector for third text
+```

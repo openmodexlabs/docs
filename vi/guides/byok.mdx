@@ -1,0 +1,86 @@
+---
+title: "Mang Khóa Riêng (BYOK)"
+description: "Sử dụng khóa API nhà cung cấp của riêng bạn với OpenModex để hưởng giảm giá theo khối lượng và thỏa thuận tùy chỉnh."
+---
+
+## Tổng Quan
+
+BYOK cho phép bạn sử dụng khóa API nhà cung cấp của riêng mình (OpenAI, Anthropic, v.v.) trong khi vẫn được hưởng lợi từ định tuyến, giám sát, chuyển đổi dự phòng và thanh toán hợp nhất của OpenModex.
+
+Tính năng này lý tưởng khi:
+
+- Bạn có **giảm giá theo khối lượng** hoặc thỏa thuận doanh nghiệp với nhà cung cấp
+- Bạn cần sử dụng **tài khoản nhà cung cấp cụ thể** để tuân thủ quy định
+- Bạn muốn **thanh toán trực tiếp** với nhà cung cấp cho một số mô hình
+
+## Thiết Lập
+
+<Steps>
+  <Step title="Truy cập Provider Keys">
+    Mở [Bảng điều khiển](https://openmodex.com/dashboard) → **Settings** → **Provider Keys**.
+  </Step>
+  <Step title="Thêm khóa nhà cung cấp">
+    Nhấp **Add Key**, chọn nhà cung cấp và dán khóa API của bạn.
+  </Step>
+  <Step title="Xác minh">
+    OpenModex sẽ xác thực khóa bằng một yêu cầu kiểm tra. Sau khi xác minh, các yêu cầu cho nhà cung cấp đó sẽ sử dụng khóa của bạn.
+  </Step>
+</Steps>
+
+## Bảo Mật
+
+<Info>
+  Tất cả khóa nhà cung cấp đều được mã hóa khi lưu trữ bằng **mã hóa phong bì AWS KMS** (AES-256). OpenModex không bao giờ ghi nhật ký hoặc tiết lộ khóa nhà cung cấp của bạn.
+</Info>
+
+- Khóa được mã hóa ngay khi gửi
+- Chỉ tiền tố khóa được lưu trữ để nhận dạng (ví dụ: `sk-...abc`)
+- Giải mã chỉ xảy ra trong bộ nhớ tại thời điểm yêu cầu
+- Khóa không bao giờ được đưa vào nhật ký, phân tích hoặc phản hồi API
+
+## Cách Định Tuyến Hoạt Động Với BYOK
+
+Khi bạn có khóa BYOK được cấu hình cho một nhà cung cấp:
+
+1. Các yêu cầu nhắm đến nhà cung cấp đó sử dụng **khóa của bạn** thay vì nhóm chia sẻ của OpenModex
+2. Bạn được tính phí trực tiếp bởi nhà cung cấp — OpenModex không tính phí token mô hình
+3. Bạn vẫn trả phí đăng ký OpenModex cho các tính năng nền tảng
+4. Định tuyến, bộ nhớ đệm, chuyển đổi dự phòng và giám sát vẫn hoạt động bình thường
+
+### Cấu Hình Hỗn Hợp
+
+Bạn có thể cấu hình BYOK cho một số nhà cung cấp và sử dụng khóa do OpenModex quản lý cho các nhà cung cấp khác:
+
+```
+OpenAI     → Your key (BYOK)
+Anthropic  → OpenModex managed
+Google     → Your key (BYOK)
+DeepSeek   → OpenModex managed
+```
+
+Trong trường hợp này:
+- Yêu cầu GPT-4o sử dụng khóa OpenAI của bạn (tính phí bởi OpenAI)
+- Yêu cầu Claude sử dụng khóa của OpenModex (tính phí bởi OpenModex)
+- Chuyển đổi dự phòng giữa nhà cung cấp BYOK và được quản lý hoạt động liền mạch
+
+## Quản Lý Khóa
+
+Từ bảng điều khiển Provider Keys:
+
+| Hành động | Mô tả |
+|--------|-------------|
+| **Thêm** | Thêm khóa nhà cung cấp mới |
+| **Kiểm tra** | Xác minh khóa hoạt động bằng yêu cầu kiểm tra |
+| **Xoay** | Thay thế giá trị khóa (cập nhật mã hóa) |
+| **Xóa** | Xóa khóa; yêu cầu chuyển về do OpenModex quản lý |
+
+## Nhà Cung Cấp Được Hỗ Trợ
+
+| Nhà cung cấp | Định dạng khóa | Hỗ trợ BYOK |
+|----------|-----------|:---:|
+| OpenAI | `sk-...` | Hỗ trợ |
+| Anthropic | `sk-ant-...` | Hỗ trợ |
+| Google | Service Account JSON | Hỗ trợ |
+| DeepSeek | `sk-...` | Hỗ trợ |
+| Mistral | `...` | Hỗ trợ |
+| Qwen | `sk-...` | Hỗ trợ |

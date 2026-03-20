@@ -1,0 +1,69 @@
+---
+title: "¿Por qué OpenModex?"
+description: "Los problemas que OpenModex resuelve y por qué los equipos eligen una pasarela de IA unificada."
+---
+
+## El Problema
+
+Construir con modelos de IA hoy significa lidiar con infraestructura fragmentada:
+
+- **Múltiples SDKs** — OpenAI, Anthropic, Google y otros, cada uno con sus propias bibliotecas cliente, flujos de autenticación y formatos de respuesta
+- **Dependencia de proveedor** — cambiar de modelo implica reescribir el código de integración
+- **Sin historia de fiabilidad** — cuando un proveedor cae, su aplicación cae
+- **Costos invisibles** — facturación separada entre proveedores hace imposible la optimización
+- **Sin inteligencia de enrutamiento** — usted codifica en duro qué modelo usar, incluso cuando existe una opción más económica o rápida
+
+## Cómo OpenModex Resuelve Esto
+
+<CardGroup cols={2}>
+  <Card title="Una API, Todos los Modelos" icon="plug">
+    Acceda a más de 100 modelos de OpenAI, Anthropic, Google, DeepSeek, Mistral y Qwen a través de un único endpoint compatible con OpenAI.
+  </Card>
+  <Card title="Cero Dependencia" icon="arrows-rotate">
+    Cambie de modelo modificando un solo parámetro de cadena. Su código, sus SDKs, su infraestructura — nada más cambia.
+  </Card>
+  <Card title="Fiabilidad Integrada" icon="shield-check">
+    Respaldos automáticos, circuit breakers y monitoreo de salud mantienen su aplicación funcionando incluso cuando los proveedores fallan.
+  </Card>
+  <Card title="Inteligencia de Costos" icon="chart-line">
+    Enrutamiento inteligente, almacenamiento en caché de prompts y seguimiento de costos por solicitud le ayudan a optimizar el gasto sin sacrificar calidad.
+  </Card>
+</CardGroup>
+
+## Quién Usa OpenModex
+
+### Startups y Equipos de Producto
+
+Lance funciones de IA rápidamente sin construir capas de abstracción de proveedores. Comience con un modelo, pruebe fácilmente otros con A/B testing y escale sin re-arquitectura.
+
+### Equipos de Plataforma e Infraestructura
+
+Centralice el acceso a APIs de IA en toda su organización. Aplique límites de velocidad, rastree costos por equipo y mantenga un único punto de integración.
+
+### Agencias y Consultoras
+
+Construya proyectos para clientes que no estén atados a un solo proveedor. Recomiende el mejor modelo para cada caso de uso y cambie instantáneamente cuando el panorama cambie.
+
+## Diferenciadores Clave
+
+| | API Directa | Otras Pasarelas | OpenModex |
+|--|:---:|:---:|:---:|
+| API compatible con OpenAI | — | Parcial | Completa |
+| Enrutamiento inteligente (costo/latencia/calidad) | — | Básico | Avanzado |
+| Conmutación automática + circuit breaker | — | Limitado | Integrado |
+| Almacenamiento en caché de prompts | — | — | Integrado |
+| API de comparación de modelos | — | — | Integrado |
+| Precios transparentes | — | Variable | Pass-through |
+| BYOK (Traiga Su Propia Clave) | — | — | Soportado |
+| SDKs oficiales (Node, Python, Go, React) | — | Parcial | Completo |
+
+## Comience
+
+<CardGroup cols={2}>
+  <Card title="Inicio Rápido" icon="rocket" href="/es/introduction/quickstart">
+    Realice su primera llamada API en 2 minutos.
+  </Card>
+  <Card title="Arquitectura" icon="sitemap" href="/es/platform/architecture">
+    Comprenda cómo funciona OpenModex internamente.
+  </Card>
+</CardGroup>

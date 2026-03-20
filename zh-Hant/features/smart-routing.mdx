@@ -1,0 +1,106 @@
+---
+title: "智慧路由"
+description: "根據成本、延遲或品質自動將請求路由到最佳模型。"
+---
+
+## 概覽
+
+OpenModex 的智慧路由引擎會自動為每個請求選擇最佳供應商。您可以讓 OpenModex 根據您的優先順序來選擇，而不是寫死使用單一供應商。
+
+## 路由策略
+
+### 成本最佳化
+
+路由到能滿足請求的最便宜供應商：
+
+```typescript
+const response = await client.chat.completions.create({
+  model: 'gpt-4o',
+  messages: [{ role: 'user', content: 'Summarize this article...' }],
+  routing: {
+    strategy: 'cost_optimized',
+  },
+});
+```
+
+### 延遲最佳化
+
+路由到最快的可用供應商：
+
+```typescript
+const response = await client.chat.completions.create({
+  model: 'gpt-4o',
+  messages: [{ role: 'user', content: 'Quick answer needed...' }],
+  routing: {
+    strategy: 'latency_optimized',
+  },
+});
+```
+
+### 品質最佳化
+
+路由到品質分數最高的供應商：
+
+```typescript
+const response = await client.chat.completions.create({
+  model: 'gpt-4o',
+  messages: [{ role: 'user', content: 'Write a detailed analysis...' }],
+  routing: {
+    strategy: 'quality_optimized',
+  },
+});
+```
+
+## 伺服器端容錯備援
+
+定義在主要模型失敗時自動執行的備援鏈：
+
+```typescript
+const response = await client.chat.completions.create({
+  model: 'gpt-4o',
+  messages: [{ role: 'user', content: 'Hello!' }],
+  routing: {
+    fallback: ['claude-3.5-sonnet', 'gemini-2.0-flash'],
+  },
+});
+```
+
+如果 `gpt-4o` 不可用（5xx 或速率限制），OpenModex 會自動嘗試 `claude-3.5-sonnet`，然後嘗試 `gemini-2.0-flash`。
+
+## 允許升級
+
+讓 OpenModex 在相同價格層級有更強模型可用時進行路由：
+
+```typescript
+const response = await client.chat.completions.create({
+  model: 'gpt-4o-mini',
+  messages: [{ role: 'user', content: 'Hello!' }],
+  routing: {
+    allow_upgrade: true,
+  },
+});
+```
+
+## 斷路器
+
+OpenModex 即時監控供應商健康狀態。當供應商開始出現故障時：
+
+1. **健康** — 請求正常路由
+2. **降級** — 連續失敗後，流量被減少
+3. **開啟** — 供應商暫時從路由中移除
+4. **恢復** — 定期健康檢查恢復供應商
+
+這一切自動發生 — 您不需要做任何設定。
+
+## 檢查發生了什麼
+
+每個回應都包含路由中繼資料：
+
+```typescript
+const response = await client.chat.completions.create({...});
+
+console.log(response.openmodex?.provider);          // "openai"
+console.log(response.openmodex?.routing_strategy);   // "cost_optimized"
+console.log(response.openmodex?.fallback_used);      // false
+console.log(response.openmodex?.latency_ms);         // 850
+```

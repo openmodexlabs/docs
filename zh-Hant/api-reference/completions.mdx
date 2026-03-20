@@ -1,0 +1,75 @@
+---
+title: "建立補全"
+description: "POST /v1/completions — 建立文字補全（舊版）。"
+api: "POST /completions"
+---
+
+<Note>
+  這是一個舊版端點。對於大多數使用案例，請改用[聊天補全](/zh-Hant/api-reference/chat-completions)。
+</Note>
+
+## 請求主體
+
+<ParamField body="model" type="string" required>
+  要使用的模型 ID。
+</ParamField>
+
+<ParamField body="prompt" type="string | string[]" required>
+  要生成補全的提示。
+</ParamField>
+
+<ParamField body="max_tokens" type="integer" default={16}>
+  要生成的最大 token 數。
+</ParamField>
+
+<ParamField body="temperature" type="number" default={1}>
+  取樣溫度，介於 0 到 2 之間。
+</ParamField>
+
+<ParamField body="top_p" type="number" default={1}>
+  核取樣參數。
+</ParamField>
+
+<ParamField body="stop" type="string | string[]">
+  停止序列。
+</ParamField>
+
+<ParamField body="suffix" type="string">
+  附加在補全之後的文字。
+</ParamField>
+
+## 回應
+
+```json
+{
+  "id": "cmpl-abc123",
+  "object": "text_completion",
+  "created": 1700000000,
+  "model": "gpt-3.5-turbo-instruct",
+  "choices": [
+    {
+      "index": 0,
+      "text": " a time, in a land far away...",
+      "finish_reason": "length"
+    }
+  ],
+  "usage": {
+    "prompt_tokens": 5,
+    "completion_tokens": 10,
+    "total_tokens": 15
+  }
+}
+```
+
+## 範例
+
+```bash
+curl https://api.openmodex.com/v1/completions \
+  -H "Authorization: Bearer omx_sk_YOUR_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "model": "gpt-3.5-turbo-instruct",
+    "prompt": "Once upon",
+    "max_tokens": 100
+  }'
+```

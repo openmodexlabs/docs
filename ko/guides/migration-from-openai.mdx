@@ -1,0 +1,119 @@
+---
+title: "OpenAI에서 마이그레이션"
+description: "몇 분 안에 OpenAI API에서 OpenModex로 전환하세요."
+---
+
+## 개요
+
+OpenModex는 OpenAI API와 완전히 호환됩니다. 마이그레이션은 일반적으로 기본 URL과 API 키, 두 줄의 코드만 변경하면 됩니다.
+
+## 옵션 1: OpenAI SDK 사용 (가장 빠름)
+
+이미 OpenAI SDK를 사용하고 있다면 설정만 변경하세요:
+
+<CodeGroup>
+```typescript Node.js
+import OpenAI from 'openai';
+
+const client = new OpenAI({
+  apiKey: 'omx_sk_YOUR_KEY',                   // ← OpenModex key
+  baseURL: 'https://api.openmodex.com/v1',     // ← OpenModex URL
+});
+
+// All existing code works unchanged
+const response = await client.chat.completions.create({
+  model: 'gpt-4o',
+  messages: [{ role: 'user', content: 'Hello!' }],
+});
+```
+
+```python Python
+from openai import OpenAI
+
+client = OpenAI(
+    api_key="omx_sk_YOUR_KEY",                   # ← OpenModex key
+    base_url="https://api.openmodex.com/v1",     # ← OpenModex URL
+)
+
+# All existing code works unchanged
+response = client.chat.completions.create(
+    model="gpt-4o",
+    messages=[{"role": "user", "content": "Hello!"}],
+)
+```
+</CodeGroup>
+
+## 옵션 2: OpenModex SDK 사용
+
+라우팅, 캐싱, 폴백 및 모델 비교 기능에 접근하려면:
+
+<CodeGroup>
+```typescript Node.js
+// Before (OpenAI)
+import OpenAI from 'openai';
+const client = new OpenAI({ apiKey: 'sk-...' });
+
+// After (OpenModex)
+import OpenModex from '@openmodex/sdk';
+const client = new OpenModex({ apiKey: 'omx_sk_...' });
+
+// API calls are identical
+const response = await client.chat.completions.create({
+  model: 'gpt-4o',
+  messages: [{ role: 'user', content: 'Hello!' }],
+});
+```
+
+```python Python
+# Before (OpenAI)
+from openai import OpenAI
+client = OpenAI(api_key="sk-...")
+
+# After (OpenModex)
+from openmodex import OpenModex
+client = OpenModex(api_key="omx_sk_...")
+
+# API calls are identical
+response = client.chat.completions.create(
+    model="gpt-4o",
+    messages=[{"role": "user", "content": "Hello!"}],
+)
+```
+</CodeGroup>
+
+## 옵션 3: 환경 변수
+
+코드 변경 없이 마이그레이션하려면 환경 변수만 설정하세요:
+
+```bash
+# Replace
+export OPENAI_API_KEY=sk-...
+export OPENAI_BASE_URL=https://api.openai.com/v1
+
+# With
+export OPENAI_API_KEY=omx_sk_...
+export OPENAI_BASE_URL=https://api.openmodex.com/v1
+```
+
+## 마이그레이션의 이점
+
+마이그레이션 후 다음 기능에 접근할 수 있습니다:
+
+| 기능 | OpenAI 직접 사용 | OpenModex |
+|---------|:---:|:---:|
+| OpenAI 모델 | ✅ | ✅ |
+| Anthropic, Google 등 | ❌ | ✅ |
+| 자동 폴백 | ❌ | ✅ |
+| 스마트 라우팅 | ❌ | ✅ |
+| 프롬프트 캐싱 | ❌ | ✅ |
+| 모델 비교 | ❌ | ✅ |
+| 통합 결제 | ❌ | ✅ |
+| 사용량 분석 | 기본 | ✅ |
+
+## 호환성 참고사항
+
+- 모든 OpenAI 채팅 완성 파라미터가 지원됩니다
+- 스트리밍이 동일하게 작동합니다 (SSE 형식)
+- Function calling / tool use가 완전히 지원됩니다
+- 응답 형식이 동일하므로 파싱 코드를 변경할 필요가 없습니다
+- `openmodex` 메타데이터 필드는 추가적이며 기존 코드를 손상시키지 않습니다

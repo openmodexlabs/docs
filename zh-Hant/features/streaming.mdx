@@ -1,0 +1,98 @@
+---
+title: "串流"
+description: "透過 Server-Sent Events 即時逐 token 傳遞回應。"
+---
+
+## 概覽
+
+串流允許您在 token 生成時即時接收，而不是等待完整回應。這大幅改善了使用者感知到的延遲。
+
+## 何時使用串流
+
+- **聊天介面** — 顯示打字指示器和即時文字
+- **長回應** — 不讓使用者等待完整回應
+- **程式碼生成** — 即時顯示正在撰寫的程式碼
+
+## 運作方式
+
+1. 在請求中設定 `stream: true`
+2. OpenModex 開啟 SSE（Server-Sent Events）連線
+3. Token 以 `data:` 事件的形式在生成時發送
+4. 串流以 `data: [DONE]` 結束
+
+## 範例
+
+<CodeGroup>
+```typescript Node.js SDK
+const stream = await client.chat.completions.create({
+  model: 'gpt-4o',
+  messages: [{ role: 'user', content: 'Tell me a story.' }],
+  stream: true,
+});
+
+for await (const chunk of stream) {
+  process.stdout.write(chunk.choices[0]?.delta?.content ?? '');
+}
+```
+
+```python Python SDK
+stream = client.chat.completions.create(
+    model="gpt-4o",
+    messages=[{"role": "user", "content": "Tell me a story."}],
+    stream=True,
+)
+
+for chunk in stream:
+    content = chunk.choices[0].delta.content
+    if content:
+        print(content, end="", flush=True)
+```
+
+```go Go SDK
+stream, _ := client.Chat.Completions.CreateStream(ctx, &openmodex.ChatCompletionParams{
+    Model:    "gpt-4o",
+    Messages: []openmodex.ChatMessage{{Role: "user", Content: "Tell me a story."}},
+})
+
+for chunk, err := range stream.Iter() {
+    if err != nil { break }
+    fmt.Print(chunk.Choices[0].Delta.Content)
+}
+```
+
+```tsx React
+import { useChat } from '@openmodex/react';
+
+function Chat() {
+  const { messages, input, setInput, sendMessage, isLoading } = useChat({
+    apiKey: 'omx_sk_...',
+    model: 'gpt-4o',
+  });
+
+  return (
+    <div>
+      {messages.map((m) => (
+        <div key={m.id}>{m.role}: {m.content}</div>
+      ))}
+      <input value={input} onChange={(e) => setInput(e.target.value)} />
+      <button onClick={() => sendMessage()}>Send</button>
+    </div>
+  );
+}
+```
+</CodeGroup>
+
+## 串流 + 容錯備援
+
+串流與容錯備援無縫配合。如果主要模型在串流開始前失敗，OpenModex 會自動使用備援模型重試：
+
+```typescript
+const stream = await client.chat.completions.create({
+  model: 'gpt-4o',
+  messages: [{ role: 'user', content: 'Hello!' }],
+  stream: true,
+  routing: {
+    fallback: ['claude-3.5-sonnet'],
+  },
+});
+```

@@ -1,0 +1,106 @@
+---
+title: "Enrutamiento Inteligente"
+description: "Enrute automáticamente las solicitudes al mejor modelo según costo, latencia o calidad."
+---
+
+## Descripción General
+
+El motor de enrutamiento inteligente de OpenModex selecciona automáticamente el proveedor óptimo para cada solicitud. En lugar de codificar un solo proveedor, puede dejar que OpenModex elija según sus prioridades.
+
+## Estrategias de Enrutamiento
+
+### Optimizado por Costo
+
+Enrutar al proveedor más económico que pueda cumplir con la solicitud:
+
+```typescript
+const response = await client.chat.completions.create({
+  model: 'gpt-4o',
+  messages: [{ role: 'user', content: 'Summarize this article...' }],
+  routing: {
+    strategy: 'cost_optimized',
+  },
+});
+```
+
+### Optimizado por Latencia
+
+Enrutar al proveedor disponible más rápido:
+
+```typescript
+const response = await client.chat.completions.create({
+  model: 'gpt-4o',
+  messages: [{ role: 'user', content: 'Quick answer needed...' }],
+  routing: {
+    strategy: 'latency_optimized',
+  },
+});
+```
+
+### Optimizado por Calidad
+
+Enrutar al proveedor con las puntuaciones de calidad más altas:
+
+```typescript
+const response = await client.chat.completions.create({
+  model: 'gpt-4o',
+  messages: [{ role: 'user', content: 'Write a detailed analysis...' }],
+  routing: {
+    strategy: 'quality_optimized',
+  },
+});
+```
+
+## Respaldos del Lado del Servidor
+
+Defina una cadena de respaldo que se ejecuta automáticamente si el modelo principal falla:
+
+```typescript
+const response = await client.chat.completions.create({
+  model: 'gpt-4o',
+  messages: [{ role: 'user', content: 'Hello!' }],
+  routing: {
+    fallback: ['claude-3.5-sonnet', 'gemini-2.0-flash'],
+  },
+});
+```
+
+Si `gpt-4o` no está disponible (5xx o límite de velocidad), OpenModex intenta automáticamente con `claude-3.5-sonnet`, luego con `gemini-2.0-flash`.
+
+## Permitir Actualización
+
+Deje que OpenModex enrute a un modelo más capaz cuando esté disponible en el mismo nivel de precios:
+
+```typescript
+const response = await client.chat.completions.create({
+  model: 'gpt-4o-mini',
+  messages: [{ role: 'user', content: 'Hello!' }],
+  routing: {
+    allow_upgrade: true,
+  },
+});
+```
+
+## Circuit Breaker
+
+OpenModex monitorea la salud del proveedor en tiempo real. Cuando un proveedor comienza a fallar:
+
+1. **Saludable** — las solicitudes se enrutan normalmente
+2. **Degradado** — después de fallos consecutivos, el tráfico se reduce
+3. **Abierto** — el proveedor se elimina temporalmente del enrutamiento
+4. **Recuperación** — verificaciones de salud periódicas restauran al proveedor
+
+Esto sucede automáticamente — no necesita configurar nada.
+
+## Verifique Lo Que Sucedió
+
+Cada respuesta incluye metadatos de enrutamiento:
+
+```typescript
+const response = await client.chat.completions.create({...});
+
+console.log(response.openmodex?.provider);          // "openai"
+console.log(response.openmodex?.routing_strategy);   // "cost_optimized"
+console.log(response.openmodex?.fallback_used);      // false
+console.log(response.openmodex?.latency_ms);         // 850
+```

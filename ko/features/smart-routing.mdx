@@ -1,0 +1,106 @@
+---
+title: "스마트 라우팅"
+description: "비용, 지연 시간 또는 품질을 기반으로 요청을 최적의 모델로 자동 라우팅합니다."
+---
+
+## 개요
+
+OpenModex의 지능형 라우팅 엔진은 각 요청에 대해 최적의 제공업체를 자동으로 선택합니다. 단일 제공업체를 하드코딩하는 대신 우선순위에 따라 OpenModex가 선택하도록 할 수 있습니다.
+
+## 라우팅 전략
+
+### 비용 최적화
+
+요청을 처리할 수 있는 가장 저렴한 제공업체로 라우팅합니다:
+
+```typescript
+const response = await client.chat.completions.create({
+  model: 'gpt-4o',
+  messages: [{ role: 'user', content: 'Summarize this article...' }],
+  routing: {
+    strategy: 'cost_optimized',
+  },
+});
+```
+
+### 지연 시간 최적화
+
+가장 빠른 사용 가능한 제공업체로 라우팅합니다:
+
+```typescript
+const response = await client.chat.completions.create({
+  model: 'gpt-4o',
+  messages: [{ role: 'user', content: 'Quick answer needed...' }],
+  routing: {
+    strategy: 'latency_optimized',
+  },
+});
+```
+
+### 품질 최적화
+
+가장 높은 품질 점수를 가진 제공업체로 라우팅합니다:
+
+```typescript
+const response = await client.chat.completions.create({
+  model: 'gpt-4o',
+  messages: [{ role: 'user', content: 'Write a detailed analysis...' }],
+  routing: {
+    strategy: 'quality_optimized',
+  },
+});
+```
+
+## 서버 측 폴백
+
+기본 모델이 실패할 경우 자동으로 실행되는 폴백 체인을 정의하세요:
+
+```typescript
+const response = await client.chat.completions.create({
+  model: 'gpt-4o',
+  messages: [{ role: 'user', content: 'Hello!' }],
+  routing: {
+    fallback: ['claude-3.5-sonnet', 'gemini-2.0-flash'],
+  },
+});
+```
+
+`gpt-4o`가 사용 불가능한 경우 (5xx 또는 요청 제한), OpenModex가 자동으로 `claude-3.5-sonnet`을 시도한 다음 `gemini-2.0-flash`를 시도합니다.
+
+## 업그레이드 허용
+
+동일한 가격 티어에서 더 우수한 모델이 사용 가능한 경우 OpenModex가 해당 모델로 라우팅하도록 허용합니다:
+
+```typescript
+const response = await client.chat.completions.create({
+  model: 'gpt-4o-mini',
+  messages: [{ role: 'user', content: 'Hello!' }],
+  routing: {
+    allow_upgrade: true,
+  },
+});
+```
+
+## 서킷 브레이커
+
+OpenModex는 실시간으로 제공업체 상태를 모니터링합니다. 제공업체에 장애가 발생하면:
+
+1. **Healthy** — 요청이 정상적으로 라우팅됨
+2. **Degraded** — 연속 실패 후 트래픽이 감소됨
+3. **Open** — 제공업체가 라우팅에서 일시적으로 제거됨
+4. **Recovery** — 주기적 상태 확인으로 제공업체가 복원됨
+
+이 과정은 자동으로 수행되므로 별도의 설정이 필요하지 않습니다.
+
+## 라우팅 결과 확인
+
+모든 응답에는 라우팅 메타데이터가 포함됩니다:
+
+```typescript
+const response = await client.chat.completions.create({...});
+
+console.log(response.openmodex?.provider);          // "openai"
+console.log(response.openmodex?.routing_strategy);   // "cost_optimized"
+console.log(response.openmodex?.fallback_used);      // false
+console.log(response.openmodex?.latency_ms);         // 850
+```

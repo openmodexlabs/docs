@@ -1,0 +1,106 @@
+---
+title: "Supported Models"
+description: "All AI models and providers available through the OpenModex gateway."
+---
+
+## Overview
+
+OpenModex provides access to 100+ models from 6 major AI providers through a single API. All models are accessible via the same OpenAI-compatible endpoint.
+
+<Tip>
+  Use the [Models API](/api-reference/models-list) to get real-time pricing and availability, or the [Compare API](/api-reference/models-compare) to evaluate models side by side.
+</Tip>
+
+## OpenAI
+
+| Model | Context | Best For | Features |
+|-------|--------:|----------|----------|
+| `gpt-4o` | 128K | General purpose, vision | Streaming, Function Calling, JSON Mode, Vision |
+| `gpt-4o-mini` | 128K | Cost-effective tasks | Streaming, Function Calling, JSON Mode |
+| `o1` | 200K | Complex reasoning | Chain-of-thought |
+| `o3` | 200K | Advanced reasoning | Chain-of-thought |
+| `gpt-4-turbo` | 128K | Legacy compatibility | Streaming, Function Calling, Vision |
+
+## Anthropic
+
+| Model | Context | Best For | Features |
+|-------|--------:|----------|----------|
+| `claude-3.5-sonnet` | 200K | Code, analysis, long context | Streaming, Tool Use |
+| `claude-3-opus` | 200K | Complex tasks, research | Streaming, Tool Use |
+| `claude-3-haiku` | 200K | Fast, cost-effective | Streaming, Tool Use |
+
+## Google
+
+| Model | Context | Best For | Features |
+|-------|--------:|----------|----------|
+| `gemini-2.0-flash` | 1M | Speed, multimodal | Streaming, Function Calling, Vision |
+| `gemini-1.5-pro` | 2M | Long documents, analysis | Streaming, Function Calling, Vision |
+| `gemini-1.5-flash` | 1M | Balance of speed & quality | Streaming, Function Calling |
+
+## DeepSeek
+
+| Model | Context | Best For | Features |
+|-------|--------:|----------|----------|
+| `deepseek-chat` | 128K | General purpose, cost savings | Streaming |
+| `deepseek-reasoner` | 128K | Reasoning, math, code | Streaming, Chain-of-thought |
+
+## Mistral
+
+| Model | Context | Best For | Features |
+|-------|--------:|----------|----------|
+| `mistral-large` | 128K | Enterprise, multilingual | Streaming, Function Calling |
+| `mistral-small` | 128K | Cost-effective, fast | Streaming |
+| `codestral` | 32K | Code generation | Streaming |
+
+## Qwen
+
+| Model | Context | Best For | Features |
+|-------|--------:|----------|----------|
+| `qwen-max` | 128K | Chinese language, general purpose | Streaming |
+| `qwen2.5-72b` | 128K | Open-weight, versatile | Streaming |
+| `qwen2.5-coder` | 128K | Code generation | Streaming |
+
+## Embedding Models
+
+| Model | Dimensions | Provider | Best For |
+|-------|----------:|----------|----------|
+| `text-embedding-3-small` | 1536 | OpenAI | Cost-effective embeddings |
+| `text-embedding-3-large` | 3072 | OpenAI | High-precision embeddings |
+| `text-embedding-ada-002` | 1536 | OpenAI | Legacy compatibility |
+
+## Choosing a Model
+
+Use the routing strategies or refer to this quick guide:
+
+| Priority | Recommended |
+|----------|-------------|
+| **Cheapest** | `gpt-4o-mini`, `deepseek-chat`, `gemini-2.0-flash` |
+| **Fastest** | `gemini-2.0-flash`, `gpt-4o-mini`, `claude-3-haiku` |
+| **Best quality** | `gpt-4o`, `claude-3.5-sonnet`, `gemini-1.5-pro` |
+| **Best at code** | `claude-3.5-sonnet`, `deepseek-reasoner`, `codestral` |
+| **Longest context** | `gemini-1.5-pro` (2M), `gemini-2.0-flash` (1M) |
+| **Best reasoning** | `o3`, `o1`, `deepseek-reasoner` |
+
+Or let OpenModex decide automatically:
+
+```typescript
+const response = await client.chat.completions.create({
+  model: 'auto',
+  messages: [{ role: 'user', content: 'Hello!' }],
+  routing: { strategy: 'cost_optimized' },
+});
+```
+
+## Live Model Data
+
+For real-time pricing, availability, and quality scores:
+
+```bash
+# List all models with pricing
+curl https://api.openmodex.com/v1/models \
+  -H "Authorization: Bearer omx_sk_YOUR_KEY"
+
+# Compare specific models
+curl "https://api.openmodex.com/v1/models/compare?models=openai/gpt-4o,anthropic/claude-3.5-sonnet" \
+  -H "Authorization: Bearer omx_sk_YOUR_KEY"
+```

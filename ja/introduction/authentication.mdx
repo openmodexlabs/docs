@@ -1,0 +1,86 @@
+---
+title: "認証"
+description: "Bearerトークンを使用してAPIリクエストを認証します。"
+---
+
+## APIキー
+
+すべてのAPIリクエストには、`Authorization`ヘッダーにAPIキーを含める必要があります：
+
+```bash
+Authorization: Bearer omx_sk_YOUR_API_KEY
+```
+
+APIキーは[ダッシュボード](https://openmodex.com/dashboard/api-keys)で作成・管理します。
+
+## キーの形式
+
+OpenModex APIキーは以下の形式に従います：
+
+```
+omx_sk_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+```
+
+- `omx_` — OpenModexプレフィックス
+- `sk_` — シークレットキー識別子
+- その後にランダムな英数字文字列が続きます
+
+## 使用方法
+
+<CodeGroup>
+```bash cURL
+curl https://api.openmodex.com/v1/chat/completions \
+  -H "Authorization: Bearer omx_sk_YOUR_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{"model": "gpt-4o", "messages": [{"role": "user", "content": "Hi"}]}'
+```
+
+```typescript Node.js
+import OpenModex from '@openmodex/sdk';
+
+// Pass directly
+const client = new OpenModex({ apiKey: 'omx_sk_YOUR_KEY' });
+
+// Or use environment variable (auto-detected)
+// OPENMODEX_API_KEY=omx_sk_YOUR_KEY
+const client = new OpenModex();
+```
+
+```python Python
+from openmodex import OpenModex
+
+# Pass directly
+client = OpenModex(api_key="omx_sk_YOUR_KEY")
+
+# Or use environment variable (auto-detected)
+# OPENMODEX_API_KEY=omx_sk_YOUR_KEY
+client = OpenModex()
+```
+</CodeGroup>
+
+## 環境変数
+
+すべての公式SDKは`OPENMODEX_API_KEY`環境変数を自動的に読み取ります：
+
+```bash
+export OPENMODEX_API_KEY=omx_sk_YOUR_KEY
+```
+
+## セキュリティのベストプラクティス
+
+<Warning>
+  APIキーをクライアントサイドのコード、公開リポジトリ、ブラウザのリクエストに公開しないでください。APIキーには課金権限が含まれており、秘密に保つ必要があります。
+</Warning>
+
+- **環境変数を使用** — ソースコードにキーをハードコーディングしないでください
+- **キーを定期的にローテーション** — ダッシュボードから新しいキーを作成し、古いキーを無効化してください
+- **開発用と本番用で別々のキーを使用**してください
+- **権限を設定** — 可能な場合は、特定のモデルやレート制限にキーを制限してください
+
+## エラーレスポンス
+
+| ステータス | 意味 |
+|--------|---------|
+| `401 Unauthorized` | APIキーが見つからないか無効です |
+| `403 Forbidden` | キーにこの操作の権限がありません |
+| `429 Too Many Requests` | レート制限を超過しました |

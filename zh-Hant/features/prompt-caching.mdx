@@ -1,0 +1,69 @@
+---
+title: "提示快取"
+description: "快取重複的提示以降低延遲和成本。"
+---
+
+## 概覽
+
+提示快取會儲存相同請求的回應，直接回傳快取結果，無需進行新的 API 呼叫。這非常適合：
+
+- 重複查詢（FAQ 機器人、常見問題）
+- 開發和測試
+- 具有可預測輸入的高流量端點
+
+## 啟用快取
+
+在您的請求中新增 `cache` 參數：
+
+```typescript
+const response = await client.chat.completions.create({
+  model: 'gpt-4o',
+  messages: [{ role: 'user', content: 'What is 2+2?' }],
+  cache: {
+    enabled: true,
+    ttl: 3600, // cache for 1 hour
+  },
+});
+
+console.log(response.openmodex?.cache_hit); // true on subsequent requests
+```
+
+## 運作方式
+
+1. OpenModex 對請求進行雜湊（模型 + 訊息 + 參數）
+2. 如果存在未過期的快取回應，則立即回傳
+3. 如果沒有快取，請求將發送到供應商，回應則被快取
+
+## 快取金鑰
+
+快取金鑰由以下內容計算：
+- 模型名稱
+- 訊息陣列（內容和角色）
+- temperature、max_tokens 和其他生成參數
+
+更改任何這些參數都會產生不同的快取金鑰。
+
+## TTL（存活時間）
+
+| 設定 | 值 |
+|---------|-------|
+| 預設 TTL | 300 秒（5 分鐘） |
+| 最小 TTL | 60 秒 |
+| 最大 TTL | 86400 秒（24 小時） |
+
+## 成本節省
+
+快取回應明顯更便宜：
+- **快取輸入 token** 以正常費率的約 50% 計費
+- **無輸出 token 成本**
+- **零延遲** — 回應在 <10ms 內回傳
+
+## 檢查快取狀態
+
+```typescript
+const response = await client.chat.completions.create({...});
+
+if (response.openmodex?.cache_hit) {
+  console.log('Served from cache!');
+}
+```

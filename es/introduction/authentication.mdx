@@ -1,0 +1,86 @@
+---
+title: "Autenticación"
+description: "Autentique sus solicitudes API con tokens Bearer."
+---
+
+## Claves API
+
+Todas las solicitudes API requieren una clave API enviada en el encabezado `Authorization`:
+
+```bash
+Authorization: Bearer omx_sk_YOUR_API_KEY
+```
+
+Las claves API se crean y gestionan en su [panel de control](https://openmodex.com/dashboard/api-keys).
+
+## Formato de Clave
+
+Las claves API de OpenModex siguen el formato:
+
+```
+omx_sk_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+```
+
+- `omx_` — prefijo de OpenModex
+- `sk_` — identificador de clave secreta
+- Seguido de una cadena alfanumérica aleatoria
+
+## Uso
+
+<CodeGroup>
+```bash cURL
+curl https://api.openmodex.com/v1/chat/completions \
+  -H "Authorization: Bearer omx_sk_YOUR_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{"model": "gpt-4o", "messages": [{"role": "user", "content": "Hi"}]}'
+```
+
+```typescript Node.js
+import OpenModex from '@openmodex/sdk';
+
+// Pass directly
+const client = new OpenModex({ apiKey: 'omx_sk_YOUR_KEY' });
+
+// Or use environment variable (auto-detected)
+// OPENMODEX_API_KEY=omx_sk_YOUR_KEY
+const client = new OpenModex();
+```
+
+```python Python
+from openmodex import OpenModex
+
+# Pass directly
+client = OpenModex(api_key="omx_sk_YOUR_KEY")
+
+# Or use environment variable (auto-detected)
+# OPENMODEX_API_KEY=omx_sk_YOUR_KEY
+client = OpenModex()
+```
+</CodeGroup>
+
+## Variables de Entorno
+
+Todos los SDKs oficiales leen automáticamente la variable de entorno `OPENMODEX_API_KEY`:
+
+```bash
+export OPENMODEX_API_KEY=omx_sk_YOUR_KEY
+```
+
+## Mejores Prácticas de Seguridad
+
+<Warning>
+  Nunca exponga su clave API en código del lado del cliente, repositorios públicos o solicitudes del navegador. Las claves API tienen permisos de facturación y deben mantenerse en secreto.
+</Warning>
+
+- **Use variables de entorno** — nunca codifique claves directamente en el código fuente
+- **Rote las claves regularmente** — cree nuevas claves y revoque las antiguas desde el panel de control
+- **Use claves separadas** para desarrollo y producción
+- **Configure permisos** — restrinja las claves a modelos específicos o límites de velocidad cuando sea posible
+
+## Respuestas de Error
+
+| Estado | Significado |
+|--------|---------|
+| `401 Unauthorized` | Clave API faltante o inválida |
+| `403 Forbidden` | La clave no tiene permiso para esta operación |
+| `429 Too Many Requests` | Límite de velocidad excedido |

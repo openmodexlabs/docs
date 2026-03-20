@@ -1,0 +1,56 @@
+---
+title: "Clés API"
+description: "Créez, gérez et effectuez la rotation de vos clés API OpenModex."
+---
+
+## Créer une clé
+
+1. Accédez à votre [tableau de bord des clés API](https://openmodex.com/dashboard/api-keys)
+2. Cliquez sur **Create New Key**
+3. Donnez-lui un nom descriptif (par exemple, "Production", "Development")
+4. Copiez la clé immédiatement — elle ne sera plus affichée
+
+<Warning>
+  Votre clé API n'est affichée qu'une seule fois lors de sa création. Conservez-la en lieu sûr. Si vous la perdez, créez-en une nouvelle.
+</Warning>
+
+## Gestion des clés
+
+Depuis le tableau de bord, vous pouvez :
+
+- **Consulter l'utilisation** — voir le nombre de requêtes et le coût par clé
+- **Renommer** — mettre à jour le libellé de la clé
+- **Effectuer une rotation** — générer une nouvelle valeur de clé tout en conservant la même configuration
+- **Révoquer** — désactiver définitivement une clé
+
+## Rotation des clés
+
+Pour effectuer la rotation d'une clé sans interruption de service :
+
+1. Créez une nouvelle clé
+2. Mettez à jour votre application pour utiliser la nouvelle clé
+3. Vérifiez que la nouvelle clé fonctionne en production
+4. Révoquez l'ancienne clé
+
+## Limites de débit
+
+Les limites de débit sont appliquées par clé API :
+
+| Niveau | Requêtes par minute | Tokens par minute |
+|------|--------------------:|------------------:|
+| Free | 30 | 60 000 |
+| Pro | 120 | 500 000 |
+| Enterprise | 300+ | Personnalisé |
+
+Lorsque vous dépassez une limite de débit, vous recevrez une réponse `429 Too Many Requests` avec un en-tête `Retry-After`.
+
+## Utilisation de BYOK (Bring Your Own Key)
+
+OpenModex prend également en charge l'utilisation de vos propres clés API fournisseur pour un accès direct :
+
+1. Accédez à **Settings → Provider Keys** dans le tableau de bord
+2. Ajoutez votre clé API fournisseur (par exemple, OpenAI, Anthropic)
+3. Les clés sont chiffrées au repos avec le chiffrement par enveloppe AWS KMS
+4. Les requêtes seront routées en utilisant votre clé fournisseur lorsqu'elle est disponible
+
+Cela vous offre les avantages de routage et de surveillance d'OpenModex tout en utilisant vos propres accords fournisseur.

@@ -1,0 +1,119 @@
+---
+title: "Chuyển đổi từ OpenAI"
+description: "Chuyển từ OpenAI API sang OpenModex trong vài phút."
+---
+
+## Tổng Quan
+
+OpenModex hoàn toàn tương thích với OpenAI API. Việc chuyển đổi thường chỉ yêu cầu thay đổi hai dòng mã: URL gốc và khóa API.
+
+## Phương Án 1: Sử Dụng OpenAI SDK (Nhanh Nhất)
+
+Nếu bạn đã sử dụng OpenAI SDK, chỉ cần thay đổi cấu hình:
+
+<CodeGroup>
+```typescript Node.js
+import OpenAI from 'openai';
+
+const client = new OpenAI({
+  apiKey: 'omx_sk_YOUR_KEY',                   // ← OpenModex key
+  baseURL: 'https://api.openmodex.com/v1',     // ← OpenModex URL
+});
+
+// All existing code works unchanged
+const response = await client.chat.completions.create({
+  model: 'gpt-4o',
+  messages: [{ role: 'user', content: 'Hello!' }],
+});
+```
+
+```python Python
+from openai import OpenAI
+
+client = OpenAI(
+    api_key="omx_sk_YOUR_KEY",                   # ← OpenModex key
+    base_url="https://api.openmodex.com/v1",     # ← OpenModex URL
+)
+
+# All existing code works unchanged
+response = client.chat.completions.create(
+    model="gpt-4o",
+    messages=[{"role": "user", "content": "Hello!"}],
+)
+```
+</CodeGroup>
+
+## Phương Án 2: Sử Dụng OpenModex SDK
+
+Để truy cập định tuyến, bộ nhớ đệm, chuyển đổi dự phòng và so sánh mô hình:
+
+<CodeGroup>
+```typescript Node.js
+// Before (OpenAI)
+import OpenAI from 'openai';
+const client = new OpenAI({ apiKey: 'sk-...' });
+
+// After (OpenModex)
+import OpenModex from '@openmodex/sdk';
+const client = new OpenModex({ apiKey: 'omx_sk_...' });
+
+// API calls are identical
+const response = await client.chat.completions.create({
+  model: 'gpt-4o',
+  messages: [{ role: 'user', content: 'Hello!' }],
+});
+```
+
+```python Python
+# Before (OpenAI)
+from openai import OpenAI
+client = OpenAI(api_key="sk-...")
+
+# After (OpenModex)
+from openmodex import OpenModex
+client = OpenModex(api_key="omx_sk_...")
+
+# API calls are identical
+response = client.chat.completions.create(
+    model="gpt-4o",
+    messages=[{"role": "user", "content": "Hello!"}],
+)
+```
+</CodeGroup>
+
+## Phương Án 3: Biến Môi Trường
+
+Để chuyển đổi không cần thay đổi mã, chỉ cần đặt biến môi trường:
+
+```bash
+# Replace
+export OPENAI_API_KEY=sk-...
+export OPENAI_BASE_URL=https://api.openai.com/v1
+
+# With
+export OPENAI_API_KEY=omx_sk_...
+export OPENAI_BASE_URL=https://api.openmodex.com/v1
+```
+
+## Những Gì Bạn Nhận Được
+
+Sau khi chuyển đổi, bạn có quyền truy cập vào:
+
+| Tính năng | OpenAI Trực tiếp | OpenModex |
+|---------|:---:|:---:|
+| Mô hình OpenAI | ✅ | ✅ |
+| Anthropic, Google, v.v. | ❌ | ✅ |
+| Chuyển đổi dự phòng tự động | ❌ | ✅ |
+| Định tuyến thông minh | ❌ | ✅ |
+| Bộ nhớ đệm prompt | ❌ | ✅ |
+| So sánh mô hình | ❌ | ✅ |
+| Thanh toán hợp nhất | ❌ | ✅ |
+| Phân tích sử dụng | Cơ bản | ✅ |
+
+## Ghi Chú Tương Thích
+
+- Tất cả tham số chat completion của OpenAI đều được hỗ trợ
+- Streaming hoạt động giống hệt (định dạng SSE)
+- Function calling / tool use được hỗ trợ đầy đủ
+- Định dạng phản hồi giống hệt — mã phân tích của bạn vẫn hoạt động
+- Trường siêu dữ liệu `openmodex` là bổ sung và sẽ không ảnh hưởng mã hiện tại

@@ -1,0 +1,77 @@
+---
+title: "Basculements automatiques"
+description: "Maintenez votre application en fonctionnement même lorsque les fournisseurs d'IA sont en panne."
+---
+
+## Vue d'ensemble
+
+Les basculements garantissent la fiabilité de votre application en passant automatiquement à un modèle alternatif lorsque le modèle principal échoue. OpenModex prend en charge les basculements côté serveur et côté client.
+
+## Basculements côté serveur
+
+Configurés par requête. OpenModex gère le basculement sur le serveur :
+
+```typescript
+const response = await client.chat.completions.create({
+  model: 'gpt-4o',
+  messages: [{ role: 'user', content: 'Hello!' }],
+  routing: {
+    fallback: ['claude-3.5-sonnet', 'gemini-2.0-flash'],
+  },
+});
+```
+
+**Comment ça fonctionne :**
+1. Essayer `gpt-4o`
+2. En cas d'échec (5xx, limite de débit, timeout) → essayer `claude-3.5-sonnet`
+3. En cas d'échec → essayer `gemini-2.0-flash`
+4. Si tout échoue → renvoyer une erreur
+
+## Basculements côté client
+
+Configurés sur le client SDK. S'appliquent à toutes les requêtes :
+
+<CodeGroup>
+```typescript Node.js
+import OpenModex from '@openmodex/sdk';
+
+const client = new OpenModex({
+  apiKey: 'omx_sk_...',
+  fallbackModels: ['claude-3.5-sonnet', 'gemini-2.0-flash'],
+});
+
+// If the requested model fails, the SDK automatically retries
+// with each fallback model
+const response = await client.chat.completions.create({
+  model: 'gpt-4o',
+  messages: [{ role: 'user', content: 'Hello!' }],
+});
+```
+
+```go Go
+client := openmodex.NewClient("omx_sk_...",
+    openmodex.WithFallbackModels("claude-3.5-sonnet", "gemini-2.0-flash"),
+)
+```
+</CodeGroup>
+
+## Quand les basculements se déclenchent
+
+Les basculements sont déclenchés par :
+- **Erreurs 5xx** — erreurs serveur du fournisseur
+- **Erreurs 429** — limite de débit dépassée
+- **Timeouts** — la requête ne s'est pas terminée à temps
+- **Erreurs réseau** — échecs de connexion
+
+Les basculements ne sont **pas** déclenchés par :
+- **Erreurs 4xx** (sauf 429) — celles-ci indiquent un problème avec votre requête
+- **Réponses réussies** — même si le contenu est inattendu
+
+## Vérifier si un basculement a été utilisé
+
+```typescript
+const response = await client.chat.completions.create({...});
+
+console.log(response.openmodex?.model_used);     // actual model that responded
+console.log(response.openmodex?.fallback_used);   // true if fallback was used
+```

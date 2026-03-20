@@ -1,0 +1,94 @@
+---
+title: "오류 처리"
+description: "애플리케이션에서 API 오류를 우아하게 처리하세요."
+---
+
+## 오류 응답 형식
+
+모든 API 오류는 일관된 JSON 형식으로 반환됩니다:
+
+```json
+{
+  "error": {
+    "message": "Human-readable error description",
+    "type": "error_type",
+    "code": "error_code"
+  }
+}
+```
+
+## 오류 유형
+
+| 상태 | 유형 | 발생 시점 |
+|--------|------|------|
+| `400` | `invalid_request_error` | 파라미터가 누락되었거나 유효하지 않음 |
+| `401` | `authentication_error` | API 키가 유효하지 않거나 누락됨 |
+| `403` | `permission_error` | 키에 권한이 없음 |
+| `404` | `not_found_error` | 유효하지 않은 엔드포인트 또는 모델 |
+| `429` | `rate_limit_error` | 요청이 너무 많음 |
+| `500` | `server_error` | 내부 서버 오류 |
+| `502` | `upstream_error` | 제공업체가 오류를 반환함 |
+| `503` | `service_unavailable` | 일시적 장애 |
+
+## SDK 오류 처리
+
+<CodeGroup>
+```typescript Node.js
+import OpenModex, { APIError } from '@openmodex/sdk';
+
+try {
+  const response = await client.chat.completions.create({...});
+} catch (err) {
+  if (err instanceof APIError) {
+    console.log(err.statusCode);     // 429
+    console.log(err.message);        // "Rate limit exceeded"
+    console.log(err.code);           // "rate_limit_exceeded"
+
+    if (err.isRateLimited) {
+      // Wait and retry
+    } else if (err.isAuthError) {
+      // Check API key
+    } else if (err.isServerError) {
+      // Retry with backoff
+    }
+  }
+}
+```
+
+```python Python
+from openmodex import OpenModex, APIError
+
+try:
+    response = client.chat.completions.create(...)
+except APIError as e:
+    print(e.status_code)   # 429
+    print(e.message)       # "Rate limit exceeded"
+
+    if e.status_code == 429:
+        # Wait and retry
+        pass
+    elif e.status_code == 401:
+        # Check API key
+        pass
+```
+</CodeGroup>
+
+## 자동 재시도
+
+모든 SDK는 일시적 오류 (429, 500, 502, 503, 504)에 대해 지수 백오프로 자동 재시도합니다:
+
+```typescript
+const client = new OpenModex({
+  apiKey: 'omx_sk_...',
+  maxRetries: 3,    // default: 2
+  timeout: 60_000,  // default: 30000ms
+});
+```
+
+## 모범 사례
+
+1. **항상 오류를 캐치하세요** — API 실패로 앱이 중단되지 않게 하세요
+2. **폴백을 사용하세요** — 중요한 경로에는 폴백 모델을 설정하세요
+3. **request_id를 기록하세요** — 지원 요청 시 오류 보고에 `response.openmodex.request_id`를 포함하세요
+4. **적절한 타임아웃을 설정하세요** — 복잡한 프롬프트에는 길게, 간단한 쿼리에는 짧게 설정하세요
+5. **스트리밍 오류를 처리하세요** — 스트림은 응답 중간에 실패할 수 있으므로 부분 콘텐츠를 버퍼링하세요

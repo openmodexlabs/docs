@@ -1,0 +1,190 @@
+---
+title: "Crear Chat Completion"
+description: "POST /v1/chat/completions — Crear una respuesta de modelo para una conversación."
+api: "POST /chat/completions"
+---
+
+## Cuerpo de la Solicitud
+
+<ParamField body="model" type="string" required>
+  ID del modelo a usar (por ejemplo, `gpt-4o`, `claude-3.5-sonnet`, `gemini-2.0-flash`).
+</ParamField>
+
+<ParamField body="messages" type="array" required>
+  Una lista de mensajes que componen la conversación.
+  <Expandable title="Objeto Message">
+    <ParamField body="role" type="string" required>
+      Uno de `system`, `user`, `assistant` o `tool`.
+    </ParamField>
+    <ParamField body="content" type="string" required>
+      El contenido del mensaje.
+    </ParamField>
+    <ParamField body="name" type="string">
+      Un nombre opcional para el participante.
+    </ParamField>
+  </Expandable>
+</ParamField>
+
+<ParamField body="stream" type="boolean" default={false}>
+  Si es `true`, devuelve un stream de Server-Sent Events (SSE).
+</ParamField>
+
+<ParamField body="temperature" type="number" default={1}>
+  Temperatura de muestreo entre 0 y 2. Valores más bajos son más determinísticos.
+</ParamField>
+
+<ParamField body="max_tokens" type="integer">
+  Número máximo de tokens a generar.
+</ParamField>
+
+<ParamField body="top_p" type="number" default={1}>
+  Parámetro de muestreo nucleus.
+</ParamField>
+
+<ParamField body="stop" type="string | string[]">
+  Secuencia(s) de parada que detendrán la generación.
+</ParamField>
+
+<ParamField body="frequency_penalty" type="number" default={0}>
+  Penalización por frecuencia de token (-2.0 a 2.0).
+</ParamField>
+
+<ParamField body="presence_penalty" type="number" default={0}>
+  Penalización por presencia de token (-2.0 a 2.0).
+</ParamField>
+
+<ParamField body="tools" type="array">
+  Una lista de herramientas que el modelo puede llamar (function calling).
+</ParamField>
+
+<ParamField body="tool_choice" type="string | object">
+  Controla qué herramienta se llama. `auto`, `none` o una herramienta específica.
+</ParamField>
+
+<ParamField body="response_format" type="object">
+  Forzar un formato de salida específico (por ejemplo, `{"type": "json_object"}`).
+</ParamField>
+
+<ParamField body="seed" type="integer">
+  Semilla de muestreo determinístico para reproducibilidad.
+</ParamField>
+
+### Extensiones OpenModex
+
+<ParamField body="routing" type="object">
+  Configurar enrutamiento inteligente para esta solicitud.
+  <Expandable title="Objeto Routing">
+    <ParamField body="strategy" type="string">
+      `cost_optimized`, `latency_optimized` o `quality_optimized`.
+    </ParamField>
+    <ParamField body="fallback" type="string[]">
+      Cadena de modelos de respaldo del lado del servidor.
+    </ParamField>
+    <ParamField body="allow_upgrade" type="boolean">
+      Permitir enrutamiento a un modelo mejor en el mismo nivel de precios.
+    </ParamField>
+  </Expandable>
+</ParamField>
+
+<ParamField body="cache" type="object">
+  Configurar almacenamiento en caché de prompts.
+  <Expandable title="Objeto Cache">
+    <ParamField body="enabled" type="boolean">
+      Habilitar almacenamiento en caché de prompts para esta solicitud.
+    </ParamField>
+    <ParamField body="ttl" type="integer">
+      Tiempo de vida del caché en segundos.
+    </ParamField>
+  </Expandable>
+</ParamField>
+
+## Respuesta
+
+```json
+{
+  "id": "chatcmpl-abc123",
+  "object": "chat.completion",
+  "created": 1700000000,
+  "model": "gpt-4o-2024-08-06",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "Hello! How can I help you today?"
+      },
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "prompt_tokens": 10,
+    "completion_tokens": 9,
+    "total_tokens": 19,
+    "cost_usd": 0.000145
+  },
+  "openmodex": {
+    "request_id": "req_abc123",
+    "model_used": "gpt-4o-2024-08-06",
+    "provider": "openai",
+    "cache_hit": false,
+    "routing_strategy": "default",
+    "fallback_used": false,
+    "latency_ms": 850
+  }
+}
+```
+
+## Ejemplo
+
+<CodeGroup>
+```bash cURL
+curl https://api.openmodex.com/v1/chat/completions \
+  -H "Authorization: Bearer omx_sk_YOUR_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "model": "gpt-4o",
+    "messages": [
+      {"role": "system", "content": "You are a helpful assistant."},
+      {"role": "user", "content": "What is the capital of France?"}
+    ],
+    "temperature": 0.7,
+    "max_tokens": 100
+  }'
+```
+
+```typescript Node.js
+import OpenModex from '@openmodex/sdk';
+
+const client = new OpenModex({ apiKey: 'omx_sk_YOUR_KEY' });
+
+const response = await client.chat.completions.create({
+  model: 'gpt-4o',
+  messages: [
+    { role: 'system', content: 'You are a helpful assistant.' },
+    { role: 'user', content: 'What is the capital of France?' },
+  ],
+  temperature: 0.7,
+  max_tokens: 100,
+});
+
+console.log(response.choices[0].message.content);
+```
+
+```python Python
+from openmodex import OpenModex
+
+client = OpenModex(api_key="omx_sk_YOUR_KEY")
+
+response = client.chat.completions.create(
+    model="gpt-4o",
+    messages=[
+        {"role": "system", "content": "You are a helpful assistant."},
+        {"role": "user", "content": "What is the capital of France?"},
+    ],
+    temperature=0.7,
+    max_tokens=100,
+)
+
+print(response.choices[0].message.content)
+```
+</CodeGroup>

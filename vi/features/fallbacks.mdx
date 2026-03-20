@@ -1,0 +1,77 @@
+---
+title: "Chuyển đổi dự phòng tự động"
+description: "Giữ ứng dụng của bạn hoạt động ngay cả khi nhà cung cấp AI gặp sự cố."
+---
+
+## Tổng Quan
+
+Chuyển đổi dự phòng đảm bảo ứng dụng của bạn luôn đáng tin cậy bằng cách tự động chuyển sang mô hình thay thế khi mô hình chính gặp lỗi. OpenModex hỗ trợ cả chuyển đổi dự phòng phía máy chủ và phía client.
+
+## Chuyển Đổi Dự Phòng Phía Máy Chủ
+
+Cấu hình theo từng yêu cầu. OpenModex xử lý việc chuyển đổi trên máy chủ:
+
+```typescript
+const response = await client.chat.completions.create({
+  model: 'gpt-4o',
+  messages: [{ role: 'user', content: 'Hello!' }],
+  routing: {
+    fallback: ['claude-3.5-sonnet', 'gemini-2.0-flash'],
+  },
+});
+```
+
+**Cách hoạt động:**
+1. Thử `gpt-4o`
+2. Nếu thất bại (5xx, giới hạn tốc độ, hết thời gian chờ) → thử `claude-3.5-sonnet`
+3. Nếu thất bại → thử `gemini-2.0-flash`
+4. Nếu tất cả đều thất bại → trả về lỗi
+
+## Chuyển Đổi Dự Phòng Phía Client
+
+Cấu hình trên SDK client. Áp dụng cho tất cả yêu cầu:
+
+<CodeGroup>
+```typescript Node.js
+import OpenModex from '@openmodex/sdk';
+
+const client = new OpenModex({
+  apiKey: 'omx_sk_...',
+  fallbackModels: ['claude-3.5-sonnet', 'gemini-2.0-flash'],
+});
+
+// If the requested model fails, the SDK automatically retries
+// with each fallback model
+const response = await client.chat.completions.create({
+  model: 'gpt-4o',
+  messages: [{ role: 'user', content: 'Hello!' }],
+});
+```
+
+```go Go
+client := openmodex.NewClient("omx_sk_...",
+    openmodex.WithFallbackModels("claude-3.5-sonnet", "gemini-2.0-flash"),
+)
+```
+</CodeGroup>
+
+## Khi Nào Dự Phòng Được Kích Hoạt
+
+Dự phòng được kích hoạt bởi:
+- **Lỗi 5xx** — lỗi máy chủ từ nhà cung cấp
+- **Lỗi 429** — vượt quá giới hạn tốc độ
+- **Hết thời gian chờ** — yêu cầu không hoàn thành kịp thời
+- **Lỗi mạng** — lỗi kết nối
+
+Dự phòng **không** được kích hoạt bởi:
+- **Lỗi 4xx** (ngoại trừ 429) — những lỗi này cho thấy vấn đề với yêu cầu của bạn
+- **Phản hồi thành công** — ngay cả khi nội dung không như mong đợi
+
+## Kiểm Tra Dự Phòng Đã Được Sử Dụng Hay Chưa
+
+```typescript
+const response = await client.chat.completions.create({...});
+
+console.log(response.openmodex?.model_used);     // actual model that responded
+console.log(response.openmodex?.fallback_used);   // true if fallback was used
+```

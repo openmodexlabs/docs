@@ -1,0 +1,57 @@
+---
+title: "帳單與成本"
+description: "了解 OpenModex 的計費方式。"
+---
+
+## 計費方式
+
+OpenModex 採用按量付費模式。您的費用基於：
+
+- **輸入 token** — 您提示/訊息中的 token
+- **輸出 token** — 模型生成的 token
+- **模型定價** — 每個模型有其專屬的每 token 費率
+
+## 定價
+
+OpenModex 以透明的利潤率透傳供應商定價。查看目前定價：
+
+- [定價頁面](https://openmodex.com/pricing)
+- [Models API](/zh-Hant/api-reference/models-list) — 包含每個模型的定價
+
+## 成本追蹤
+
+每個回應都包含成本資訊：
+
+```json
+{
+  "usage": {
+    "prompt_tokens": 150,
+    "completion_tokens": 50,
+    "total_tokens": 200,
+    "cost_usd": 0.001
+  }
+}
+```
+
+## 控制台分析
+
+[控制台](https://openmodex.com/dashboard)提供：
+
+- **即時支出** — 當前餘額和消耗速率
+- **按模型分析** — 各模型的成本和使用量
+- **每日趨勢** — 時間維度的支出變化
+- **按金鑰分析** — 按 API 金鑰追蹤成本
+
+## 節省費用
+
+1. **使用成本最佳化路由** — 讓 OpenModex 選擇最便宜的模型
+2. **啟用快取** — 避免為重複查詢付費
+3. **選擇較小的模型** — `gpt-4o-mini` 比 `gpt-4o` 便宜 10 倍
+4. **設定 max_tokens** — 限制輸出長度以控制成本
+5. **使用 BYOK** — 自帶供應商金鑰享受批量折扣
+
+## 餘額與付款
+
+- 透過**信用卡**（Stripe）或**加密貨幣**儲值
+- 在控制台查看餘額和交易紀錄
+- 設定餘額不足提醒以避免服務中斷

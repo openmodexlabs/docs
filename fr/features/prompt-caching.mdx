@@ -1,0 +1,69 @@
+---
+title: "Mise en cache des prompts"
+description: "Mettez en cache les prompts répétés pour réduire la latence et les coûts."
+---
+
+## Vue d'ensemble
+
+La mise en cache des prompts stocke les réponses pour des requêtes identiques, renvoyant les résultats en cache instantanément sans effectuer de nouvel appel API. C'est idéal pour :
+
+- Les requêtes répétées (bots FAQ, questions fréquentes)
+- Le développement et les tests
+- Les endpoints à fort trafic avec des entrées prévisibles
+
+## Activer la mise en cache
+
+Ajoutez le paramètre `cache` à votre requête :
+
+```typescript
+const response = await client.chat.completions.create({
+  model: 'gpt-4o',
+  messages: [{ role: 'user', content: 'What is 2+2?' }],
+  cache: {
+    enabled: true,
+    ttl: 3600, // cache for 1 hour
+  },
+});
+
+console.log(response.openmodex?.cache_hit); // true on subsequent requests
+```
+
+## Comment ça fonctionne
+
+1. OpenModex calcule le hash de la requête (modèle + messages + paramètres)
+2. Si une réponse en cache existe et n'a pas expiré, elle est renvoyée immédiatement
+3. Si aucun cache n'existe, la requête est envoyée au fournisseur et la réponse est mise en cache
+
+## Clé de cache
+
+La clé de cache est calculée à partir de :
+- Le nom du modèle
+- Le tableau des messages (contenu et rôles)
+- La température, max_tokens et les autres paramètres de génération
+
+La modification de l'un de ces paramètres produit une clé de cache différente.
+
+## TTL (Time to Live)
+
+| Paramètre | Valeur |
+|---------|-------|
+| TTL par défaut | 300 secondes (5 minutes) |
+| TTL minimum | 60 secondes |
+| TTL maximum | 86400 secondes (24 heures) |
+
+## Économies
+
+Les réponses en cache sont considérablement moins chères :
+- Les **tokens d'entrée en cache** sont facturés à environ 50 % du tarif normal
+- **Pas de coût de tokens de sortie** pour les réponses en cache
+- **Zéro latence** — les réponses sont renvoyées en <10ms
+
+## Vérifier le statut du cache
+
+```typescript
+const response = await client.chat.completions.create({...});
+
+if (response.openmodex?.cache_hit) {
+  console.log('Served from cache!');
+}
+```

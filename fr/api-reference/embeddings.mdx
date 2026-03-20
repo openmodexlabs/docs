@@ -1,0 +1,94 @@
+---
+title: "Créer des embeddings"
+description: "POST /v1/embeddings — Générer des embeddings vectoriels pour du texte."
+api: "POST /embeddings"
+---
+
+## Corps de la requête
+
+<ParamField body="model" type="string" required>
+  Modèle d'embedding à utiliser (par exemple, `text-embedding-3-small`, `text-embedding-3-large`).
+</ParamField>
+
+<ParamField body="input" type="string | string[]" required>
+  Le(s) texte(s) à transformer en embedding. Peut être une chaîne unique ou un tableau de chaînes.
+</ParamField>
+
+<ParamField body="encoding_format" type="string" default="float">
+  Le format des embeddings. `float` ou `base64`.
+</ParamField>
+
+<ParamField body="dimensions" type="integer">
+  Le nombre de dimensions pour les embeddings de sortie (dépend du modèle).
+</ParamField>
+
+## Réponse
+
+```json
+{
+  "object": "list",
+  "data": [
+    {
+      "object": "embedding",
+      "embedding": [0.0023, -0.0094, 0.0156, ...],
+      "index": 0
+    }
+  ],
+  "model": "text-embedding-3-small",
+  "usage": {
+    "prompt_tokens": 8,
+    "total_tokens": 8
+  }
+}
+```
+
+## Exemple
+
+<CodeGroup>
+```bash cURL
+curl https://api.openmodex.com/v1/embeddings \
+  -H "Authorization: Bearer omx_sk_YOUR_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "model": "text-embedding-3-small",
+    "input": "OpenModex is a unified AI gateway."
+  }'
+```
+
+```typescript Node.js
+const result = await client.embeddings.create({
+  model: 'text-embedding-3-small',
+  input: 'OpenModex is a unified AI gateway.',
+});
+
+console.log(result.data[0].embedding);
+```
+
+```python Python
+result = client.embeddings.create(
+    model="text-embedding-3-small",
+    input="OpenModex is a unified AI gateway.",
+)
+
+print(result.data[0].embedding)
+```
+</CodeGroup>
+
+## Embeddings par lots
+
+Vous pouvez transformer plusieurs textes en embeddings en une seule requête :
+
+```typescript
+const result = await client.embeddings.create({
+  model: 'text-embedding-3-small',
+  input: [
+    'First text to embed',
+    'Second text to embed',
+    'Third text to embed',
+  ],
+});
+
+// result.data[0].embedding -> vector for first text
+// result.data[1].embedding -> vector for second text
+// result.data[2].embedding -> vector for third text
+```

@@ -1,0 +1,100 @@
+---
+title: "Go SDK"
+description: "OpenModex API向けの公式Go SDK。"
+---
+
+## インストール
+
+```bash
+go get github.com/openmodexlabs/openmodex-sdk-go
+```
+
+**Go 1.21以上**が必要です。
+
+## クイックスタート
+
+```go
+package main
+
+import (
+    "context"
+    "fmt"
+    openmodex "github.com/openmodexlabs/openmodex-sdk-go"
+)
+
+func main() {
+    client := openmodex.NewClient("omx_sk_YOUR_KEY")
+
+    resp, err := client.Chat.Completions.Create(context.Background(), &openmodex.ChatCompletionParams{
+        Model:    "gpt-4o",
+        Messages: []openmodex.ChatMessage{
+            {Role: "user", Content: "Hello!"},
+        },
+    })
+    if err != nil {
+        panic(err)
+    }
+
+    fmt.Println(resp.Choices[0].Message.Content)
+}
+```
+
+## 設定
+
+```go
+client := openmodex.NewClient("omx_sk_...",
+    openmodex.WithBaseURL("https://api.openmodex.com/v1"),
+    openmodex.WithTimeout(60 * time.Second),
+    openmodex.WithMaxRetries(3),
+    openmodex.WithFallbackModels("claude-3.5-sonnet", "gemini-2.0-flash"),
+)
+```
+
+## ストリーミング
+
+```go
+stream, err := client.Chat.Completions.CreateStream(ctx, &openmodex.ChatCompletionParams{
+    Model:    "gpt-4o",
+    Messages: []openmodex.ChatMessage{
+        {Role: "user", Content: "Write a poem."},
+    },
+})
+if err != nil {
+    panic(err)
+}
+
+for chunk, err := range stream.Iter() {
+    if err != nil {
+        break
+    }
+    fmt.Print(chunk.Choices[0].Delta.Content)
+}
+```
+
+## モデルエイリアス
+
+Go SDKは便利なモデルエイリアスをサポートしています：
+
+```go
+// Route to the cheapest available model
+resp, _ := client.Chat.Completions.Create(ctx, &openmodex.ChatCompletionParams{
+    Model: "@cheapest",
+    Messages: messages,
+})
+
+// Other aliases: @auto, @fastest, @best
+```
+
+## プリセット
+
+```go
+// Use built-in presets for common configurations
+client := openmodex.NewClient("omx_sk_...", openmodex.CostSaver)
+client := openmodex.NewClient("omx_sk_...", openmodex.LowLatency)
+client := openmodex.NewClient("omx_sk_...", openmodex.HighQuality)
+```
+
+## リンク
+
+- [pkg.go.dev](https://pkg.go.dev/github.com/openmodexlabs/openmodex-sdk-go)
+- [GitHub](https://github.com/openmodexlabs/openmodex-sdk-go)

@@ -1,0 +1,144 @@
+---
+title: "스트리밍"
+description: "POST /v1/chat/completions — 채팅 완성 응답을 실시간으로 스트리밍합니다."
+---
+
+## 개요
+
+`stream: true`를 설정하면 Server-Sent Events (SSE)로 응답을 받습니다. 각 이벤트에는 부분 응답 청크가 포함되어 생성되는 대로 실시간으로 콘텐츠를 표시할 수 있습니다.
+
+## 스트림 형식
+
+스트림은 JSON 객체를 포함하는 `data:` 라인을 전송합니다:
+
+```
+data: {"id":"chatcmpl-abc","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"role":"assistant"},"finish_reason":null}]}
+
+data: {"id":"chatcmpl-abc","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"content":"Hello"},"finish_reason":null}]}
+
+data: {"id":"chatcmpl-abc","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"content":"!"},"finish_reason":null}]}
+
+data: {"id":"chatcmpl-abc","object":"chat.completion.chunk","choices":[{"index":0,"delta":{},"finish_reason":"stop"}]}
+
+data: [DONE]
+```
+
+## 청크 객체
+
+각 청크에는 다음이 포함됩니다:
+
+| 필드 | 타입 | 설명 |
+|-------|------|-------------|
+| `id` | string | 하나의 응답에서 모든 청크 간 공유됨 |
+| `object` | string | 항상 `chat.completion.chunk` |
+| `created` | integer | Unix 타임스탬프 |
+| `model` | string | 응답을 생성한 모델 |
+| `choices[].delta.role` | string | 첫 번째 청크에서만 존재 |
+| `choices[].delta.content` | string | 토큰 콘텐츠 (비어 있을 수 있음) |
+| `choices[].finish_reason` | string \| null | 스트리밍 중에는 `stop`, `length` 또는 `null` |
+
+## 예제
+
+<CodeGroup>
+```bash cURL
+curl https://api.openmodex.com/v1/chat/completions \
+  -H "Authorization: Bearer omx_sk_YOUR_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "model": "gpt-4o",
+    "messages": [{"role": "user", "content": "Write a poem about the sea."}],
+    "stream": true
+  }'
+```
+
+```typescript Node.js
+import OpenModex from '@openmodex/sdk';
+
+const client = new OpenModex({ apiKey: 'omx_sk_YOUR_KEY' });
+
+const stream = await client.chat.completions.create({
+  model: 'gpt-4o',
+  messages: [{ role: 'user', content: 'Write a poem about the sea.' }],
+  stream: true,
+});
+
+for await (const chunk of stream) {
+  const content = chunk.choices[0]?.delta?.content;
+  if (content) process.stdout.write(content);
+}
+```
+
+```python Python
+from openmodex import OpenModex
+
+client = OpenModex(api_key="omx_sk_YOUR_KEY")
+
+stream = client.chat.completions.create(
+    model="gpt-4o",
+    messages=[{"role": "user", "content": "Write a poem about the sea."}],
+    stream=True,
+)
+
+for chunk in stream:
+    content = chunk.choices[0].delta.content
+    if content:
+        print(content, end="", flush=True)
+```
+
+```tsx React
+import { useChat } from '@openmodex/react';
+
+function Chat() {
+  const { messages, input, setInput, sendMessage, isLoading, stop } = useChat({
+    apiKey: 'omx_sk_YOUR_KEY',
+    model: 'gpt-4o',
+  });
+
+  return (
+    <div>
+      {messages.map((m) => (
+        <p key={m.id}><b>{m.role}:</b> {m.content}</p>
+      ))}
+      <input value={input} onChange={(e) => setInput(e.target.value)} />
+      <button onClick={() => sendMessage()} disabled={isLoading}>Send</button>
+      {isLoading && <button onClick={stop}>Stop</button>}
+    </div>
+  );
+}
+```
+</CodeGroup>
+
+## 스트림 중단
+
+진행 중인 스트림을 취소할 수 있습니다:
+
+<CodeGroup>
+```typescript Node.js
+const stream = await client.chat.completions.create({
+  model: 'gpt-4o',
+  messages: [{ role: 'user', content: 'Write a long story...' }],
+  stream: true,
+});
+
+// Abort after 2 seconds
+setTimeout(() => stream.abort(), 2000);
+
+for await (const chunk of stream) {
+  process.stdout.write(chunk.choices[0]?.delta?.content ?? '');
+}
+```
+
+```python Python
+stream = client.chat.completions.create(
+    model="gpt-4o",
+    messages=[{"role": "user", "content": "Write a long story..."}],
+    stream=True,
+)
+
+for chunk in stream:
+    content = chunk.choices[0].delta.content
+    if content:
+        print(content, end="", flush=True)
+    # Call stream.close() to abort
+```
+</CodeGroup>

@@ -1,0 +1,94 @@
+---
+title: "ベストプラクティス"
+description: "OpenModexを最大限に活用するためのヒント。"
+---
+
+## 適切なモデルを選択する
+
+すべてのタスクに最も高価なモデルが必要なわけではありません：
+
+| ユースケース | 推奨モデル | 理由 |
+|----------|-------------------|-----|
+| シンプルなQ&A、分類 | `gpt-4o-mini`, `gemini-2.0-flash` | 高速で安価 |
+| 複雑な推論 | `gpt-4o`, `claude-3.5-sonnet` | より高い品質 |
+| コード生成 | `claude-3.5-sonnet`, `deepseek-chat` | コードに最適 |
+| 長文ドキュメント | `claude-3.5-sonnet`, `gemini-1.5-pro` | 大きなコンテキスト |
+| コスト重視 | `deepseek-chat`, `gpt-4o-mini` | 最低コスト |
+
+## スマートルーティングを使用する
+
+ハードコーディングではなく、OpenModexに最適なモデルを選択させましょう：
+
+```typescript
+// Don't do this
+if (isSimpleQuery) {
+  model = 'gpt-4o-mini';
+} else {
+  model = 'gpt-4o';
+}
+
+// Do this instead
+const response = await client.chat.completions.create({
+  model: 'gpt-4o',
+  messages,
+  routing: { strategy: 'cost_optimized' },
+});
+```
+
+## 常にフォールバックを設定する
+
+本番アプリケーションでは、常にフォールバックを設定してください：
+
+```typescript
+const client = new OpenModex({
+  apiKey: 'omx_sk_...',
+  fallbackModels: ['claude-3.5-sonnet', 'gemini-2.0-flash'],
+});
+```
+
+## チャットUIにはストリーミングを使用する
+
+ストリーミングはユーザー体験を大幅に改善します：
+
+```typescript
+// Bad — user waits 3-10 seconds staring at a spinner
+const response = await client.chat.completions.create({
+  model: 'gpt-4o',
+  messages,
+});
+
+// Good — user sees text appearing in real-time
+const stream = await client.chat.completions.create({
+  model: 'gpt-4o',
+  messages,
+  stream: true,
+});
+```
+
+## 繰り返しクエリにはキャッシュを有効化する
+
+予測可能または繰り返しのプロンプトがある場合、キャッシュを有効にしてください：
+
+```typescript
+const response = await client.chat.completions.create({
+  model: 'gpt-4o',
+  messages: [{ role: 'user', content: 'What are your business hours?' }],
+  cache: { enabled: true, ttl: 3600 },
+});
+```
+
+## 適切なタイムアウトを設定する
+
+```typescript
+const client = new OpenModex({
+  apiKey: 'omx_sk_...',
+  timeout: 60_000, // 60 seconds for complex tasks
+});
+```
+
+## 使用状況を監視する
+
+- 利用分析は[ダッシュボード](https://openmodex.com/dashboard)で確認できます
+- モデルごと、APIキーごとのコストを追跡します
+- 異常な支出パターンに対するアラートを設定します
+- レスポンスの`openmodex.cost_usd`フィールドを使用してリクエストごとのコストを追跡します

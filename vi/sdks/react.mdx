@@ -1,0 +1,138 @@
+---
+title: "React Hooks"
+description: "React hooks để xây dựng giao diện AI — useChat, useCompletion, useModels."
+---
+
+## Cài Đặt
+
+```bash
+npm install @openmodex/react
+```
+
+Yêu cầu **React 18+**.
+
+## useChat
+
+Hook chat đầy đủ tính năng với streaming, lịch sử tin nhắn và hỗ trợ hủy bỏ.
+
+```tsx
+import { useChat } from '@openmodex/react';
+
+function ChatApp() {
+  const { messages, input, setInput, sendMessage, isLoading, stop, error } = useChat({
+    apiKey: 'omx_sk_...',
+    model: 'gpt-4o',
+    system: 'You are a helpful assistant.',
+    onFinish: (message) => console.log('Done:', message.content),
+    onError: (error) => console.error(error),
+  });
+
+  return (
+    <div>
+      <div>
+        {messages.map((m) => (
+          <div key={m.id}>
+            <strong>{m.role}:</strong> {m.content}
+          </div>
+        ))}
+      </div>
+
+      <form onSubmit={(e) => { e.preventDefault(); sendMessage(); }}>
+        <input
+          value={input}
+          onChange={(e) => setInput(e.target.value)}
+          placeholder="Type a message..."
+        />
+        <button type="submit" disabled={isLoading}>Send</button>
+        {isLoading && <button onClick={stop}>Stop</button>}
+      </form>
+
+      {error && <p style={{ color: 'red' }}>{error.message}</p>}
+    </div>
+  );
+}
+```
+
+### Tùy Chọn
+
+| Tùy chọn | Kiểu | Mặc định | Mô tả |
+|--------|------|---------|-------------|
+| `apiKey` | `string` | — | Khóa API |
+| `baseURL` | `string` | `https://api.openmodex.com/v1` | URL API |
+| `model` | `string` | `gpt-4o` | Mô hình để sử dụng |
+| `initialMessages` | `ChatMessage[]` | `[]` | Điền trước cuộc hội thoại |
+| `initialInput` | `string` | `''` | Giá trị đầu vào ban đầu |
+| `system` | `string` | — | Prompt hệ thống |
+| `onFinish` | `(message) => void` | — | Gọi khi hoàn thành |
+| `onError` | `(error) => void` | — | Gọi khi lỗi |
+
+### Giá Trị Trả Về
+
+| Thuộc tính | Kiểu | Mô tả |
+|----------|------|-------------|
+| `messages` | `ChatMessage[]` | Tất cả tin nhắn |
+| `setMessages` | `Dispatch` | Đặt tin nhắn |
+| `input` | `string` | Đầu vào hiện tại |
+| `setInput` | `Dispatch` | Cập nhật đầu vào |
+| `sendMessage` | `(content?) => Promise` | Gửi tin nhắn |
+| `isLoading` | `boolean` | Trạng thái đang tải |
+| `error` | `Error \| null` | Lỗi gần nhất |
+| `stop` | `() => void` | Hủy bỏ luồng |
+
+## useCompletion
+
+Hoàn thành đơn lượt với streaming.
+
+```tsx
+import { useCompletion } from '@openmodex/react';
+
+function CompletionApp() {
+  const { completion, input, setInput, complete, isLoading, stop } = useCompletion({
+    apiKey: 'omx_sk_...',
+    model: 'gpt-4o',
+  });
+
+  return (
+    <div>
+      <input value={input} onChange={(e) => setInput(e.target.value)} />
+      <button onClick={() => complete()} disabled={isLoading}>Complete</button>
+      {isLoading && <button onClick={stop}>Stop</button>}
+      <p>{completion}</p>
+    </div>
+  );
+}
+```
+
+## useModels
+
+Lấy danh sách mô hình có sẵn.
+
+```tsx
+import { useModels } from '@openmodex/react';
+
+function ModelList() {
+  const { models, isLoading, error, refetch } = useModels({
+    apiKey: 'omx_sk_...',
+  });
+
+  if (isLoading) return <p>Loading models...</p>;
+  if (error) return <p>Error: {error.message}</p>;
+
+  return (
+    <ul>
+      {models.map((m) => (
+        <li key={m.id}>
+          <strong>{m.name}</strong> — {m.provider}
+          <br />
+          <small>{m.description}</small>
+        </li>
+      ))}
+    </ul>
+  );
+}
+```
+
+## Liên Kết
+
+- [npm](https://www.npmjs.com/package/@openmodex/react)
+- [GitHub](https://github.com/openmodexlabs/openmodex-packages/tree/main/packages/react)

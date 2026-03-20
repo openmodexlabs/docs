@@ -1,0 +1,154 @@
+---
+title: "快速开始"
+description: "在 2 分钟内完成您对 OpenModex 的第一次 API 调用。"
+---
+
+## 1. 获取您的 API 密钥
+
+在 [openmodex.com](https://openmodex.com) 注册并从[控制面板](https://openmodex.com/dashboard/api-keys)创建 API 密钥。
+
+您的密钥格式如下：`omx_sk_xxxxxxxxxxxxxxxx`
+
+## 2. 发送您的第一个请求
+
+<CodeGroup>
+```bash cURL
+curl https://api.openmodex.com/v1/chat/completions \
+  -H "Authorization: Bearer omx_sk_YOUR_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "model": "gpt-4o",
+    "messages": [{"role": "user", "content": "Hello!"}]
+  }'
+```
+
+```typescript Node.js
+import OpenModex from '@openmodex/sdk';
+
+const client = new OpenModex({ apiKey: 'omx_sk_YOUR_KEY' });
+
+const response = await client.chat.completions.create({
+  model: 'gpt-4o',
+  messages: [{ role: 'user', content: 'Hello!' }],
+});
+
+console.log(response.choices[0].message.content);
+```
+
+```python Python
+from openmodex import OpenModex
+
+client = OpenModex(api_key="omx_sk_YOUR_KEY")
+
+response = client.chat.completions.create(
+    model="gpt-4o",
+    messages=[{"role": "user", "content": "Hello!"}],
+)
+
+print(response.choices[0].message.content)
+```
+
+```go Go
+package main
+
+import (
+    "context"
+    "fmt"
+    openmodex "github.com/openmodexlabs/openmodex-sdk-go"
+)
+
+func main() {
+    client := openmodex.NewClient("omx_sk_YOUR_KEY")
+
+    resp, _ := client.Chat.Completions.Create(context.Background(), &openmodex.ChatCompletionParams{
+        Model:    "gpt-4o",
+        Messages: []openmodex.ChatMessage{{Role: "user", Content: "Hello!"}},
+    })
+
+    fmt.Println(resp.Choices[0].Message.Content)
+}
+```
+</CodeGroup>
+
+## 3. 尝试流式响应
+
+获取实时逐 token 的响应：
+
+<CodeGroup>
+```bash cURL
+curl https://api.openmodex.com/v1/chat/completions \
+  -H "Authorization: Bearer omx_sk_YOUR_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "model": "gpt-4o",
+    "messages": [{"role": "user", "content": "Write a haiku about code."}],
+    "stream": true
+  }'
+```
+
+```typescript Node.js
+const stream = await client.chat.completions.create({
+  model: 'gpt-4o',
+  messages: [{ role: 'user', content: 'Write a haiku about code.' }],
+  stream: true,
+});
+
+for await (const chunk of stream) {
+  process.stdout.write(chunk.choices[0]?.delta?.content ?? '');
+}
+```
+
+```python Python
+stream = client.chat.completions.create(
+    model="gpt-4o",
+    messages=[{"role": "user", "content": "Write a haiku about code."}],
+    stream=True,
+)
+
+for chunk in stream:
+    content = chunk.choices[0].delta.content
+    if content:
+        print(content, end="", flush=True)
+```
+</CodeGroup>
+
+## 4. 尝试不同的模型
+
+只需更改一个参数即可切换模型 — 无需修改代码：
+
+```typescript
+// Use Claude
+const response1 = await client.chat.completions.create({
+  model: 'claude-3.5-sonnet',
+  messages: [{ role: 'user', content: 'Explain quantum computing.' }],
+});
+
+// Use Gemini
+const response2 = await client.chat.completions.create({
+  model: 'gemini-2.0-flash',
+  messages: [{ role: 'user', content: 'Explain quantum computing.' }],
+});
+
+// Use DeepSeek
+const response3 = await client.chat.completions.create({
+  model: 'deepseek-chat',
+  messages: [{ role: 'user', content: 'Explain quantum computing.' }],
+});
+```
+
+## 接下来做什么？
+
+<CardGroup cols={2}>
+  <Card title="身份验证" icon="key" href="/zh/introduction/authentication">
+    了解 API 密钥身份验证和安全性。
+  </Card>
+  <Card title="智能路由" icon="route" href="/zh/features/smart-routing">
+    自动将请求路由到每次请求的最佳模型。
+  </Card>
+  <Card title="安装 SDK" icon="download" href="/zh/sdks/overview">
+    获取适用于您的编程语言的类型安全客户端。
+  </Card>
+  <Card title="API 参考" icon="book" href="/zh/api-reference/overview">
+    浏览所有可用端点。
+  </Card>
+</CardGroup>

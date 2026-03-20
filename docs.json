@@ -1,22 +1,50 @@
 {
   "$schema": "https://mintlify.com/docs.json",
-  "theme": "mint",
+  "theme": "quill",
   "name": "OpenModex",
   "logo": {
     "light": "/images/logo-light.svg",
-    "dark": "/images/logo-dark.svg"
+    "dark": "/images/logo-dark.svg",
+    "href": "https://openmodex.com"
   },
   "favicon": "/images/favicon.png",
   "colors": {
     "primary": "#18181B",
-    "light": "#27272A",
-    "dark": "#FAFAFA"
+    "light": "#52525B",
+    "dark": "#FAFAFA",
+    "background": {
+      "light": "#FFFFFF",
+      "dark": "#09090B"
+    }
   },
+  "font": {
+    "headings": {
+      "family": "Inter",
+      "weight": 600
+    },
+    "body": {
+      "family": "Inter",
+      "weight": 400
+    }
+  },
+  "layout": "sidenav",
+  "sidebar": {
+    "items": "border"
+  },
+  "rounded": "default",
   "navbar": {
     "links": [
       {
+        "label": "Website",
+        "href": "https://openmodex.com"
+      },
+      {
         "label": "Dashboard",
         "href": "https://openmodex.com/dashboard"
+      },
+      {
+        "label": "Blog",
+        "href": "https://openmodex.com/blog"
       }
     ],
     "primary": {
@@ -26,95 +54,956 @@
     }
   },
   "navigation": {
-    "tabs": [
+    "languages": [
       {
-        "tab": "Documentation",
-        "groups": [
+        "language": "en",
+        "default": true,
+        "tabs": [
           {
-            "group": "Getting Started",
-            "pages": [
-              "introduction/overview",
-              "introduction/quickstart",
-              "introduction/authentication",
-              "introduction/api-keys"
+            "tab": "Documentation",
+            "groups": [
+              {
+                "group": "Getting Started",
+                "pages": [
+                  "introduction/overview",
+                  "introduction/why-openmodex",
+                  "introduction/quickstart",
+                  "introduction/authentication",
+                  "introduction/api-keys"
+                ]
+              },
+              {
+                "group": "Platform",
+                "pages": [
+                  "platform/architecture",
+                  "platform/supported-models",
+                  "platform/pricing"
+                ]
+              },
+              {
+                "group": "Core Features",
+                "pages": [
+                  "features/smart-routing",
+                  "features/prompt-caching",
+                  "features/fallbacks",
+                  "features/rate-limiting",
+                  "features/streaming"
+                ]
+              },
+              {
+                "group": "Guides",
+                "pages": [
+                  "guides/migration-from-openai",
+                  "guides/use-cases",
+                  "guides/byok",
+                  "guides/error-handling",
+                  "guides/best-practices",
+                  "guides/billing-and-costs"
+                ]
+              }
             ]
           },
           {
-            "group": "Core Features",
-            "pages": [
-              "features/smart-routing",
-              "features/prompt-caching",
-              "features/fallbacks",
-              "features/rate-limiting",
-              "features/streaming"
+            "tab": "API Reference",
+            "groups": [
+              {
+                "group": "Overview",
+                "pages": [
+                  "api-reference/overview"
+                ]
+              },
+              {
+                "group": "Chat",
+                "pages": [
+                  "api-reference/chat-completions",
+                  "api-reference/chat-streaming"
+                ]
+              },
+              {
+                "group": "Completions",
+                "pages": [
+                  "api-reference/completions"
+                ]
+              },
+              {
+                "group": "Embeddings",
+                "pages": [
+                  "api-reference/embeddings"
+                ]
+              },
+              {
+                "group": "Models",
+                "pages": [
+                  "api-reference/models-list",
+                  "api-reference/models-retrieve",
+                  "api-reference/models-compare"
+                ]
+              }
             ]
           },
           {
-            "group": "Guides",
-            "pages": [
-              "guides/migration-from-openai",
-              "guides/error-handling",
-              "guides/best-practices",
-              "guides/billing-and-costs"
+            "tab": "SDKs",
+            "groups": [
+              {
+                "group": "Official SDKs",
+                "pages": [
+                  "sdks/overview",
+                  "sdks/node",
+                  "sdks/python",
+                  "sdks/go"
+                ]
+              },
+              {
+                "group": "Frontend",
+                "pages": [
+                  "sdks/react",
+                  "sdks/cli"
+                ]
+              }
+            ]
+          },
+          {
+            "tab": "Changelog",
+            "groups": [
+              {
+                "group": "Changelog",
+                "pages": [
+                  "changelog/overview"
+                ]
+              }
             ]
           }
         ]
       },
       {
-        "tab": "API Reference",
-        "groups": [
+        "language": "zh",
+        "tabs": [
           {
-            "group": "Overview",
-            "pages": [
-              "api-reference/overview"
+            "tab": "文档",
+            "groups": [
+              {
+                "group": "快速入门",
+                "pages": [
+                  "zh/introduction/overview",
+                  "zh/introduction/why-openmodex",
+                  "zh/introduction/quickstart",
+                  "zh/introduction/authentication",
+                  "zh/introduction/api-keys"
+                ]
+              },
+              {
+                "group": "平台",
+                "pages": [
+                  "zh/platform/architecture",
+                  "zh/platform/supported-models",
+                  "zh/platform/pricing"
+                ]
+              },
+              {
+                "group": "核心功能",
+                "pages": [
+                  "zh/features/smart-routing",
+                  "zh/features/prompt-caching",
+                  "zh/features/fallbacks",
+                  "zh/features/rate-limiting",
+                  "zh/features/streaming"
+                ]
+              },
+              {
+                "group": "使用指南",
+                "pages": [
+                  "zh/guides/migration-from-openai",
+                  "zh/guides/use-cases",
+                  "zh/guides/byok",
+                  "zh/guides/error-handling",
+                  "zh/guides/best-practices",
+                  "zh/guides/billing-and-costs"
+                ]
+              }
             ]
           },
           {
-            "group": "Chat",
-            "pages": [
-              "api-reference/chat-completions",
-              "api-reference/chat-streaming"
+            "tab": "API 参考",
+            "groups": [
+              {
+                "group": "概览",
+                "pages": [
+                  "zh/api-reference/overview"
+                ]
+              },
+              {
+                "group": "聊天",
+                "pages": [
+                  "zh/api-reference/chat-completions",
+                  "zh/api-reference/chat-streaming"
+                ]
+              },
+              {
+                "group": "补全",
+                "pages": [
+                  "zh/api-reference/completions"
+                ]
+              },
+              {
+                "group": "向量嵌入",
+                "pages": [
+                  "zh/api-reference/embeddings"
+                ]
+              },
+              {
+                "group": "模型",
+                "pages": [
+                  "zh/api-reference/models-list",
+                  "zh/api-reference/models-retrieve",
+                  "zh/api-reference/models-compare"
+                ]
+              }
             ]
           },
           {
-            "group": "Completions",
-            "pages": [
-              "api-reference/completions"
+            "tab": "SDK",
+            "groups": [
+              {
+                "group": "官方 SDK",
+                "pages": [
+                  "zh/sdks/overview",
+                  "zh/sdks/node",
+                  "zh/sdks/python",
+                  "zh/sdks/go"
+                ]
+              },
+              {
+                "group": "前端",
+                "pages": [
+                  "zh/sdks/react",
+                  "zh/sdks/cli"
+                ]
+              }
             ]
           },
           {
-            "group": "Embeddings",
-            "pages": [
-              "api-reference/embeddings"
-            ]
-          },
-          {
-            "group": "Models",
-            "pages": [
-              "api-reference/models-list",
-              "api-reference/models-retrieve",
-              "api-reference/models-compare"
+            "tab": "更新日志",
+            "groups": [
+              {
+                "group": "更新日志",
+                "pages": [
+                  "zh/changelog/overview"
+                ]
+              }
             ]
           }
         ]
       },
       {
-        "tab": "SDKs",
-        "groups": [
+        "language": "zh-Hant",
+        "tabs": [
           {
-            "group": "Official SDKs",
-            "pages": [
-              "sdks/overview",
-              "sdks/node",
-              "sdks/python",
-              "sdks/go"
+            "tab": "文件",
+            "groups": [
+              {
+                "group": "快速入門",
+                "pages": [
+                  "zh-Hant/introduction/overview",
+                  "zh-Hant/introduction/why-openmodex",
+                  "zh-Hant/introduction/quickstart",
+                  "zh-Hant/introduction/authentication",
+                  "zh-Hant/introduction/api-keys"
+                ]
+              },
+              {
+                "group": "平台",
+                "pages": [
+                  "zh-Hant/platform/architecture",
+                  "zh-Hant/platform/supported-models",
+                  "zh-Hant/platform/pricing"
+                ]
+              },
+              {
+                "group": "核心功能",
+                "pages": [
+                  "zh-Hant/features/smart-routing",
+                  "zh-Hant/features/prompt-caching",
+                  "zh-Hant/features/fallbacks",
+                  "zh-Hant/features/rate-limiting",
+                  "zh-Hant/features/streaming"
+                ]
+              },
+              {
+                "group": "使用指南",
+                "pages": [
+                  "zh-Hant/guides/migration-from-openai",
+                  "zh-Hant/guides/use-cases",
+                  "zh-Hant/guides/byok",
+                  "zh-Hant/guides/error-handling",
+                  "zh-Hant/guides/best-practices",
+                  "zh-Hant/guides/billing-and-costs"
+                ]
+              }
             ]
           },
           {
-            "group": "Frontend",
-            "pages": [
-              "sdks/react",
-              "sdks/cli"
+            "tab": "API 參考",
+            "groups": [
+              {
+                "group": "概覽",
+                "pages": [
+                  "zh-Hant/api-reference/overview"
+                ]
+              },
+              {
+                "group": "聊天",
+                "pages": [
+                  "zh-Hant/api-reference/chat-completions",
+                  "zh-Hant/api-reference/chat-streaming"
+                ]
+              },
+              {
+                "group": "補全",
+                "pages": [
+                  "zh-Hant/api-reference/completions"
+                ]
+              },
+              {
+                "group": "向量嵌入",
+                "pages": [
+                  "zh-Hant/api-reference/embeddings"
+                ]
+              },
+              {
+                "group": "模型",
+                "pages": [
+                  "zh-Hant/api-reference/models-list",
+                  "zh-Hant/api-reference/models-retrieve",
+                  "zh-Hant/api-reference/models-compare"
+                ]
+              }
+            ]
+          },
+          {
+            "tab": "SDK",
+            "groups": [
+              {
+                "group": "官方 SDK",
+                "pages": [
+                  "zh-Hant/sdks/overview",
+                  "zh-Hant/sdks/node",
+                  "zh-Hant/sdks/python",
+                  "zh-Hant/sdks/go"
+                ]
+              },
+              {
+                "group": "前端",
+                "pages": [
+                  "zh-Hant/sdks/react",
+                  "zh-Hant/sdks/cli"
+                ]
+              }
+            ]
+          },
+          {
+            "tab": "更新日誌",
+            "groups": [
+              {
+                "group": "更新日誌",
+                "pages": [
+                  "zh-Hant/changelog/overview"
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "language": "ja",
+        "tabs": [
+          {
+            "tab": "ドキュメント",
+            "groups": [
+              {
+                "group": "はじめに",
+                "pages": [
+                  "ja/introduction/overview",
+                  "ja/introduction/why-openmodex",
+                  "ja/introduction/quickstart",
+                  "ja/introduction/authentication",
+                  "ja/introduction/api-keys"
+                ]
+              },
+              {
+                "group": "プラットフォーム",
+                "pages": [
+                  "ja/platform/architecture",
+                  "ja/platform/supported-models",
+                  "ja/platform/pricing"
+                ]
+              },
+              {
+                "group": "コア機能",
+                "pages": [
+                  "ja/features/smart-routing",
+                  "ja/features/prompt-caching",
+                  "ja/features/fallbacks",
+                  "ja/features/rate-limiting",
+                  "ja/features/streaming"
+                ]
+              },
+              {
+                "group": "ガイド",
+                "pages": [
+                  "ja/guides/migration-from-openai",
+                  "ja/guides/use-cases",
+                  "ja/guides/byok",
+                  "ja/guides/error-handling",
+                  "ja/guides/best-practices",
+                  "ja/guides/billing-and-costs"
+                ]
+              }
+            ]
+          },
+          {
+            "tab": "API リファレンス",
+            "groups": [
+              {
+                "group": "概要",
+                "pages": [
+                  "ja/api-reference/overview"
+                ]
+              },
+              {
+                "group": "チャット",
+                "pages": [
+                  "ja/api-reference/chat-completions",
+                  "ja/api-reference/chat-streaming"
+                ]
+              },
+              {
+                "group": "補完",
+                "pages": [
+                  "ja/api-reference/completions"
+                ]
+              },
+              {
+                "group": "埋め込み",
+                "pages": [
+                  "ja/api-reference/embeddings"
+                ]
+              },
+              {
+                "group": "モデル",
+                "pages": [
+                  "ja/api-reference/models-list",
+                  "ja/api-reference/models-retrieve",
+                  "ja/api-reference/models-compare"
+                ]
+              }
+            ]
+          },
+          {
+            "tab": "SDK",
+            "groups": [
+              {
+                "group": "公式 SDK",
+                "pages": [
+                  "ja/sdks/overview",
+                  "ja/sdks/node",
+                  "ja/sdks/python",
+                  "ja/sdks/go"
+                ]
+              },
+              {
+                "group": "フロントエンド",
+                "pages": [
+                  "ja/sdks/react",
+                  "ja/sdks/cli"
+                ]
+              }
+            ]
+          },
+          {
+            "tab": "変更履歴",
+            "groups": [
+              {
+                "group": "変更履歴",
+                "pages": [
+                  "ja/changelog/overview"
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "language": "ko",
+        "tabs": [
+          {
+            "tab": "문서",
+            "groups": [
+              {
+                "group": "시작하기",
+                "pages": [
+                  "ko/introduction/overview",
+                  "ko/introduction/why-openmodex",
+                  "ko/introduction/quickstart",
+                  "ko/introduction/authentication",
+                  "ko/introduction/api-keys"
+                ]
+              },
+              {
+                "group": "플랫폼",
+                "pages": [
+                  "ko/platform/architecture",
+                  "ko/platform/supported-models",
+                  "ko/platform/pricing"
+                ]
+              },
+              {
+                "group": "핵심 기능",
+                "pages": [
+                  "ko/features/smart-routing",
+                  "ko/features/prompt-caching",
+                  "ko/features/fallbacks",
+                  "ko/features/rate-limiting",
+                  "ko/features/streaming"
+                ]
+              },
+              {
+                "group": "가이드",
+                "pages": [
+                  "ko/guides/migration-from-openai",
+                  "ko/guides/use-cases",
+                  "ko/guides/byok",
+                  "ko/guides/error-handling",
+                  "ko/guides/best-practices",
+                  "ko/guides/billing-and-costs"
+                ]
+              }
+            ]
+          },
+          {
+            "tab": "API 레퍼런스",
+            "groups": [
+              {
+                "group": "개요",
+                "pages": [
+                  "ko/api-reference/overview"
+                ]
+              },
+              {
+                "group": "채팅",
+                "pages": [
+                  "ko/api-reference/chat-completions",
+                  "ko/api-reference/chat-streaming"
+                ]
+              },
+              {
+                "group": "완성",
+                "pages": [
+                  "ko/api-reference/completions"
+                ]
+              },
+              {
+                "group": "임베딩",
+                "pages": [
+                  "ko/api-reference/embeddings"
+                ]
+              },
+              {
+                "group": "모델",
+                "pages": [
+                  "ko/api-reference/models-list",
+                  "ko/api-reference/models-retrieve",
+                  "ko/api-reference/models-compare"
+                ]
+              }
+            ]
+          },
+          {
+            "tab": "SDK",
+            "groups": [
+              {
+                "group": "공식 SDK",
+                "pages": [
+                  "ko/sdks/overview",
+                  "ko/sdks/node",
+                  "ko/sdks/python",
+                  "ko/sdks/go"
+                ]
+              },
+              {
+                "group": "프론트엔드",
+                "pages": [
+                  "ko/sdks/react",
+                  "ko/sdks/cli"
+                ]
+              }
+            ]
+          },
+          {
+            "tab": "변경 이력",
+            "groups": [
+              {
+                "group": "변경 이력",
+                "pages": [
+                  "ko/changelog/overview"
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "language": "vi",
+        "tabs": [
+          {
+            "tab": "Tài liệu",
+            "groups": [
+              {
+                "group": "Bắt đầu",
+                "pages": [
+                  "vi/introduction/overview",
+                  "vi/introduction/why-openmodex",
+                  "vi/introduction/quickstart",
+                  "vi/introduction/authentication",
+                  "vi/introduction/api-keys"
+                ]
+              },
+              {
+                "group": "Nền tảng",
+                "pages": [
+                  "vi/platform/architecture",
+                  "vi/platform/supported-models",
+                  "vi/platform/pricing"
+                ]
+              },
+              {
+                "group": "Tính năng cốt lõi",
+                "pages": [
+                  "vi/features/smart-routing",
+                  "vi/features/prompt-caching",
+                  "vi/features/fallbacks",
+                  "vi/features/rate-limiting",
+                  "vi/features/streaming"
+                ]
+              },
+              {
+                "group": "Hướng dẫn",
+                "pages": [
+                  "vi/guides/migration-from-openai",
+                  "vi/guides/use-cases",
+                  "vi/guides/byok",
+                  "vi/guides/error-handling",
+                  "vi/guides/best-practices",
+                  "vi/guides/billing-and-costs"
+                ]
+              }
+            ]
+          },
+          {
+            "tab": "Tham chiếu API",
+            "groups": [
+              {
+                "group": "Tổng quan",
+                "pages": [
+                  "vi/api-reference/overview"
+                ]
+              },
+              {
+                "group": "Trò chuyện",
+                "pages": [
+                  "vi/api-reference/chat-completions",
+                  "vi/api-reference/chat-streaming"
+                ]
+              },
+              {
+                "group": "Hoàn thành",
+                "pages": [
+                  "vi/api-reference/completions"
+                ]
+              },
+              {
+                "group": "Nhúng",
+                "pages": [
+                  "vi/api-reference/embeddings"
+                ]
+              },
+              {
+                "group": "Mô hình",
+                "pages": [
+                  "vi/api-reference/models-list",
+                  "vi/api-reference/models-retrieve",
+                  "vi/api-reference/models-compare"
+                ]
+              }
+            ]
+          },
+          {
+            "tab": "SDK",
+            "groups": [
+              {
+                "group": "SDK chính thức",
+                "pages": [
+                  "vi/sdks/overview",
+                  "vi/sdks/node",
+                  "vi/sdks/python",
+                  "vi/sdks/go"
+                ]
+              },
+              {
+                "group": "Frontend",
+                "pages": [
+                  "vi/sdks/react",
+                  "vi/sdks/cli"
+                ]
+              }
+            ]
+          },
+          {
+            "tab": "Nhật ký thay đổi",
+            "groups": [
+              {
+                "group": "Nhật ký thay đổi",
+                "pages": [
+                  "vi/changelog/overview"
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "language": "es",
+        "tabs": [
+          {
+            "tab": "Documentación",
+            "groups": [
+              {
+                "group": "Primeros Pasos",
+                "pages": [
+                  "es/introduction/overview",
+                  "es/introduction/why-openmodex",
+                  "es/introduction/quickstart",
+                  "es/introduction/authentication",
+                  "es/introduction/api-keys"
+                ]
+              },
+              {
+                "group": "Plataforma",
+                "pages": [
+                  "es/platform/architecture",
+                  "es/platform/supported-models",
+                  "es/platform/pricing"
+                ]
+              },
+              {
+                "group": "Características Principales",
+                "pages": [
+                  "es/features/smart-routing",
+                  "es/features/prompt-caching",
+                  "es/features/fallbacks",
+                  "es/features/rate-limiting",
+                  "es/features/streaming"
+                ]
+              },
+              {
+                "group": "Guías",
+                "pages": [
+                  "es/guides/migration-from-openai",
+                  "es/guides/use-cases",
+                  "es/guides/byok",
+                  "es/guides/error-handling",
+                  "es/guides/best-practices",
+                  "es/guides/billing-and-costs"
+                ]
+              }
+            ]
+          },
+          {
+            "tab": "Referencia API",
+            "groups": [
+              {
+                "group": "Descripción General",
+                "pages": [
+                  "es/api-reference/overview"
+                ]
+              },
+              {
+                "group": "Chat",
+                "pages": [
+                  "es/api-reference/chat-completions",
+                  "es/api-reference/chat-streaming"
+                ]
+              },
+              {
+                "group": "Completaciones",
+                "pages": [
+                  "es/api-reference/completions"
+                ]
+              },
+              {
+                "group": "Embeddings",
+                "pages": [
+                  "es/api-reference/embeddings"
+                ]
+              },
+              {
+                "group": "Modelos",
+                "pages": [
+                  "es/api-reference/models-list",
+                  "es/api-reference/models-retrieve",
+                  "es/api-reference/models-compare"
+                ]
+              }
+            ]
+          },
+          {
+            "tab": "SDKs",
+            "groups": [
+              {
+                "group": "SDKs Oficiales",
+                "pages": [
+                  "es/sdks/overview",
+                  "es/sdks/node",
+                  "es/sdks/python",
+                  "es/sdks/go"
+                ]
+              },
+              {
+                "group": "Frontend",
+                "pages": [
+                  "es/sdks/react",
+                  "es/sdks/cli"
+                ]
+              }
+            ]
+          },
+          {
+            "tab": "Registro de Cambios",
+            "groups": [
+              {
+                "group": "Registro de Cambios",
+                "pages": [
+                  "es/changelog/overview"
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "language": "fr",
+        "tabs": [
+          {
+            "tab": "Documentation",
+            "groups": [
+              {
+                "group": "Démarrage",
+                "pages": [
+                  "fr/introduction/overview",
+                  "fr/introduction/why-openmodex",
+                  "fr/introduction/quickstart",
+                  "fr/introduction/authentication",
+                  "fr/introduction/api-keys"
+                ]
+              },
+              {
+                "group": "Plateforme",
+                "pages": [
+                  "fr/platform/architecture",
+                  "fr/platform/supported-models",
+                  "fr/platform/pricing"
+                ]
+              },
+              {
+                "group": "Fonctionnalités",
+                "pages": [
+                  "fr/features/smart-routing",
+                  "fr/features/prompt-caching",
+                  "fr/features/fallbacks",
+                  "fr/features/rate-limiting",
+                  "fr/features/streaming"
+                ]
+              },
+              {
+                "group": "Guides",
+                "pages": [
+                  "fr/guides/migration-from-openai",
+                  "fr/guides/use-cases",
+                  "fr/guides/byok",
+                  "fr/guides/error-handling",
+                  "fr/guides/best-practices",
+                  "fr/guides/billing-and-costs"
+                ]
+              }
+            ]
+          },
+          {
+            "tab": "Référence API",
+            "groups": [
+              {
+                "group": "Aperçu",
+                "pages": [
+                  "fr/api-reference/overview"
+                ]
+              },
+              {
+                "group": "Chat",
+                "pages": [
+                  "fr/api-reference/chat-completions",
+                  "fr/api-reference/chat-streaming"
+                ]
+              },
+              {
+                "group": "Complétions",
+                "pages": [
+                  "fr/api-reference/completions"
+                ]
+              },
+              {
+                "group": "Embeddings",
+                "pages": [
+                  "fr/api-reference/embeddings"
+                ]
+              },
+              {
+                "group": "Modèles",
+                "pages": [
+                  "fr/api-reference/models-list",
+                  "fr/api-reference/models-retrieve",
+                  "fr/api-reference/models-compare"
+                ]
+              }
+            ]
+          },
+          {
+            "tab": "SDK",
+            "groups": [
+              {
+                "group": "SDK Officiels",
+                "pages": [
+                  "fr/sdks/overview",
+                  "fr/sdks/node",
+                  "fr/sdks/python",
+                  "fr/sdks/go"
+                ]
+              },
+              {
+                "group": "Frontend",
+                "pages": [
+                  "fr/sdks/react",
+                  "fr/sdks/cli"
+                ]
+              }
+            ]
+          },
+          {
+            "tab": "Journal des modifications",
+            "groups": [
+              {
+                "group": "Journal des modifications",
+                "pages": [
+                  "fr/changelog/overview"
+                ]
+              }
             ]
           }
         ]
@@ -123,16 +1012,39 @@
   },
   "footerSocials": {
     "github": "https://github.com/openmodexlabs",
-    "x": "https://x.com/openmodex"
+    "x": "https://x.com/openmodex",
+    "linkedin": "https://linkedin.com/company/openmodex"
   },
   "feedback": {
-    "thumbsRating": true
+    "thumbsRating": true,
+    "suggestEdit": true
+  },
+  "search": {
+    "prompt": "Search documentation..."
   },
   "api": {
     "baseUrl": "https://api.openmodex.com/v1",
     "auth": {
       "method": "bearer",
       "name": "Authorization"
+    },
+    "playground": {
+      "mode": "simple"
     }
-  }
+  },
+  "seo": {
+    "indexHiddenPages": false
+  },
+  "metadata": {
+    "og:site_name": "OpenModex Documentation",
+    "og:description": "One API, 100+ AI models. Intelligent routing, automatic fallbacks, and unified billing.",
+    "og:image": "https://openmodex.com/og-image.png",
+    "twitter:site": "@openmodex"
+  },
+  "redirects": [
+    {
+      "source": "/",
+      "destination": "/introduction/overview"
+    }
+  ]
 }

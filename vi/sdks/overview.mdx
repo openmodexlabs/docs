@@ -1,0 +1,63 @@
+---
+title: "Tổng quan SDK"
+description: "SDK chính thức cho Node.js, Python, Go, React và CLI."
+---
+
+## SDK Chính Thức
+
+OpenModex cung cấp SDK chính thức cho tất cả các nền tảng chính:
+
+<CardGroup cols={2}>
+  <Card title="Node.js / TypeScript" icon="js" href="/vi/sdks/node">
+    `npm install @openmodex/sdk`
+  </Card>
+  <Card title="Python" icon="python" href="/vi/sdks/python">
+    `pip install openmodex`
+  </Card>
+  <Card title="Go" icon="golang" href="/vi/sdks/go">
+    `go get github.com/openmodexlabs/openmodex-sdk-go`
+  </Card>
+  <Card title="React" icon="react" href="/vi/sdks/react">
+    `npm install @openmodex/react`
+  </Card>
+</CardGroup>
+
+## Ma Trận Tính Năng
+
+| Tính năng | Node.js | Python | Go |
+|---------|:-------:|:------:|:--:|
+| Hoàn thành chat | ✅ | ✅ | ✅ |
+| Streaming | ✅ | ✅ | ✅ |
+| Embedding | ✅ | ✅ | ✅ |
+| Liệt kê mô hình | ✅ | ✅ | ✅ |
+| So sánh mô hình | ✅ | ✅ | ✅ |
+| Dự phòng phía client | ✅ | ✅ | ✅ |
+| Cấu hình định tuyến | ✅ | ✅ | ✅ |
+| Cấu hình bộ đệm | ✅ | ✅ | ✅ |
+| Thử lại tự động | ✅ | ✅ | ✅ |
+| Hỗ trợ bất đồng bộ | ✅ | ✅ | ✅ |
+| Kiểu TypeScript | ✅ | — | — |
+
+## Tương Thích OpenAI SDK
+
+Đã sử dụng OpenAI SDK? Bạn có thể sử dụng nó với OpenModex bằng cách thay đổi URL gốc:
+
+<CodeGroup>
+```typescript Node.js
+import OpenAI from 'openai';
+
+const client = new OpenAI({
+  apiKey: 'omx_sk_...',
+  baseURL: 'https://api.openmodex.com/v1',
+});
+```
+
+```python Python
+from openai import OpenAI
+
+client = OpenAI(
+    api_key="omx_sk_...",
+    base_url="https://api.openmodex.com/v1",
+)
+```
+</CodeGroup>

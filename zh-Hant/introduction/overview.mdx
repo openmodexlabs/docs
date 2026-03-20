@@ -1,0 +1,77 @@
+---
+title: "什麼是 OpenModex？"
+description: "一個 API，100+ AI 模型。智慧路由、自動容錯備援及統一計費。"
+---
+
+## 通用 AI 閘道器
+
+OpenModex 是一個統一的 API 閘道器，讓您透過單一的 OpenAI 相容 API 存取來自所有主要供應商的 100+ 大型語言模型。
+
+不再需要管理多個 API 金鑰、不同的 SDK 和各個 AI 供應商的獨立帳單，OpenModex 讓您可以：
+
+- **使用一個 API 金鑰**存取 OpenAI、Anthropic、Google Gemini、DeepSeek、Mistral、Qwen 等
+- **即時切換模型** — 只需更改一個參數，無需改動整個程式碼庫
+- **智慧路由** — 讓 OpenModex 根據成本、延遲或品質自動選擇最佳模型
+- **優雅降級** — 自動容錯備援確保即使供應商中斷，您的應用程式也能正常運作
+- **節省成本** — 提示快取、成本最佳化路由和透明定價
+
+## 運作方式
+
+<Steps>
+  <Step title="取得您的 API 金鑰">
+    在 [openmodex.com](https://openmodex.com) 註冊，並在控制台建立 API 金鑰。
+  </Step>
+  <Step title="將程式碼指向 OpenModex">
+    將供應商的基底 URL 替換為 `https://api.openmodex.com/v1`。如果您已在使用 OpenAI SDK，只需更改一行程式碼。
+  </Step>
+  <Step title="選擇任何模型">
+    直接使用模型名稱 — `gpt-4o`、`claude-3.5-sonnet`、`gemini-2.0-flash`、`deepseek-chat` 等眾多模型。
+  </Step>
+</Steps>
+
+## OpenAI 相容
+
+如果您已在使用 OpenAI API，切換到 OpenModex 非常簡單：
+
+```typescript
+import OpenAI from 'openai';
+
+const client = new OpenAI({
+  apiKey: 'omx_sk_...',                      // your OpenModex key
+  baseURL: 'https://api.openmodex.com/v1',   // point to OpenModex
+});
+
+// Everything else stays the same
+const response = await client.chat.completions.create({
+  model: 'gpt-4o',  // or any other model
+  messages: [{ role: 'user', content: 'Hello!' }],
+});
+```
+
+## 支援的供應商
+
+| 供應商 | 模型 | 特色 |
+|----------|--------|-----------|
+| **OpenAI** | GPT-4o, GPT-4o-mini, o1, o3 | 業界標準 |
+| **Anthropic** | Claude 3.5 Sonnet, Claude 3 Opus | 最適合長上下文 |
+| **Google** | Gemini 2.0 Flash, Gemini 1.5 Pro | 多模態 + 速度 |
+| **DeepSeek** | DeepSeek-V3, DeepSeek-R1 | 高性價比推理 |
+| **Mistral** | Mistral Large, Mistral Small | 歐洲 AI |
+| **Qwen** | Qwen2.5, Qwen-Max | 中文語言最佳化 |
+
+## 後續步驟
+
+<CardGroup cols={2}>
+  <Card title="快速開始" icon="rocket" href="/zh-Hant/introduction/quickstart">
+    在 2 分鐘內完成您的第一個 API 呼叫。
+  </Card>
+  <Card title="API 參考" icon="code" href="/zh-Hant/api-reference/overview">
+    瀏覽完整的 API 文件。
+  </Card>
+  <Card title="SDK" icon="puzzle-piece" href="/zh-Hant/sdks/overview">
+    適用於 Node.js、Python、Go 和 React 的官方 SDK。
+  </Card>
+  <Card title="智慧路由" icon="route" href="/zh-Hant/features/smart-routing">
+    了解智慧路由如何節省成本並提升可靠性。
+  </Card>
+</CardGroup>

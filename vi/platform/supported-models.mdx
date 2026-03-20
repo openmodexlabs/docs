@@ -1,0 +1,106 @@
+---
+title: "Mô hình được hỗ trợ"
+description: "Tất cả mô hình AI và nhà cung cấp có sẵn thông qua cổng OpenModex."
+---
+
+## Tổng Quan
+
+OpenModex cung cấp quyền truy cập vào hơn 100 mô hình từ 6 nhà cung cấp AI hàng đầu thông qua một API duy nhất. Tất cả mô hình đều có thể truy cập qua cùng một endpoint tương thích với OpenAI.
+
+<Tip>
+  Sử dụng [API Mô hình](/vi/api-reference/models-list) để xem giá và tình trạng khả dụng theo thời gian thực, hoặc [API So sánh](/vi/api-reference/models-compare) để đánh giá các mô hình song song.
+</Tip>
+
+## OpenAI
+
+| Mô hình | Ngữ cảnh | Phù hợp nhất cho | Tính năng |
+|-------|--------:|----------|----------|
+| `gpt-4o` | 128K | Đa năng, thị giác | Streaming, Function Calling, JSON Mode, Vision |
+| `gpt-4o-mini` | 128K | Tác vụ tiết kiệm chi phí | Streaming, Function Calling, JSON Mode |
+| `o1` | 200K | Suy luận phức tạp | Chain-of-thought |
+| `o3` | 200K | Suy luận nâng cao | Chain-of-thought |
+| `gpt-4-turbo` | 128K | Tương thích phiên bản cũ | Streaming, Function Calling, Vision |
+
+## Anthropic
+
+| Mô hình | Ngữ cảnh | Phù hợp nhất cho | Tính năng |
+|-------|--------:|----------|----------|
+| `claude-3.5-sonnet` | 200K | Lập trình, phân tích, ngữ cảnh dài | Streaming, Tool Use |
+| `claude-3-opus` | 200K | Tác vụ phức tạp, nghiên cứu | Streaming, Tool Use |
+| `claude-3-haiku` | 200K | Nhanh, tiết kiệm chi phí | Streaming, Tool Use |
+
+## Google
+
+| Mô hình | Ngữ cảnh | Phù hợp nhất cho | Tính năng |
+|-------|--------:|----------|----------|
+| `gemini-2.0-flash` | 1M | Tốc độ, đa phương thức | Streaming, Function Calling, Vision |
+| `gemini-1.5-pro` | 2M | Tài liệu dài, phân tích | Streaming, Function Calling, Vision |
+| `gemini-1.5-flash` | 1M | Cân bằng tốc độ & chất lượng | Streaming, Function Calling |
+
+## DeepSeek
+
+| Mô hình | Ngữ cảnh | Phù hợp nhất cho | Tính năng |
+|-------|--------:|----------|----------|
+| `deepseek-chat` | 128K | Đa năng, tiết kiệm chi phí | Streaming |
+| `deepseek-reasoner` | 128K | Suy luận, toán, lập trình | Streaming, Chain-of-thought |
+
+## Mistral
+
+| Mô hình | Ngữ cảnh | Phù hợp nhất cho | Tính năng |
+|-------|--------:|----------|----------|
+| `mistral-large` | 128K | Doanh nghiệp, đa ngôn ngữ | Streaming, Function Calling |
+| `mistral-small` | 128K | Tiết kiệm chi phí, nhanh | Streaming |
+| `codestral` | 32K | Tạo mã nguồn | Streaming |
+
+## Qwen
+
+| Mô hình | Ngữ cảnh | Phù hợp nhất cho | Tính năng |
+|-------|--------:|----------|----------|
+| `qwen-max` | 128K | Tiếng Trung, đa năng | Streaming |
+| `qwen2.5-72b` | 128K | Trọng số mở, linh hoạt | Streaming |
+| `qwen2.5-coder` | 128K | Tạo mã nguồn | Streaming |
+
+## Mô Hình Embedding
+
+| Mô hình | Chiều | Nhà cung cấp | Phù hợp nhất cho |
+|-------|----------:|----------|----------|
+| `text-embedding-3-small` | 1536 | OpenAI | Embedding tiết kiệm chi phí |
+| `text-embedding-3-large` | 3072 | OpenAI | Embedding độ chính xác cao |
+| `text-embedding-ada-002` | 1536 | OpenAI | Tương thích phiên bản cũ |
+
+## Chọn Mô Hình
+
+Sử dụng các chiến lược định tuyến hoặc tham khảo hướng dẫn nhanh này:
+
+| Ưu tiên | Đề xuất |
+|----------|-------------|
+| **Rẻ nhất** | `gpt-4o-mini`, `deepseek-chat`, `gemini-2.0-flash` |
+| **Nhanh nhất** | `gemini-2.0-flash`, `gpt-4o-mini`, `claude-3-haiku` |
+| **Chất lượng tốt nhất** | `gpt-4o`, `claude-3.5-sonnet`, `gemini-1.5-pro` |
+| **Lập trình tốt nhất** | `claude-3.5-sonnet`, `deepseek-reasoner`, `codestral` |
+| **Ngữ cảnh dài nhất** | `gemini-1.5-pro` (2M), `gemini-2.0-flash` (1M) |
+| **Suy luận tốt nhất** | `o3`, `o1`, `deepseek-reasoner` |
+
+Hoặc để OpenModex tự động quyết định:
+
+```typescript
+const response = await client.chat.completions.create({
+  model: 'auto',
+  messages: [{ role: 'user', content: 'Hello!' }],
+  routing: { strategy: 'cost_optimized' },
+});
+```
+
+## Dữ Liệu Mô Hình Thời Gian Thực
+
+Để xem giá, tình trạng khả dụng và điểm chất lượng theo thời gian thực:
+
+```bash
+# List all models with pricing
+curl https://api.openmodex.com/v1/models \
+  -H "Authorization: Bearer omx_sk_YOUR_KEY"
+
+# Compare specific models
+curl "https://api.openmodex.com/v1/models/compare?models=openai/gpt-4o,anthropic/claude-3.5-sonnet" \
+  -H "Authorization: Bearer omx_sk_YOUR_KEY"
+```

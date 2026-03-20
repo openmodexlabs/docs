@@ -1,0 +1,190 @@
+---
+title: "Tạo hoàn thành chat"
+description: "POST /v1/chat/completions — Tạo phản hồi mô hình cho một cuộc hội thoại."
+api: "POST /chat/completions"
+---
+
+## Thân Yêu Cầu
+
+<ParamField body="model" type="string" required>
+  ID mô hình để sử dụng (ví dụ: `gpt-4o`, `claude-3.5-sonnet`, `gemini-2.0-flash`).
+</ParamField>
+
+<ParamField body="messages" type="array" required>
+  Danh sách tin nhắn tạo thành cuộc hội thoại.
+  <Expandable title="Đối tượng Message">
+    <ParamField body="role" type="string" required>
+      Một trong `system`, `user`, `assistant` hoặc `tool`.
+    </ParamField>
+    <ParamField body="content" type="string" required>
+      Nội dung của tin nhắn.
+    </ParamField>
+    <ParamField body="name" type="string">
+      Tên tùy chọn cho người tham gia.
+    </ParamField>
+  </Expandable>
+</ParamField>
+
+<ParamField body="stream" type="boolean" default={false}>
+  Nếu `true`, trả về luồng Server-Sent Events (SSE).
+</ParamField>
+
+<ParamField body="temperature" type="number" default={1}>
+  Nhiệt độ lấy mẫu từ 0 đến 2. Giá trị thấp hơn cho kết quả xác định hơn.
+</ParamField>
+
+<ParamField body="max_tokens" type="integer">
+  Số lượng token tối đa để tạo.
+</ParamField>
+
+<ParamField body="top_p" type="number" default={1}>
+  Tham số lấy mẫu nucleus.
+</ParamField>
+
+<ParamField body="stop" type="string | string[]">
+  Chuỗi dừng sẽ ngừng việc tạo.
+</ParamField>
+
+<ParamField body="frequency_penalty" type="number" default={0}>
+  Hình phạt tần suất token (-2.0 đến 2.0).
+</ParamField>
+
+<ParamField body="presence_penalty" type="number" default={0}>
+  Hình phạt sự hiện diện token (-2.0 đến 2.0).
+</ParamField>
+
+<ParamField body="tools" type="array">
+  Danh sách công cụ mà mô hình có thể gọi (function calling).
+</ParamField>
+
+<ParamField body="tool_choice" type="string | object">
+  Kiểm soát công cụ nào được gọi. `auto`, `none` hoặc một công cụ cụ thể.
+</ParamField>
+
+<ParamField body="response_format" type="object">
+  Buộc định dạng đầu ra cụ thể (ví dụ: `{"type": "json_object"}`).
+</ParamField>
+
+<ParamField body="seed" type="integer">
+  Seed lấy mẫu xác định để tái tạo kết quả.
+</ParamField>
+
+### Phần Mở Rộng OpenModex
+
+<ParamField body="routing" type="object">
+  Cấu hình định tuyến thông minh cho yêu cầu này.
+  <Expandable title="Đối tượng Routing">
+    <ParamField body="strategy" type="string">
+      `cost_optimized`, `latency_optimized` hoặc `quality_optimized`.
+    </ParamField>
+    <ParamField body="fallback" type="string[]">
+      Chuỗi mô hình dự phòng phía máy chủ.
+    </ParamField>
+    <ParamField body="allow_upgrade" type="boolean">
+      Cho phép định tuyến đến mô hình tốt hơn ở cùng mức giá.
+    </ParamField>
+  </Expandable>
+</ParamField>
+
+<ParamField body="cache" type="object">
+  Cấu hình bộ nhớ đệm prompt.
+  <Expandable title="Đối tượng Cache">
+    <ParamField body="enabled" type="boolean">
+      Bật bộ nhớ đệm prompt cho yêu cầu này.
+    </ParamField>
+    <ParamField body="ttl" type="integer">
+      Thời gian sống của bộ đệm tính bằng giây.
+    </ParamField>
+  </Expandable>
+</ParamField>
+
+## Phản Hồi
+
+```json
+{
+  "id": "chatcmpl-abc123",
+  "object": "chat.completion",
+  "created": 1700000000,
+  "model": "gpt-4o-2024-08-06",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "Hello! How can I help you today?"
+      },
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "prompt_tokens": 10,
+    "completion_tokens": 9,
+    "total_tokens": 19,
+    "cost_usd": 0.000145
+  },
+  "openmodex": {
+    "request_id": "req_abc123",
+    "model_used": "gpt-4o-2024-08-06",
+    "provider": "openai",
+    "cache_hit": false,
+    "routing_strategy": "default",
+    "fallback_used": false,
+    "latency_ms": 850
+  }
+}
+```
+
+## Ví Dụ
+
+<CodeGroup>
+```bash cURL
+curl https://api.openmodex.com/v1/chat/completions \
+  -H "Authorization: Bearer omx_sk_YOUR_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "model": "gpt-4o",
+    "messages": [
+      {"role": "system", "content": "You are a helpful assistant."},
+      {"role": "user", "content": "What is the capital of France?"}
+    ],
+    "temperature": 0.7,
+    "max_tokens": 100
+  }'
+```
+
+```typescript Node.js
+import OpenModex from '@openmodex/sdk';
+
+const client = new OpenModex({ apiKey: 'omx_sk_YOUR_KEY' });
+
+const response = await client.chat.completions.create({
+  model: 'gpt-4o',
+  messages: [
+    { role: 'system', content: 'You are a helpful assistant.' },
+    { role: 'user', content: 'What is the capital of France?' },
+  ],
+  temperature: 0.7,
+  max_tokens: 100,
+});
+
+console.log(response.choices[0].message.content);
+```
+
+```python Python
+from openmodex import OpenModex
+
+client = OpenModex(api_key="omx_sk_YOUR_KEY")
+
+response = client.chat.completions.create(
+    model="gpt-4o",
+    messages=[
+        {"role": "system", "content": "You are a helpful assistant."},
+        {"role": "user", "content": "What is the capital of France?"},
+    ],
+    temperature=0.7,
+    max_tokens=100,
+)
+
+print(response.choices[0].message.content)
+```
+</CodeGroup>

@@ -1,0 +1,136 @@
+---
+title: "Architecture"
+description: "How OpenModex routes, optimizes, and delivers AI model responses."
+---
+
+## System Overview
+
+OpenModex sits between your application and AI model providers. Every request flows through a pipeline of intelligent middleware before reaching the optimal provider.
+
+```
+Your App → OpenModex Gateway → [ Auth → Routing → Caching → Provider ] → Response
+```
+
+## Request Flow
+
+<Steps>
+  <Step title="Authentication">
+    Your API key is validated and mapped to your account, team, and rate limits.
+  </Step>
+  <Step title="Rate Limiting">
+    Request is checked against your tier's rate limits (per-key, per-minute). Uses Redis sorted sets for precise sliding-window enforcement.
+  </Step>
+  <Step title="Cache Check">
+    If prompt caching is enabled, OpenModex checks for an exact-match cached response. Cache hits return instantly with zero provider cost.
+  </Step>
+  <Step title="Routing Decision">
+    The routing engine selects the optimal provider based on your strategy (cost, latency, or quality), current provider health, and fallback configuration.
+  </Step>
+  <Step title="Provider Request">
+    The request is translated to the target provider's format and forwarded. OpenModex supports real-time SSE streaming pass-through.
+  </Step>
+  <Step title="Response + Metadata">
+    The provider response is normalized to OpenAI format, enriched with OpenModex metadata (routing info, cost, latency), and returned to your app.
+  </Step>
+</Steps>
+
+## Core Components
+
+### API Gateway
+
+- **OpenAI-compatible REST API** — drop-in replacement for OpenAI's API
+- **SSE streaming** — real-time token-by-token delivery
+- **Idempotency** — safe retries with `Idempotency-Key` header (24h TTL)
+
+### Routing Engine
+
+The routing engine maintains a real-time view of provider health and performance:
+
+| Strategy | Behavior |
+|----------|----------|
+| **Default** | Route to the specified provider |
+| **Cost Optimized** | Pick the cheapest provider for the requested model |
+| **Latency Optimized** | Pick the fastest available provider |
+| **Quality Optimized** | Pick the provider with the highest quality scores |
+
+### Circuit Breaker
+
+Provider health is monitored automatically:
+
+1. **Closed** — requests route normally
+2. **Half-Open** — after consecutive failures, traffic is throttled
+3. **Open** — provider is temporarily removed from the routing pool
+4. **Recovery** — periodic health probes restore the provider
+
+### Provider Adapters
+
+Each AI provider is wrapped in a standardized adapter that handles:
+
+- Request format translation (OpenAI format → provider-native format)
+- Response normalization (provider-native → OpenAI format)
+- Error mapping to consistent error codes
+- Streaming protocol translation
+
+**Supported Providers:**
+
+| Provider | Adapter | Models |
+|----------|---------|--------|
+| OpenAI | Native | GPT-4o, GPT-4o-mini, o1, o3 |
+| Anthropic | Translated | Claude 3.5 Sonnet, Claude 3 Opus |
+| Google | Translated | Gemini 2.0 Flash, Gemini 1.5 Pro |
+| DeepSeek | Translated | DeepSeek-V3, DeepSeek-R1 |
+| Mistral | Translated | Mistral Large, Mistral Small |
+| Qwen | Translated | Qwen2.5, Qwen-Max |
+
+### Caching Layer
+
+- **Exact-match caching** — hash of (model + messages + parameters)
+- **Configurable TTL** — 60s to 24h per request
+- **Redis-backed** — sub-millisecond cache lookups
+- **Cost savings** — cached responses billed at ~50% input rate, zero output cost
+
+### Billing Pipeline
+
+1. Every request emits a billing event to Kafka
+2. Events are consumed asynchronously and persisted
+3. Account balances are updated atomically via Redis Lua scripts
+4. Analytics are flushed to Apache Doris for dashboards and reporting
+
+## Infrastructure
+
+| Component | Technology |
+|-----------|-----------|
+| API Gateway | Go + Gin Framework |
+| Cache & Rate Limiting | Redis 7.0+ |
+| Message Queue | Apache Kafka |
+| Analytics Warehouse | Apache Doris |
+| Key Encryption | AWS KMS (AES-256 envelope encryption) |
+| ID Generation | Snowflake IDs |
+
+## Security
+
+- **API keys** are hashed at rest; only the prefix is stored for lookup
+- **BYOK provider keys** are encrypted with AWS KMS envelope encryption
+- **Rate limiting** uses atomic Redis operations to prevent race conditions
+- **All traffic** is encrypted with TLS 1.3
+- **Passwords** are hashed with Argon2id
+
+## Data Flow Diagram
+
+```
+┌─────────────┐     ┌──────────────────────────────────────────────┐
+│  Your App   │────▶│  OpenModex API Gateway                       │
+│             │◀────│                                              │
+└─────────────┘     │  ┌──────┐  ┌────────┐  ┌───────┐  ┌──────┐ │
+                    │  │ Auth │─▶│ Router │─▶│ Cache │─▶│ Send │ │
+                    │  └──────┘  └────────┘  └───────┘  └──┬───┘ │
+                    │                                      │     │
+                    └──────────────────────────────────────┼─────┘
+                                                           │
+                    ┌──────────────────────────────────────┼─────┐
+                    │  AI Providers                        ▼     │
+                    │  ┌────────┐ ┌──────────┐ ┌────────┐       │
+                    │  │ OpenAI │ │ Anthropic│ │ Google │  ...  │
+                    │  └────────┘ └──────────┘ └────────┘       │
+                    └────────────────────────────────────────────┘
+```

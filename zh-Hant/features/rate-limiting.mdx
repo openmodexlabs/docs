@@ -1,0 +1,65 @@
+---
+title: "速率限制"
+description: "了解並處理 API 速率限制。"
+---
+
+## 速率限制
+
+速率限制根據您的訂閱方案按 API 金鑰強制執行：
+
+| 方案 | 請求數/分鐘 | Token 數/分鐘 |
+|------|-------------:|-----------:|
+| Free | 30 | 60,000 |
+| Pro | 120 | 500,000 |
+| Enterprise | 300+ | 自訂 |
+
+## 速率限制標頭
+
+每個回應都包含速率限制標頭：
+
+```
+X-RateLimit-Limit: 120
+X-RateLimit-Remaining: 115
+X-RateLimit-Reset: 1700000060
+```
+
+| 標頭 | 說明 |
+|--------|-------------|
+| `X-RateLimit-Limit` | 每個視窗的最大請求數 |
+| `X-RateLimit-Remaining` | 視窗內剩餘的請求數 |
+| `X-RateLimit-Reset` | 視窗重置的 Unix 時間戳記 |
+
+## 處理 429 錯誤
+
+當速率受限時，您將收到 `429 Too Many Requests` 回應：
+
+```json
+{
+  "error": {
+    "message": "Rate limit exceeded. Please retry after 2 seconds.",
+    "type": "rate_limit_error",
+    "code": "rate_limit_exceeded"
+  }
+}
+```
+
+## 自動重試
+
+所有官方 SDK 都會自動以指數退避策略重試 429 錯誤：
+
+```typescript
+const client = new OpenModex({
+  apiKey: 'omx_sk_...',
+  maxRetries: 3, // default: 2
+});
+```
+
+重試延遲遵循：`min(500ms × 2^attempt, 5000ms)`
+
+## 最佳實踐
+
+1. **使用指數退避** — SDK 會自動處理
+2. **監控剩餘配額** — 檢查 `X-RateLimit-Remaining` 標頭
+3. **使用串流** — 串流請求無論回應長度都只計為一次請求
+4. **升級方案** — 如果持續達到限制，考慮升級
+5. **分散負載** — 為不同服務使用多個 API 金鑰

@@ -1,0 +1,60 @@
+---
+title: "Changelog"
+description: "Latest updates, new features, and improvements to the OpenModex platform."
+---
+
+## March 2026
+
+### v1.4.0 — Model Comparison API
+
+<Info>Released March 15, 2026</Info>
+
+- **New:** `GET /v1/models/compare` endpoint for side-by-side model evaluation
+- **New:** Quality scores (overall, code, math, reasoning) in model responses
+- **New:** Performance metrics (latency p50/p99, availability) per model
+- **Improved:** Model listing now includes pricing breakdown (official vs OpenModex rates)
+
+### v1.3.0 — BYOK Support
+
+<Info>Released March 1, 2026</Info>
+
+- **New:** Bring Your Own Key — use your own provider API keys
+- **New:** AWS KMS envelope encryption for provider key storage
+- **New:** Provider key management in the Dashboard
+- **Improved:** Routing engine handles mixed BYOK + managed configurations
+
+---
+
+## February 2026
+
+### v1.2.0 — React Hooks
+
+<Info>Released February 15, 2026</Info>
+
+- **New:** `@openmodex/react` package with `useChat`, `useCompletion`, `useModels` hooks
+- **New:** Built-in streaming and abort support in React hooks
+- **Improved:** TypeScript SDK now exports all types
+
+### v1.1.0 — Prompt Caching
+
+<Info>Released February 1, 2026</Info>
+
+- **New:** Server-side prompt caching with configurable TTL (60s–24h)
+- **New:** `cache_hit` field in response metadata
+- **Improved:** Cached responses billed at 50% input rate, zero output cost
+
+---
+
+## January 2026
+
+### v1.0.0 — General Availability
+
+<Info>Released January 15, 2026</Info>
+
+- **Launch:** OpenModex API Gateway — OpenAI-compatible API for 100+ models
+- **Launch:** Smart routing (cost, latency, quality strategies)
+- **Launch:** Automatic fallbacks with circuit breaker
+- **Launch:** Official SDKs for Node.js, Python, and Go
+- **Launch:** CLI tool (`@openmodex/cli`)
+- **Launch:** Dashboard with usage analytics and billing
+- Providers: OpenAI, Anthropic, Google Gemini, DeepSeek, Mistral, Qwen

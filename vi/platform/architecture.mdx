@@ -1,0 +1,136 @@
+---
+title: "Kiến trúc"
+description: "Cách OpenModex định tuyến, tối ưu hóa và phân phối phản hồi từ mô hình AI."
+---
+
+## Tổng Quan Hệ Thống
+
+OpenModex nằm giữa ứng dụng của bạn và các nhà cung cấp mô hình AI. Mọi yêu cầu đều đi qua một pipeline middleware thông minh trước khi đến nhà cung cấp tối ưu.
+
+```
+Your App → OpenModex Gateway → [ Auth → Routing → Caching → Provider ] → Response
+```
+
+## Luồng Yêu Cầu
+
+<Steps>
+  <Step title="Xác thực">
+    Khóa API của bạn được xác thực và ánh xạ đến tài khoản, đội nhóm và giới hạn tốc độ của bạn.
+  </Step>
+  <Step title="Giới hạn tốc độ">
+    Yêu cầu được kiểm tra theo giới hạn tốc độ của gói đăng ký (theo khóa, theo phút). Sử dụng Redis sorted sets để thực thi cửa sổ trượt chính xác.
+  </Step>
+  <Step title="Kiểm tra bộ nhớ đệm">
+    Nếu bộ nhớ đệm prompt được bật, OpenModex kiểm tra phản hồi đã được lưu đệm khớp chính xác. Kết quả trúng bộ đệm được trả về ngay lập tức với chi phí nhà cung cấp bằng không.
+  </Step>
+  <Step title="Quyết định định tuyến">
+    Công cụ định tuyến chọn nhà cung cấp tối ưu dựa trên chiến lược của bạn (chi phí, độ trễ hoặc chất lượng), tình trạng sức khỏe hiện tại của nhà cung cấp và cấu hình dự phòng.
+  </Step>
+  <Step title="Yêu cầu đến nhà cung cấp">
+    Yêu cầu được chuyển đổi sang định dạng của nhà cung cấp đích và chuyển tiếp. OpenModex hỗ trợ chuyển tiếp streaming SSE theo thời gian thực.
+  </Step>
+  <Step title="Phản hồi + Siêu dữ liệu">
+    Phản hồi của nhà cung cấp được chuẩn hóa về định dạng OpenAI, bổ sung siêu dữ liệu OpenModex (thông tin định tuyến, chi phí, độ trễ) và trả về cho ứng dụng của bạn.
+  </Step>
+</Steps>
+
+## Các Thành Phần Cốt Lõi
+
+### Cổng API
+
+- **REST API tương thích OpenAI** — thay thế trực tiếp API của OpenAI
+- **Streaming SSE** — phân phối token theo thời gian thực
+- **Tính idempotent** — thử lại an toàn với header `Idempotency-Key` (TTL 24 giờ)
+
+### Công Cụ Định Tuyến
+
+Công cụ định tuyến duy trì cái nhìn thời gian thực về sức khỏe và hiệu suất của nhà cung cấp:
+
+| Chiến lược | Hành vi |
+|----------|----------|
+| **Mặc định** | Định tuyến đến nhà cung cấp được chỉ định |
+| **Tối ưu chi phí** | Chọn nhà cung cấp rẻ nhất cho mô hình được yêu cầu |
+| **Tối ưu độ trễ** | Chọn nhà cung cấp nhanh nhất có sẵn |
+| **Tối ưu chất lượng** | Chọn nhà cung cấp có điểm chất lượng cao nhất |
+
+### Bộ Ngắt Mạch
+
+Sức khỏe của nhà cung cấp được giám sát tự động:
+
+1. **Đóng** — yêu cầu được định tuyến bình thường
+2. **Nửa mở** — sau các lỗi liên tiếp, lưu lượng bị giảm
+3. **Mở** — nhà cung cấp tạm thời bị loại khỏi nhóm định tuyến
+4. **Phục hồi** — các kiểm tra sức khỏe định kỳ khôi phục nhà cung cấp
+
+### Bộ Chuyển Đổi Nhà Cung Cấp
+
+Mỗi nhà cung cấp AI được bọc trong một bộ chuyển đổi chuẩn hóa xử lý:
+
+- Chuyển đổi định dạng yêu cầu (định dạng OpenAI → định dạng gốc của nhà cung cấp)
+- Chuẩn hóa phản hồi (gốc nhà cung cấp → định dạng OpenAI)
+- Ánh xạ lỗi sang mã lỗi nhất quán
+- Chuyển đổi giao thức streaming
+
+**Nhà Cung Cấp Được Hỗ Trợ:**
+
+| Nhà cung cấp | Bộ chuyển đổi | Mô hình |
+|----------|---------|--------|
+| OpenAI | Gốc | GPT-4o, GPT-4o-mini, o1, o3 |
+| Anthropic | Chuyển đổi | Claude 3.5 Sonnet, Claude 3 Opus |
+| Google | Chuyển đổi | Gemini 2.0 Flash, Gemini 1.5 Pro |
+| DeepSeek | Chuyển đổi | DeepSeek-V3, DeepSeek-R1 |
+| Mistral | Chuyển đổi | Mistral Large, Mistral Small |
+| Qwen | Chuyển đổi | Qwen2.5, Qwen-Max |
+
+### Lớp Bộ Nhớ Đệm
+
+- **Bộ đệm khớp chính xác** — hash của (mô hình + tin nhắn + tham số)
+- **TTL có thể cấu hình** — 60 giây đến 24 giờ cho mỗi yêu cầu
+- **Dựa trên Redis** — tra cứu bộ đệm dưới mili giây
+- **Tiết kiệm chi phí** — phản hồi từ bộ đệm được tính phí ~50% tỷ lệ đầu vào, không chi phí đầu ra
+
+### Pipeline Thanh Toán
+
+1. Mỗi yêu cầu phát ra một sự kiện thanh toán đến Kafka
+2. Các sự kiện được xử lý bất đồng bộ và lưu trữ
+3. Số dư tài khoản được cập nhật nguyên tử qua Redis Lua scripts
+4. Phân tích được đẩy sang Apache Doris cho bảng điều khiển và báo cáo
+
+## Cơ Sở Hạ Tầng
+
+| Thành phần | Công nghệ |
+|-----------|-----------|
+| Cổng API | Go + Gin Framework |
+| Bộ đệm & Giới hạn tốc độ | Redis 7.0+ |
+| Hàng đợi tin nhắn | Apache Kafka |
+| Kho dữ liệu phân tích | Apache Doris |
+| Mã hóa khóa | AWS KMS (mã hóa phong bì AES-256) |
+| Tạo ID | Snowflake IDs |
+
+## Bảo Mật
+
+- **Khóa API** được hash khi lưu trữ; chỉ tiền tố được lưu để tra cứu
+- **Khóa nhà cung cấp BYOK** được mã hóa bằng mã hóa phong bì AWS KMS
+- **Giới hạn tốc độ** sử dụng các phép toán Redis nguyên tử để ngăn điều kiện tranh chấp
+- **Tất cả lưu lượng** được mã hóa bằng TLS 1.3
+- **Mật khẩu** được hash bằng Argon2id
+
+## Sơ Đồ Luồng Dữ Liệu
+
+```
+┌─────────────┐     ┌──────────────────────────────────────────────┐
+│  Your App   │────▶│  OpenModex API Gateway                       │
+│             │◀────│                                              │
+└─────────────┘     │  ┌──────┐  ┌────────┐  ┌───────┐  ┌──────┐ │
+                    │  │ Auth │─▶│ Router │─▶│ Cache │─▶│ Send │ │
+                    │  └──────┘  └────────┘  └───────┘  └──┬───┘ │
+                    │                                      │     │
+                    └──────────────────────────────────────┼─────┘
+                                                           │
+                    ┌──────────────────────────────────────┼─────┐
+                    │  AI Providers                        ▼     │
+                    │  ┌────────┐ ┌──────────┐ ┌────────┐       │
+                    │  │ OpenAI │ │ Anthropic│ │ Google │  ...  │
+                    │  └────────┘ └──────────┘ └────────┘       │
+                    └────────────────────────────────────────────┘
+```

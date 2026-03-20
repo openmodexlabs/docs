@@ -1,0 +1,69 @@
+---
+title: "Caché de Prompts"
+description: "Almacene en caché prompts repetidos para reducir latencia y costo."
+---
+
+## Descripción General
+
+El almacenamiento en caché de prompts guarda respuestas para solicitudes idénticas, devolviendo resultados en caché instantáneamente sin realizar una nueva llamada API. Esto es ideal para:
+
+- Consultas repetidas (bots de FAQ, preguntas comunes)
+- Desarrollo y pruebas
+- Endpoints de alto tráfico con entradas predecibles
+
+## Habilitar el Caché
+
+Agregue el parámetro `cache` a su solicitud:
+
+```typescript
+const response = await client.chat.completions.create({
+  model: 'gpt-4o',
+  messages: [{ role: 'user', content: 'What is 2+2?' }],
+  cache: {
+    enabled: true,
+    ttl: 3600, // cache for 1 hour
+  },
+});
+
+console.log(response.openmodex?.cache_hit); // true on subsequent requests
+```
+
+## Cómo Funciona
+
+1. OpenModex genera un hash de la solicitud (modelo + mensajes + parámetros)
+2. Si existe una respuesta en caché y no ha expirado, se devuelve inmediatamente
+3. Si no hay caché, la solicitud va al proveedor y la respuesta se almacena en caché
+
+## Clave de Caché
+
+La clave de caché se calcula a partir de:
+- Nombre del modelo
+- Array de mensajes (contenido y roles)
+- Temperature, max_tokens y otros parámetros de generación
+
+Cambiar cualquiera de estos parámetros resulta en una clave de caché diferente.
+
+## TTL (Tiempo de Vida)
+
+| Configuración | Valor |
+|---------|-------|
+| TTL predeterminado | 300 segundos (5 minutos) |
+| TTL mínimo | 60 segundos |
+| TTL máximo | 86400 segundos (24 horas) |
+
+## Ahorro de Costos
+
+Las respuestas en caché son significativamente más económicas:
+- Los **tokens de entrada en caché** se facturan a ~50% de la tarifa normal
+- **Sin costo de tokens de salida** para respuestas en caché
+- **Latencia cero** — las respuestas se devuelven en <10ms
+
+## Verificar Estado del Caché
+
+```typescript
+const response = await client.chat.completions.create({...});
+
+if (response.openmodex?.cache_hit) {
+  console.log('Served from cache!');
+}
+```

@@ -1,0 +1,94 @@
+---
+title: "Bonnes pratiques"
+description: "Conseils pour tirer le meilleur parti d'OpenModex."
+---
+
+## Choisir le bon modèle
+
+Toutes les tâches ne nécessitent pas le modèle le plus coûteux :
+
+| Cas d'utilisation | Modèle recommandé | Pourquoi |
+|----------|-------------------|-----|
+| Q&R simple, classification | `gpt-4o-mini`, `gemini-2.0-flash` | Rapide et économique |
+| Raisonnement complexe | `gpt-4o`, `claude-3.5-sonnet` | Meilleure qualité |
+| Génération de code | `claude-3.5-sonnet`, `deepseek-chat` | Meilleur en code |
+| Longs documents | `claude-3.5-sonnet`, `gemini-1.5-pro` | Grand contexte |
+| Sensible au coût | `deepseek-chat`, `gpt-4o-mini` | Coût le plus bas |
+
+## Utiliser le routage intelligent
+
+Laissez OpenModex choisir le meilleur modèle au lieu de le coder en dur :
+
+```typescript
+// Don't do this
+if (isSimpleQuery) {
+  model = 'gpt-4o-mini';
+} else {
+  model = 'gpt-4o';
+}
+
+// Do this instead
+const response = await client.chat.completions.create({
+  model: 'gpt-4o',
+  messages,
+  routing: { strategy: 'cost_optimized' },
+});
+```
+
+## Toujours configurer les basculements
+
+Pour les applications en production, configurez toujours des basculements :
+
+```typescript
+const client = new OpenModex({
+  apiKey: 'omx_sk_...',
+  fallbackModels: ['claude-3.5-sonnet', 'gemini-2.0-flash'],
+});
+```
+
+## Utiliser le streaming pour les interfaces de chat
+
+Le streaming améliore considérablement l'expérience utilisateur :
+
+```typescript
+// Bad — user waits 3-10 seconds staring at a spinner
+const response = await client.chat.completions.create({
+  model: 'gpt-4o',
+  messages,
+});
+
+// Good — user sees text appearing in real-time
+const stream = await client.chat.completions.create({
+  model: 'gpt-4o',
+  messages,
+  stream: true,
+});
+```
+
+## Activer la mise en cache pour les requêtes répétées
+
+Si vous avez des prompts prévisibles ou répétés, activez la mise en cache :
+
+```typescript
+const response = await client.chat.completions.create({
+  model: 'gpt-4o',
+  messages: [{ role: 'user', content: 'What are your business hours?' }],
+  cache: { enabled: true, ttl: 3600 },
+});
+```
+
+## Définir des timeouts appropriés
+
+```typescript
+const client = new OpenModex({
+  apiKey: 'omx_sk_...',
+  timeout: 60_000, // 60 seconds for complex tasks
+});
+```
+
+## Surveiller votre utilisation
+
+- Consultez le [tableau de bord](https://openmodex.com/dashboard) pour les analyses d'utilisation
+- Suivez les coûts par modèle, par clé API
+- Configurez des alertes pour les schémas de dépenses inhabituels
+- Utilisez le champ `openmodex.cost_usd` dans les réponses pour suivre les coûts par requête

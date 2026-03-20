@@ -1,0 +1,57 @@
+---
+title: "Thanh toán & Chi phí"
+description: "Hiểu cách thanh toán của OpenModex hoạt động."
+---
+
+## Cách Thanh Toán Hoạt Động
+
+OpenModex sử dụng mô hình thanh toán theo mức sử dụng. Bạn bị tính phí dựa trên:
+
+- **Token đầu vào** — các token trong prompt/tin nhắn của bạn
+- **Token đầu ra** — các token được mô hình tạo ra
+- **Giá mô hình** — mỗi mô hình có mức giá theo token riêng
+
+## Bảng Giá
+
+OpenModex chuyển tiếp giá nhà cung cấp với biên lợi nhuận minh bạch. Xem giá hiện tại:
+
+- [Trang giá](https://openmodex.com/pricing)
+- [API Mô hình](/vi/api-reference/models-list) — bao gồm giá theo từng mô hình
+
+## Theo Dõi Chi Phí
+
+Mỗi phản hồi đều bao gồm thông tin chi phí:
+
+```json
+{
+  "usage": {
+    "prompt_tokens": 150,
+    "completion_tokens": 50,
+    "total_tokens": 200,
+    "cost_usd": 0.001
+  }
+}
+```
+
+## Phân Tích Bảng Điều Khiển
+
+[Bảng điều khiển](https://openmodex.com/dashboard) cung cấp:
+
+- **Chi tiêu thời gian thực** — số dư hiện tại và tốc độ tiêu thụ
+- **Phân tích theo mô hình** — chi phí và mức sử dụng theo từng mô hình
+- **Xu hướng hàng ngày** — chi tiêu theo thời gian
+- **Phân tích theo khóa** — theo dõi chi phí theo khóa API
+
+## Tiết Kiệm Chi Phí
+
+1. **Sử dụng định tuyến tối ưu chi phí** — để OpenModex chọn mô hình rẻ nhất
+2. **Bật bộ nhớ đệm** — tránh trả phí cho các truy vấn lặp lại
+3. **Chọn mô hình nhỏ hơn** — `gpt-4o-mini` rẻ hơn 10 lần so với `gpt-4o`
+4. **Đặt max_tokens** — giới hạn độ dài đầu ra để kiểm soát chi phí
+5. **Sử dụng BYOK** — mang khóa nhà cung cấp của riêng bạn để hưởng giảm giá theo khối lượng
+
+## Số Dư và Thanh Toán
+
+- Nạp tiền qua **thẻ tín dụng** (Stripe) hoặc **tiền mã hóa**
+- Xem số dư và lịch sử giao dịch trong bảng điều khiển
+- Thiết lập cảnh báo số dư thấp để tránh gián đoạn dịch vụ

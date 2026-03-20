@@ -1,0 +1,94 @@
+---
+title: "最佳实践"
+description: "充分利用 OpenModex 的实用建议。"
+---
+
+## 选择合适的模型
+
+不是每个任务都需要最昂贵的模型：
+
+| 使用场景 | 推荐模型 | 原因 |
+|----------|-------------------|-----|
+| 简单问答、分类 | `gpt-4o-mini`、`gemini-2.0-flash` | 快速且便宜 |
+| 复杂推理 | `gpt-4o`、`claude-3.5-sonnet` | 更高质量 |
+| 代码生成 | `claude-3.5-sonnet`、`deepseek-chat` | 最擅长代码 |
+| 长文档 | `claude-3.5-sonnet`、`gemini-1.5-pro` | 大上下文窗口 |
+| 成本敏感 | `deepseek-chat`、`gpt-4o-mini` | 最低成本 |
+
+## 使用智能路由
+
+让 OpenModex 选择最佳模型，而不是硬编码：
+
+```typescript
+// Don't do this
+if (isSimpleQuery) {
+  model = 'gpt-4o-mini';
+} else {
+  model = 'gpt-4o';
+}
+
+// Do this instead
+const response = await client.chat.completions.create({
+  model: 'gpt-4o',
+  messages,
+  routing: { strategy: 'cost_optimized' },
+});
+```
+
+## 始终配置故障转移
+
+对于生产环境应用，务必设置故障转移：
+
+```typescript
+const client = new OpenModex({
+  apiKey: 'omx_sk_...',
+  fallbackModels: ['claude-3.5-sonnet', 'gemini-2.0-flash'],
+});
+```
+
+## 聊天 UI 使用流式传输
+
+流式传输能显著改善用户体验：
+
+```typescript
+// Bad — user waits 3-10 seconds staring at a spinner
+const response = await client.chat.completions.create({
+  model: 'gpt-4o',
+  messages,
+});
+
+// Good — user sees text appearing in real-time
+const stream = await client.chat.completions.create({
+  model: 'gpt-4o',
+  messages,
+  stream: true,
+});
+```
+
+## 为重复查询启用缓存
+
+如果您有可预测或重复的提示词，请启用缓存：
+
+```typescript
+const response = await client.chat.completions.create({
+  model: 'gpt-4o',
+  messages: [{ role: 'user', content: 'What are your business hours?' }],
+  cache: { enabled: true, ttl: 3600 },
+});
+```
+
+## 设置适当的超时
+
+```typescript
+const client = new OpenModex({
+  apiKey: 'omx_sk_...',
+  timeout: 60_000, // 60 seconds for complex tasks
+});
+```
+
+## 监控您的用量
+
+- 在[控制面板](https://openmodex.com/dashboard)查看用量分析
+- 按模型、按 API 密钥追踪成本
+- 设置异常消费模式的告警
+- 使用响应中的 `openmodex.cost_usd` 字段追踪每次请求的成本

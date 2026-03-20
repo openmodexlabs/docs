@@ -1,0 +1,144 @@
+---
+title: "Streaming"
+description: "POST /v1/chat/completions — Diffuser les réponses de complétion de chat en temps réel."
+---
+
+## Vue d'ensemble
+
+Définissez `stream: true` pour recevoir les réponses sous forme de Server-Sent Events (SSE). Chaque événement contient un fragment de réponse partiel, vous permettant d'afficher le contenu en temps réel au fur et à mesure de sa génération.
+
+## Format du flux
+
+Le flux envoie des lignes `data:` contenant des objets JSON :
+
+```
+data: {"id":"chatcmpl-abc","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"role":"assistant"},"finish_reason":null}]}
+
+data: {"id":"chatcmpl-abc","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"content":"Hello"},"finish_reason":null}]}
+
+data: {"id":"chatcmpl-abc","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"content":"!"},"finish_reason":null}]}
+
+data: {"id":"chatcmpl-abc","object":"chat.completion.chunk","choices":[{"index":0,"delta":{},"finish_reason":"stop"}]}
+
+data: [DONE]
+```
+
+## Objet chunk
+
+Chaque chunk contient :
+
+| Champ | Type | Description |
+|-------|------|-------------|
+| `id` | string | Partagé entre tous les chunks d'une même réponse |
+| `object` | string | Toujours `chat.completion.chunk` |
+| `created` | integer | Horodatage Unix |
+| `model` | string | Modèle ayant généré la réponse |
+| `choices[].delta.role` | string | Présent uniquement dans le premier chunk |
+| `choices[].delta.content` | string | Contenu du token (peut être vide) |
+| `choices[].finish_reason` | string \| null | `stop`, `length` ou `null` pendant le streaming |
+
+## Exemples
+
+<CodeGroup>
+```bash cURL
+curl https://api.openmodex.com/v1/chat/completions \
+  -H "Authorization: Bearer omx_sk_YOUR_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "model": "gpt-4o",
+    "messages": [{"role": "user", "content": "Write a poem about the sea."}],
+    "stream": true
+  }'
+```
+
+```typescript Node.js
+import OpenModex from '@openmodex/sdk';
+
+const client = new OpenModex({ apiKey: 'omx_sk_YOUR_KEY' });
+
+const stream = await client.chat.completions.create({
+  model: 'gpt-4o',
+  messages: [{ role: 'user', content: 'Write a poem about the sea.' }],
+  stream: true,
+});
+
+for await (const chunk of stream) {
+  const content = chunk.choices[0]?.delta?.content;
+  if (content) process.stdout.write(content);
+}
+```
+
+```python Python
+from openmodex import OpenModex
+
+client = OpenModex(api_key="omx_sk_YOUR_KEY")
+
+stream = client.chat.completions.create(
+    model="gpt-4o",
+    messages=[{"role": "user", "content": "Write a poem about the sea."}],
+    stream=True,
+)
+
+for chunk in stream:
+    content = chunk.choices[0].delta.content
+    if content:
+        print(content, end="", flush=True)
+```
+
+```tsx React
+import { useChat } from '@openmodex/react';
+
+function Chat() {
+  const { messages, input, setInput, sendMessage, isLoading, stop } = useChat({
+    apiKey: 'omx_sk_YOUR_KEY',
+    model: 'gpt-4o',
+  });
+
+  return (
+    <div>
+      {messages.map((m) => (
+        <p key={m.id}><b>{m.role}:</b> {m.content}</p>
+      ))}
+      <input value={input} onChange={(e) => setInput(e.target.value)} />
+      <button onClick={() => sendMessage()} disabled={isLoading}>Send</button>
+      {isLoading && <button onClick={stop}>Stop</button>}
+    </div>
+  );
+}
+```
+</CodeGroup>
+
+## Annuler un flux
+
+Vous pouvez annuler un flux en cours :
+
+<CodeGroup>
+```typescript Node.js
+const stream = await client.chat.completions.create({
+  model: 'gpt-4o',
+  messages: [{ role: 'user', content: 'Write a long story...' }],
+  stream: true,
+});
+
+// Abort after 2 seconds
+setTimeout(() => stream.abort(), 2000);
+
+for await (const chunk of stream) {
+  process.stdout.write(chunk.choices[0]?.delta?.content ?? '');
+}
+```
+
+```python Python
+stream = client.chat.completions.create(
+    model="gpt-4o",
+    messages=[{"role": "user", "content": "Write a long story..."}],
+    stream=True,
+)
+
+for chunk in stream:
+    content = chunk.choices[0].delta.content
+    if content:
+        print(content, end="", flush=True)
+    # Call stream.close() to abort
+```
+</CodeGroup>

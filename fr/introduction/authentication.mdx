@@ -1,0 +1,86 @@
+---
+title: "Authentification"
+description: "Authentifiez vos requêtes API avec des jetons Bearer."
+---
+
+## Clés API
+
+Toutes les requêtes API nécessitent une clé API transmise dans l'en-tête `Authorization` :
+
+```bash
+Authorization: Bearer omx_sk_YOUR_API_KEY
+```
+
+Les clés API sont créées et gérées dans votre [tableau de bord](https://openmodex.com/dashboard/api-keys).
+
+## Format de clé
+
+Les clés API OpenModex suivent le format :
+
+```
+omx_sk_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+```
+
+- `omx_` — préfixe OpenModex
+- `sk_` — identifiant de clé secrète
+- Suivi d'une chaîne alphanumérique aléatoire
+
+## Utilisation
+
+<CodeGroup>
+```bash cURL
+curl https://api.openmodex.com/v1/chat/completions \
+  -H "Authorization: Bearer omx_sk_YOUR_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{"model": "gpt-4o", "messages": [{"role": "user", "content": "Hi"}]}'
+```
+
+```typescript Node.js
+import OpenModex from '@openmodex/sdk';
+
+// Pass directly
+const client = new OpenModex({ apiKey: 'omx_sk_YOUR_KEY' });
+
+// Or use environment variable (auto-detected)
+// OPENMODEX_API_KEY=omx_sk_YOUR_KEY
+const client = new OpenModex();
+```
+
+```python Python
+from openmodex import OpenModex
+
+# Pass directly
+client = OpenModex(api_key="omx_sk_YOUR_KEY")
+
+# Or use environment variable (auto-detected)
+# OPENMODEX_API_KEY=omx_sk_YOUR_KEY
+client = OpenModex()
+```
+</CodeGroup>
+
+## Variables d'environnement
+
+Tous les SDK officiels lisent automatiquement la variable d'environnement `OPENMODEX_API_KEY` :
+
+```bash
+export OPENMODEX_API_KEY=omx_sk_YOUR_KEY
+```
+
+## Bonnes pratiques de sécurité
+
+<Warning>
+  N'exposez jamais votre clé API dans du code côté client, des dépôts publics ou des requêtes navigateur. Les clés API portent des permissions de facturation et doivent rester secrètes.
+</Warning>
+
+- **Utilisez des variables d'environnement** — ne codez jamais les clés en dur dans le code source
+- **Effectuez une rotation régulière des clés** — créez de nouvelles clés et révoquez les anciennes depuis le tableau de bord
+- **Utilisez des clés séparées** pour le développement et la production
+- **Définissez des permissions** — restreignez les clés à des modèles spécifiques ou des limites de débit lorsque c'est possible
+
+## Réponses d'erreur
+
+| Statut | Signification |
+|--------|---------|
+| `401 Unauthorized` | Clé API manquante ou invalide |
+| `403 Forbidden` | La clé n'a pas les permissions pour cette opération |
+| `429 Too Many Requests` | Limite de débit dépassée |

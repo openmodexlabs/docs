@@ -1,0 +1,65 @@
+---
+title: "Limitation de débit"
+description: "Comprendre et gérer les limites de débit de l'API."
+---
+
+## Limites de débit
+
+Les limites de débit sont appliquées par clé API en fonction de votre niveau d'abonnement :
+
+| Niveau | Requêtes/min | Tokens/min |
+|------|-------------:|-----------:|
+| Free | 30 | 60 000 |
+| Pro | 120 | 500 000 |
+| Enterprise | 300+ | Personnalisé |
+
+## En-têtes de limite de débit
+
+Chaque réponse inclut des en-têtes de limite de débit :
+
+```
+X-RateLimit-Limit: 120
+X-RateLimit-Remaining: 115
+X-RateLimit-Reset: 1700000060
+```
+
+| En-tête | Description |
+|--------|-------------|
+| `X-RateLimit-Limit` | Nombre maximum de requêtes par fenêtre |
+| `X-RateLimit-Remaining` | Requêtes restantes dans la fenêtre |
+| `X-RateLimit-Reset` | Horodatage Unix de réinitialisation de la fenêtre |
+
+## Gestion des erreurs 429
+
+Lorsque vous êtes limité en débit, vous recevrez une réponse `429 Too Many Requests` :
+
+```json
+{
+  "error": {
+    "message": "Rate limit exceeded. Please retry after 2 seconds.",
+    "type": "rate_limit_error",
+    "code": "rate_limit_exceeded"
+  }
+}
+```
+
+## Nouvelles tentatives automatiques
+
+Tous les SDK officiels retentent automatiquement les erreurs 429 avec un backoff exponentiel :
+
+```typescript
+const client = new OpenModex({
+  apiKey: 'omx_sk_...',
+  maxRetries: 3, // default: 2
+});
+```
+
+Le délai de nouvelle tentative suit : `min(500ms × 2^attempt, 5000ms)`
+
+## Bonnes pratiques
+
+1. **Utilisez le backoff exponentiel** — les SDK le gèrent automatiquement
+2. **Surveillez le quota restant** — vérifiez les en-têtes `X-RateLimit-Remaining`
+3. **Utilisez le streaming** — les requêtes en streaming comptent comme une seule requête quelle que soit la longueur de la réponse
+4. **Passez au niveau supérieur** — si vous atteignez régulièrement les limites, envisagez une mise à niveau
+5. **Répartissez la charge** — utilisez plusieurs clés API pour différents services

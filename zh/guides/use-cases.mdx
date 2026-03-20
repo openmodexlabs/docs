@@ -1,0 +1,173 @@
+---
+title: "使用场景"
+description: "使用 OpenModex 构建的常见模式和使用场景。"
+---
+
+## AI 驱动的聊天应用
+
+构建实时流式响应的对话界面，并按对话切换模型。
+
+```typescript
+import OpenModex from '@openmodex/sdk';
+
+const client = new OpenModex({
+  apiKey: process.env.OPENMODEX_API_KEY,
+  fallbackModels: ['claude-3.5-sonnet', 'gemini-2.0-flash'],
+});
+
+// Use GPT-4o for complex questions, mini for simple ones
+const stream = await client.chat.completions.create({
+  model: isComplexQuery ? 'gpt-4o' : 'gpt-4o-mini',
+  messages: conversationHistory,
+  stream: true,
+});
+
+for await (const chunk of stream) {
+  process.stdout.write(chunk.choices[0]?.delta?.content ?? '');
+}
+```
+
+**为什么选择 OpenModex：** 自动故障转移确保即使供应商出现问题时聊天功能依然可用。流式传输在所有供应商间的工作方式完全一致。
+
+---
+
+## RAG（检索增强生成）
+
+结合嵌入进行搜索，配合 chat completion 进行内容生成。
+
+```typescript
+// 1. Create embeddings for your knowledge base
+const embedding = await client.embeddings.create({
+  model: 'text-embedding-3-small',
+  input: userQuery,
+});
+
+// 2. Search your vector database
+const relevantDocs = await vectorDB.search(embedding.data[0].embedding);
+
+// 3. Generate an answer with context
+const response = await client.chat.completions.create({
+  model: 'gpt-4o',
+  messages: [
+    { role: 'system', content: `Answer based on this context:\n${relevantDocs}` },
+    { role: 'user', content: userQuery },
+  ],
+  routing: { strategy: 'quality_optimized' },
+});
+```
+
+**为什么选择 OpenModex：** 在同一 API 调用流程中使用低成本的嵌入模型和高成本的生成模型。路由确保您在生成步骤获得最佳质量。
+
+---
+
+## 内容生成流水线
+
+使用成本优化路由大规模生成内容。
+
+```typescript
+// Generate 1000 product descriptions cost-efficiently
+const descriptions = await Promise.all(
+  products.map(async (product) => {
+    const response = await client.chat.completions.create({
+      model: 'gpt-4o-mini', // cost-effective for structured tasks
+      messages: [
+        { role: 'system', content: 'Write a 100-word product description.' },
+        { role: 'user', content: JSON.stringify(product) },
+      ],
+      routing: { strategy: 'cost_optimized' },
+      cache: { enabled: true, ttl: 86400 }, // cache for 24h
+    });
+    return response.choices[0].message.content;
+  })
+);
+```
+
+**为什么选择 OpenModex：** 成本优化路由和提示词缓存大幅降低批量工作负载的成本。自动重试处理瞬时故障。
+
+---
+
+## 代码助手
+
+使用最佳的代码专用模型构建代码生成工具。
+
+```typescript
+const response = await client.chat.completions.create({
+  model: 'claude-3.5-sonnet', // best at code
+  messages: [
+    { role: 'system', content: 'You are a senior software engineer.' },
+    { role: 'user', content: `Review this code and suggest improvements:\n${code}` },
+  ],
+  routing: {
+    fallback: ['deepseek-chat', 'gpt-4o'], // code-capable fallbacks
+  },
+});
+```
+
+**为什么选择 OpenModex：** 轻松测试哪个模型为您的用例生成最佳代码。到其他代码能力模型的故障转移确保可用性。
+
+---
+
+## 多模型 A/B 测试
+
+对比不同模型对相同提示词的输出以评估质量。
+
+```typescript
+// Compare responses from different models
+const comparison = await client.models.compare([
+  'openai/gpt-4o',
+  'anthropic/claude-3.5-sonnet',
+  'google/gemini-2.0-flash',
+]);
+
+// Run the same prompt against multiple models
+const results = await Promise.all(
+  ['gpt-4o', 'claude-3.5-sonnet', 'gemini-2.0-flash'].map(async (model) => {
+    const response = await client.chat.completions.create({
+      model,
+      messages: [{ role: 'user', content: testPrompt }],
+    });
+    return {
+      model,
+      content: response.choices[0].message.content,
+      cost: response.usage?.cost_usd,
+      latency: response.openmodex?.latency_ms,
+    };
+  })
+);
+```
+
+**为什么选择 OpenModex：** 一个 API 密钥、一套 SDK、一个计费账户。无需管理多个独立集成即可对比不同供应商的成本、质量和延迟。
+
+---
+
+## 实时 React 聊天 UI
+
+使用 React hooks 构建交互式 AI 聊天界面。
+
+```tsx
+import { useChat } from '@openmodex/react';
+
+function SupportChat() {
+  const { messages, input, setInput, sendMessage, isLoading, stop } = useChat({
+    apiKey: process.env.NEXT_PUBLIC_OPENMODEX_KEY,
+    model: 'gpt-4o-mini',
+    system: 'You are a helpful customer support agent for Acme Corp.',
+  });
+
+  return (
+    <div className="chat-container">
+      {messages.map((m) => (
+        <div key={m.id} className={`message ${m.role}`}>
+          {m.content}
+        </div>
+      ))}
+      <form onSubmit={(e) => { e.preventDefault(); sendMessage(); }}>
+        <input value={input} onChange={(e) => setInput(e.target.value)} />
+        <button disabled={isLoading}>Send</button>
+      </form>
+    </div>
+  );
+}
+```
+
+**为什么选择 OpenModex：** `@openmodex/react` hooks 开箱即用地处理流式传输、消息状态和中止支持。

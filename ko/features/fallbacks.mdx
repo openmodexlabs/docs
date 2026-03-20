@@ -1,0 +1,77 @@
+---
+title: "자동 폴백"
+description: "AI 제공업체에 장애가 발생해도 앱이 계속 실행되도록 합니다."
+---
+
+## 개요
+
+폴백은 기본 모델이 실패할 때 자동으로 대체 모델로 전환하여 애플리케이션의 안정성을 보장합니다. OpenModex는 서버 측 및 클라이언트 측 폴백을 모두 지원합니다.
+
+## 서버 측 폴백
+
+요청별로 설정합니다. OpenModex가 서버에서 장애 조치를 처리합니다:
+
+```typescript
+const response = await client.chat.completions.create({
+  model: 'gpt-4o',
+  messages: [{ role: 'user', content: 'Hello!' }],
+  routing: {
+    fallback: ['claude-3.5-sonnet', 'gemini-2.0-flash'],
+  },
+});
+```
+
+**작동 방식:**
+1. `gpt-4o` 시도
+2. 실패 시 (5xx, 요청 제한, 타임아웃) → `claude-3.5-sonnet` 시도
+3. 실패 시 → `gemini-2.0-flash` 시도
+4. 모두 실패 시 → 오류 반환
+
+## 클라이언트 측 폴백
+
+SDK 클라이언트에서 설정합니다. 모든 요청에 적용됩니다:
+
+<CodeGroup>
+```typescript Node.js
+import OpenModex from '@openmodex/sdk';
+
+const client = new OpenModex({
+  apiKey: 'omx_sk_...',
+  fallbackModels: ['claude-3.5-sonnet', 'gemini-2.0-flash'],
+});
+
+// If the requested model fails, the SDK automatically retries
+// with each fallback model
+const response = await client.chat.completions.create({
+  model: 'gpt-4o',
+  messages: [{ role: 'user', content: 'Hello!' }],
+});
+```
+
+```go Go
+client := openmodex.NewClient("omx_sk_...",
+    openmodex.WithFallbackModels("claude-3.5-sonnet", "gemini-2.0-flash"),
+)
+```
+</CodeGroup>
+
+## 폴백이 트리거되는 경우
+
+폴백이 트리거되는 경우:
+- **5xx 오류** — 제공업체의 서버 오류
+- **429 오류** — 요청 제한 초과
+- **타임아웃** — 요청이 시간 내에 완료되지 않음
+- **네트워크 오류** — 연결 실패
+
+폴백이 트리거되지 **않는** 경우:
+- **4xx 오류** (429 제외) — 요청 자체에 문제가 있음을 나타냄
+- **성공적인 응답** — 내용이 예상과 다르더라도
+
+## 폴백 사용 여부 확인
+
+```typescript
+const response = await client.chat.completions.create({...});
+
+console.log(response.openmodex?.model_used);     // actual model that responded
+console.log(response.openmodex?.fallback_used);   // true if fallback was used
+```

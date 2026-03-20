@@ -1,0 +1,65 @@
+---
+title: "Limitación de Velocidad"
+description: "Comprenda y maneje los límites de velocidad de la API."
+---
+
+## Límites de Velocidad
+
+Los límites de velocidad se aplican por clave API según su nivel de suscripción:
+
+| Nivel | Solicitudes/min | Tokens/min |
+|------|-------------:|-----------:|
+| Free | 30 | 60,000 |
+| Pro | 120 | 500,000 |
+| Enterprise | 300+ | Personalizado |
+
+## Encabezados de Límite de Velocidad
+
+Cada respuesta incluye encabezados de límite de velocidad:
+
+```
+X-RateLimit-Limit: 120
+X-RateLimit-Remaining: 115
+X-RateLimit-Reset: 1700000060
+```
+
+| Encabezado | Descripción |
+|--------|-------------|
+| `X-RateLimit-Limit` | Máximo de solicitudes por ventana |
+| `X-RateLimit-Remaining` | Solicitudes restantes en la ventana |
+| `X-RateLimit-Reset` | Marca de tiempo Unix cuando la ventana se reinicia |
+
+## Manejo de Errores 429
+
+Cuando se excede el límite de velocidad, recibirá una respuesta `429 Too Many Requests`:
+
+```json
+{
+  "error": {
+    "message": "Rate limit exceeded. Please retry after 2 seconds.",
+    "type": "rate_limit_error",
+    "code": "rate_limit_exceeded"
+  }
+}
+```
+
+## Reintentos Automáticos
+
+Todos los SDKs oficiales reintentan automáticamente en errores 429 con backoff exponencial:
+
+```typescript
+const client = new OpenModex({
+  apiKey: 'omx_sk_...',
+  maxRetries: 3, // default: 2
+});
+```
+
+El retraso de reintento sigue: `min(500ms × 2^attempt, 5000ms)`
+
+## Mejores Prácticas
+
+1. **Use backoff exponencial** — los SDKs manejan esto automáticamente
+2. **Monitoree la cuota restante** — verifique los encabezados `X-RateLimit-Remaining`
+3. **Use streaming** — las solicitudes de streaming cuentan como una sola solicitud independientemente de la longitud de la respuesta
+4. **Actualice su nivel** — si constantemente alcanza los límites, considere actualizar
+5. **Distribuya la carga** — use múltiples claves API para diferentes servicios

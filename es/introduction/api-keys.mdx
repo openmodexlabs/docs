@@ -1,0 +1,56 @@
+---
+title: "Claves API"
+description: "Cree, gestione y rote sus claves API de OpenModex."
+---
+
+## Crear una Clave
+
+1. Vaya a su [panel de claves API](https://openmodex.com/dashboard/api-keys)
+2. Haga clic en **Create New Key**
+3. Asígnele un nombre descriptivo (por ejemplo, "Production", "Development")
+4. Copie la clave inmediatamente — no se mostrará de nuevo
+
+<Warning>
+  Su clave API se muestra solo una vez al momento de la creación. Almacénela de forma segura. Si la pierde, cree una nueva.
+</Warning>
+
+## Gestionar Claves
+
+Desde el panel de control puede:
+
+- **Ver uso** — consulte conteos de solicitudes y costos por clave
+- **Renombrar** — actualice la etiqueta de la clave
+- **Rotar** — genere un nuevo valor de clave manteniendo la misma configuración
+- **Revocar** — deshabilite permanentemente una clave
+
+## Rotación de Claves
+
+Para rotar una clave sin tiempo de inactividad:
+
+1. Cree una nueva clave
+2. Actualice su aplicación para usar la nueva clave
+3. Verifique que la nueva clave funcione en producción
+4. Revoque la clave antigua
+
+## Límites de Velocidad
+
+Los límites de velocidad se aplican por clave API:
+
+| Nivel | Solicitudes por Minuto | Tokens por Minuto |
+|------|--------------------:|------------------:|
+| Free | 30 | 60,000 |
+| Pro | 120 | 500,000 |
+| Enterprise | 300+ | Personalizado |
+
+Cuando exceda un límite de velocidad, recibirá una respuesta `429 Too Many Requests` con un encabezado `Retry-After`.
+
+## Uso de BYOK (Traiga Su Propia Clave)
+
+OpenModex también soporta el uso de sus propias claves API de proveedores para acceso directo:
+
+1. Vaya a **Settings → Provider Keys** en el panel de control
+2. Agregue su clave API del proveedor (por ejemplo, OpenAI, Anthropic)
+3. Las claves se cifran en reposo usando cifrado de sobre AWS KMS
+4. Las solicitudes se enrutarán usando su clave de proveedor cuando esté disponible
+
+Esto le brinda los beneficios de enrutamiento y monitoreo de OpenModex mientras usa sus propios acuerdos con proveedores.

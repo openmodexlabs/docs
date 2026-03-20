@@ -1,0 +1,69 @@
+---
+title: "Bộ nhớ đệm prompt"
+description: "Lưu đệm các prompt lặp lại để giảm độ trễ và chi phí."
+---
+
+## Tổng Quan
+
+Bộ nhớ đệm prompt lưu trữ phản hồi cho các yêu cầu giống hệt nhau, trả về kết quả từ bộ đệm ngay lập tức mà không cần thực hiện lệnh gọi API mới. Tính năng này lý tưởng cho:
+
+- Các truy vấn lặp lại (bot FAQ, câu hỏi phổ biến)
+- Phát triển và kiểm thử
+- Các endpoint lưu lượng cao với đầu vào có thể dự đoán
+
+## Bật Bộ Nhớ Đệm
+
+Thêm tham số `cache` vào yêu cầu của bạn:
+
+```typescript
+const response = await client.chat.completions.create({
+  model: 'gpt-4o',
+  messages: [{ role: 'user', content: 'What is 2+2?' }],
+  cache: {
+    enabled: true,
+    ttl: 3600, // cache for 1 hour
+  },
+});
+
+console.log(response.openmodex?.cache_hit); // true on subsequent requests
+```
+
+## Cách Hoạt Động
+
+1. OpenModex hash yêu cầu (mô hình + tin nhắn + tham số)
+2. Nếu phản hồi đã lưu đệm tồn tại và chưa hết hạn, nó được trả về ngay lập tức
+3. Nếu không có bộ đệm, yêu cầu được gửi đến nhà cung cấp và phản hồi được lưu đệm
+
+## Khóa Bộ Đệm
+
+Khóa bộ đệm được tính từ:
+- Tên mô hình
+- Mảng tin nhắn (nội dung và vai trò)
+- Temperature, max_tokens và các tham số tạo khác
+
+Thay đổi bất kỳ tham số nào trong số này sẽ tạo ra một khóa bộ đệm khác.
+
+## TTL (Thời Gian Sống)
+
+| Cài đặt | Giá trị |
+|---------|-------|
+| TTL mặc định | 300 giây (5 phút) |
+| TTL tối thiểu | 60 giây |
+| TTL tối đa | 86400 giây (24 giờ) |
+
+## Tiết Kiệm Chi Phí
+
+Phản hồi từ bộ đệm rẻ hơn đáng kể:
+- **Token đầu vào từ bộ đệm** được tính phí ~50% so với mức giá thông thường
+- **Không tính phí token đầu ra** cho phản hồi từ bộ đệm
+- **Không có độ trễ** — phản hồi được trả về trong <10ms
+
+## Kiểm Tra Trạng Thái Bộ Đệm
+
+```typescript
+const response = await client.chat.completions.create({...});
+
+if (response.openmodex?.cache_hit) {
+  console.log('Served from cache!');
+}
+```

@@ -1,0 +1,60 @@
+---
+title: "更新日誌"
+description: "OpenModex 平台的最新更新、新功能和改進。"
+---
+
+## 2026 年 3 月
+
+### v1.4.0 — 模型比較 API
+
+<Info>發佈於 2026 年 3 月 15 日</Info>
+
+- **新增：** `GET /v1/models/compare` 端點，用於並排模型評估
+- **新增：** 模型回應中的品質評分（overall、code、math、reasoning）
+- **新增：** 每個模型的效能指標（延遲 p50/p99、可用性）
+- **改進：** 模型列表現在包含定價細分（官方費率 vs OpenModex 費率）
+
+### v1.3.0 — BYOK 支援
+
+<Info>發佈於 2026 年 3 月 1 日</Info>
+
+- **新增：** 自帶金鑰 — 使用您自己的供應商 API 金鑰
+- **新增：** 供應商金鑰儲存使用 AWS KMS 信封加密
+- **新增：** 控制台中的供應商金鑰管理
+- **改進：** 路由引擎處理 BYOK + 託管混合設定
+
+---
+
+## 2026 年 2 月
+
+### v1.2.0 — React Hooks
+
+<Info>發佈於 2026 年 2 月 15 日</Info>
+
+- **新增：** `@openmodex/react` 套件，包含 `useChat`、`useCompletion`、`useModels` hooks
+- **新增：** React hooks 中內建串流和中止支援
+- **改進：** TypeScript SDK 現在匯出所有型別
+
+### v1.1.0 — 提示快取
+
+<Info>發佈於 2026 年 2 月 1 日</Info>
+
+- **新增：** 伺服器端提示快取，可設定 TTL（60 秒至 24 小時）
+- **新增：** 回應中繼資料中的 `cache_hit` 欄位
+- **改進：** 快取回應以 50% 輸入費率計費，零輸出成本
+
+---
+
+## 2026 年 1 月
+
+### v1.0.0 — 正式發佈
+
+<Info>發佈於 2026 年 1 月 15 日</Info>
+
+- **發佈：** OpenModex API 閘道器 — 適用於 100+ 模型的 OpenAI 相容 API
+- **發佈：** 智慧路由（成本、延遲、品質策略）
+- **發佈：** 自動容錯備援搭配斷路器
+- **發佈：** 適用於 Node.js、Python 和 Go 的官方 SDK
+- **發佈：** CLI 工具（`@openmodex/cli`）
+- **發佈：** 控制台，含使用量分析和計費功能
+- 供應商：OpenAI、Anthropic、Google Gemini、DeepSeek、Mistral、Qwen

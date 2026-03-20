@@ -1,0 +1,154 @@
+---
+title: "Bắt đầu nhanh"
+description: "Thực hiện lệnh gọi API đầu tiên đến OpenModex trong chưa đầy 2 phút."
+---
+
+## 1. Nhận Khóa API Của Bạn
+
+Đăng ký tại [openmodex.com](https://openmodex.com) và tạo khóa API từ [bảng điều khiển](https://openmodex.com/dashboard/api-keys).
+
+Khóa của bạn sẽ có dạng: `omx_sk_xxxxxxxxxxxxxxxx`
+
+## 2. Thực Hiện Yêu Cầu Đầu Tiên
+
+<CodeGroup>
+```bash cURL
+curl https://api.openmodex.com/v1/chat/completions \
+  -H "Authorization: Bearer omx_sk_YOUR_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "model": "gpt-4o",
+    "messages": [{"role": "user", "content": "Hello!"}]
+  }'
+```
+
+```typescript Node.js
+import OpenModex from '@openmodex/sdk';
+
+const client = new OpenModex({ apiKey: 'omx_sk_YOUR_KEY' });
+
+const response = await client.chat.completions.create({
+  model: 'gpt-4o',
+  messages: [{ role: 'user', content: 'Hello!' }],
+});
+
+console.log(response.choices[0].message.content);
+```
+
+```python Python
+from openmodex import OpenModex
+
+client = OpenModex(api_key="omx_sk_YOUR_KEY")
+
+response = client.chat.completions.create(
+    model="gpt-4o",
+    messages=[{"role": "user", "content": "Hello!"}],
+)
+
+print(response.choices[0].message.content)
+```
+
+```go Go
+package main
+
+import (
+    "context"
+    "fmt"
+    openmodex "github.com/openmodexlabs/openmodex-sdk-go"
+)
+
+func main() {
+    client := openmodex.NewClient("omx_sk_YOUR_KEY")
+
+    resp, _ := client.Chat.Completions.Create(context.Background(), &openmodex.ChatCompletionParams{
+        Model:    "gpt-4o",
+        Messages: []openmodex.ChatMessage{{Role: "user", Content: "Hello!"}},
+    })
+
+    fmt.Println(resp.Choices[0].Message.Content)
+}
+```
+</CodeGroup>
+
+## 3. Thử Streaming
+
+Nhận phản hồi theo thời gian thực, từng token một:
+
+<CodeGroup>
+```bash cURL
+curl https://api.openmodex.com/v1/chat/completions \
+  -H "Authorization: Bearer omx_sk_YOUR_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "model": "gpt-4o",
+    "messages": [{"role": "user", "content": "Write a haiku about code."}],
+    "stream": true
+  }'
+```
+
+```typescript Node.js
+const stream = await client.chat.completions.create({
+  model: 'gpt-4o',
+  messages: [{ role: 'user', content: 'Write a haiku about code.' }],
+  stream: true,
+});
+
+for await (const chunk of stream) {
+  process.stdout.write(chunk.choices[0]?.delta?.content ?? '');
+}
+```
+
+```python Python
+stream = client.chat.completions.create(
+    model="gpt-4o",
+    messages=[{"role": "user", "content": "Write a haiku about code."}],
+    stream=True,
+)
+
+for chunk in stream:
+    content = chunk.choices[0].delta.content
+    if content:
+        print(content, end="", flush=True)
+```
+</CodeGroup>
+
+## 4. Thử Một Mô Hình Khác
+
+Chuyển đổi mô hình bằng cách thay đổi một tham số — không cần thay đổi mã nguồn:
+
+```typescript
+// Use Claude
+const response1 = await client.chat.completions.create({
+  model: 'claude-3.5-sonnet',
+  messages: [{ role: 'user', content: 'Explain quantum computing.' }],
+});
+
+// Use Gemini
+const response2 = await client.chat.completions.create({
+  model: 'gemini-2.0-flash',
+  messages: [{ role: 'user', content: 'Explain quantum computing.' }],
+});
+
+// Use DeepSeek
+const response3 = await client.chat.completions.create({
+  model: 'deepseek-chat',
+  messages: [{ role: 'user', content: 'Explain quantum computing.' }],
+});
+```
+
+## Tiếp Theo Là Gì?
+
+<CardGroup cols={2}>
+  <Card title="Xác thực" icon="key" href="/vi/introduction/authentication">
+    Tìm hiểu về xác thực khóa API và bảo mật.
+  </Card>
+  <Card title="Định tuyến thông minh" icon="route" href="/vi/features/smart-routing">
+    Tự động định tuyến đến mô hình tốt nhất cho mỗi yêu cầu.
+  </Card>
+  <Card title="Cài đặt SDK" icon="download" href="/vi/sdks/overview">
+    Nhận client có kiểu dữ liệu cho ngôn ngữ của bạn.
+  </Card>
+  <Card title="Tham chiếu API" icon="book" href="/vi/api-reference/overview">
+    Khám phá tất cả các endpoint có sẵn.
+  </Card>
+</CardGroup>

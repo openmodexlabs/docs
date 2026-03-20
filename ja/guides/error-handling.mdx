@@ -1,0 +1,94 @@
+---
+title: "エラーハンドリング"
+description: "アプリケーションでAPIエラーを適切に処理します。"
+---
+
+## エラーレスポンス形式
+
+すべてのAPIエラーは一貫したJSON形式で返されます：
+
+```json
+{
+  "error": {
+    "message": "Human-readable error description",
+    "type": "error_type",
+    "code": "error_code"
+  }
+}
+```
+
+## エラータイプ
+
+| ステータス | タイプ | 発生条件 |
+|--------|------|------|
+| `400` | `invalid_request_error` | パラメータが不足または無効 |
+| `401` | `authentication_error` | APIキーが無効または不足 |
+| `403` | `permission_error` | キーの権限が不足 |
+| `404` | `not_found_error` | エンドポイントまたはモデルが無効 |
+| `429` | `rate_limit_error` | リクエストが多すぎる |
+| `500` | `server_error` | 内部サーバーエラー |
+| `502` | `upstream_error` | プロバイダーがエラーを返した |
+| `503` | `service_unavailable` | 一時的な停止 |
+
+## SDKでのエラーハンドリング
+
+<CodeGroup>
+```typescript Node.js
+import OpenModex, { APIError } from '@openmodex/sdk';
+
+try {
+  const response = await client.chat.completions.create({...});
+} catch (err) {
+  if (err instanceof APIError) {
+    console.log(err.statusCode);     // 429
+    console.log(err.message);        // "Rate limit exceeded"
+    console.log(err.code);           // "rate_limit_exceeded"
+
+    if (err.isRateLimited) {
+      // Wait and retry
+    } else if (err.isAuthError) {
+      // Check API key
+    } else if (err.isServerError) {
+      // Retry with backoff
+    }
+  }
+}
+```
+
+```python Python
+from openmodex import OpenModex, APIError
+
+try:
+    response = client.chat.completions.create(...)
+except APIError as e:
+    print(e.status_code)   # 429
+    print(e.message)       # "Rate limit exceeded"
+
+    if e.status_code == 429:
+        # Wait and retry
+        pass
+    elif e.status_code == 401:
+        # Check API key
+        pass
+```
+</CodeGroup>
+
+## 自動リトライ
+
+すべてのSDKは、一時的なエラー（429、500、502、503、504）に対してエクスポネンシャルバックオフで自動的にリトライします：
+
+```typescript
+const client = new OpenModex({
+  apiKey: 'omx_sk_...',
+  maxRetries: 3,    // default: 2
+  timeout: 60_000,  // default: 30000ms
+});
+```
+
+## ベストプラクティス
+
+1. **常にエラーをキャッチ** — API障害でアプリがクラッシュしないようにしてください
+2. **フォールバックを使用** — 重要なパスにフォールバックモデルを設定してください
+3. **request_idをログに記録** — サポートへのエラーレポートに`response.openmodex.request_id`を含めてください
+4. **適切なタイムアウトを設定** — 複雑なプロンプトには長く、シンプルなクエリには短く設定
+5. **ストリーミングエラーを処理** — ストリームはレスポンスの途中で失敗する可能性があります。部分的なコンテンツをバッファリングしてください

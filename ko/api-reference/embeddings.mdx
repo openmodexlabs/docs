@@ -1,0 +1,94 @@
+---
+title: "임베딩 생성"
+description: "POST /v1/embeddings — 텍스트에 대한 벡터 임베딩을 생성합니다."
+api: "POST /embeddings"
+---
+
+## 요청 본문
+
+<ParamField body="model" type="string" required>
+  사용할 임베딩 모델 (예: `text-embedding-3-small`, `text-embedding-3-large`).
+</ParamField>
+
+<ParamField body="input" type="string | string[]" required>
+  임베딩할 텍스트입니다. 단일 문자열 또는 문자열 배열이 가능합니다.
+</ParamField>
+
+<ParamField body="encoding_format" type="string" default="float">
+  임베딩 형식입니다. `float` 또는 `base64`.
+</ParamField>
+
+<ParamField body="dimensions" type="integer">
+  출력 임베딩의 차원 수입니다 (모델에 따라 다름).
+</ParamField>
+
+## 응답
+
+```json
+{
+  "object": "list",
+  "data": [
+    {
+      "object": "embedding",
+      "embedding": [0.0023, -0.0094, 0.0156, ...],
+      "index": 0
+    }
+  ],
+  "model": "text-embedding-3-small",
+  "usage": {
+    "prompt_tokens": 8,
+    "total_tokens": 8
+  }
+}
+```
+
+## 예제
+
+<CodeGroup>
+```bash cURL
+curl https://api.openmodex.com/v1/embeddings \
+  -H "Authorization: Bearer omx_sk_YOUR_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "model": "text-embedding-3-small",
+    "input": "OpenModex is a unified AI gateway."
+  }'
+```
+
+```typescript Node.js
+const result = await client.embeddings.create({
+  model: 'text-embedding-3-small',
+  input: 'OpenModex is a unified AI gateway.',
+});
+
+console.log(result.data[0].embedding);
+```
+
+```python Python
+result = client.embeddings.create(
+    model="text-embedding-3-small",
+    input="OpenModex is a unified AI gateway.",
+)
+
+print(result.data[0].embedding)
+```
+</CodeGroup>
+
+## 배치 임베딩
+
+단일 요청에서 여러 텍스트를 임베딩할 수 있습니다:
+
+```typescript
+const result = await client.embeddings.create({
+  model: 'text-embedding-3-small',
+  input: [
+    'First text to embed',
+    'Second text to embed',
+    'Third text to embed',
+  ],
+});
+
+// result.data[0].embedding -> vector for first text
+// result.data[1].embedding -> vector for second text
+// result.data[2].embedding -> vector for third text
+```

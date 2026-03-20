@@ -1,0 +1,60 @@
+---
+title: "Nhật ký thay đổi"
+description: "Các bản cập nhật mới nhất, tính năng mới và cải tiến cho nền tảng OpenModex."
+---
+
+## Tháng 3 năm 2026
+
+### v1.4.0 — API So Sánh Mô Hình
+
+<Info>Phát hành ngày 15 tháng 3 năm 2026</Info>
+
+- **Mới:** Endpoint `GET /v1/models/compare` để đánh giá mô hình song song
+- **Mới:** Điểm chất lượng (tổng thể, lập trình, toán, suy luận) trong phản hồi mô hình
+- **Mới:** Chỉ số hiệu suất (độ trễ p50/p99, tính khả dụng) theo từng mô hình
+- **Cải tiến:** Danh sách mô hình giờ bao gồm phân tích giá (giá chính thức so với giá OpenModex)
+
+### v1.3.0 — Hỗ Trợ BYOK
+
+<Info>Phát hành ngày 1 tháng 3 năm 2026</Info>
+
+- **Mới:** Mang Khóa Riêng — sử dụng khóa API nhà cung cấp của riêng bạn
+- **Mới:** Mã hóa phong bì AWS KMS cho lưu trữ khóa nhà cung cấp
+- **Mới:** Quản lý khóa nhà cung cấp trong Bảng điều khiển
+- **Cải tiến:** Công cụ định tuyến xử lý cấu hình hỗn hợp BYOK + được quản lý
+
+---
+
+## Tháng 2 năm 2026
+
+### v1.2.0 — React Hooks
+
+<Info>Phát hành ngày 15 tháng 2 năm 2026</Info>
+
+- **Mới:** Gói `@openmodex/react` với hooks `useChat`, `useCompletion`, `useModels`
+- **Mới:** Hỗ trợ streaming và hủy bỏ tích hợp sẵn trong React hooks
+- **Cải tiến:** TypeScript SDK giờ xuất tất cả các kiểu
+
+### v1.1.0 — Bộ Nhớ Đệm Prompt
+
+<Info>Phát hành ngày 1 tháng 2 năm 2026</Info>
+
+- **Mới:** Bộ nhớ đệm prompt phía máy chủ với TTL có thể cấu hình (60 giây–24 giờ)
+- **Mới:** Trường `cache_hit` trong siêu dữ liệu phản hồi
+- **Cải tiến:** Phản hồi từ bộ đệm được tính phí 50% tỷ lệ đầu vào, không chi phí đầu ra
+
+---
+
+## Tháng 1 năm 2026
+
+### v1.0.0 — Phát Hành Chính Thức
+
+<Info>Phát hành ngày 15 tháng 1 năm 2026</Info>
+
+- **Ra mắt:** OpenModex API Gateway — API tương thích OpenAI cho hơn 100 mô hình
+- **Ra mắt:** Định tuyến thông minh (chiến lược chi phí, độ trễ, chất lượng)
+- **Ra mắt:** Chuyển đổi dự phòng tự động với bộ ngắt mạch
+- **Ra mắt:** SDK chính thức cho Node.js, Python và Go
+- **Ra mắt:** Công cụ CLI (`@openmodex/cli`)
+- **Ra mắt:** Bảng điều khiển với phân tích sử dụng và thanh toán
+- Nhà cung cấp: OpenAI, Anthropic, Google Gemini, DeepSeek, Mistral, Qwen

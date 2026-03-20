@@ -1,0 +1,138 @@
+---
+title: "Reactフック"
+description: "AI搭載インターフェース構築用のReactフック — useChat、useCompletion、useModels。"
+---
+
+## インストール
+
+```bash
+npm install @openmodex/react
+```
+
+**React 18以上**が必要です。
+
+## useChat
+
+ストリーミング、メッセージ履歴、中断サポートを備えたフル機能のチャットフック。
+
+```tsx
+import { useChat } from '@openmodex/react';
+
+function ChatApp() {
+  const { messages, input, setInput, sendMessage, isLoading, stop, error } = useChat({
+    apiKey: 'omx_sk_...',
+    model: 'gpt-4o',
+    system: 'You are a helpful assistant.',
+    onFinish: (message) => console.log('Done:', message.content),
+    onError: (error) => console.error(error),
+  });
+
+  return (
+    <div>
+      <div>
+        {messages.map((m) => (
+          <div key={m.id}>
+            <strong>{m.role}:</strong> {m.content}
+          </div>
+        ))}
+      </div>
+
+      <form onSubmit={(e) => { e.preventDefault(); sendMessage(); }}>
+        <input
+          value={input}
+          onChange={(e) => setInput(e.target.value)}
+          placeholder="Type a message..."
+        />
+        <button type="submit" disabled={isLoading}>Send</button>
+        {isLoading && <button onClick={stop}>Stop</button>}
+      </form>
+
+      {error && <p style={{ color: 'red' }}>{error.message}</p>}
+    </div>
+  );
+}
+```
+
+### オプション
+
+| オプション | 型 | デフォルト | 説明 |
+|--------|------|---------|-------------|
+| `apiKey` | `string` | — | APIキー |
+| `baseURL` | `string` | `https://api.openmodex.com/v1` | API URL |
+| `model` | `string` | `gpt-4o` | 使用するモデル |
+| `initialMessages` | `ChatMessage[]` | `[]` | 会話の初期値 |
+| `initialInput` | `string` | `''` | 入力の初期値 |
+| `system` | `string` | — | システムプロンプト |
+| `onFinish` | `(message) => void` | — | 完了時に呼び出される |
+| `onError` | `(error) => void` | — | エラー時に呼び出される |
+
+### 戻り値
+
+| プロパティ | 型 | 説明 |
+|----------|------|-------------|
+| `messages` | `ChatMessage[]` | すべてのメッセージ |
+| `setMessages` | `Dispatch` | メッセージを設定 |
+| `input` | `string` | 現在の入力 |
+| `setInput` | `Dispatch` | 入力を更新 |
+| `sendMessage` | `(content?) => Promise` | メッセージを送信 |
+| `isLoading` | `boolean` | ローディング状態 |
+| `error` | `Error \| null` | 最後のエラー |
+| `stop` | `() => void` | ストリームを中断 |
+
+## useCompletion
+
+ストリーミング付きのシングルターン補完。
+
+```tsx
+import { useCompletion } from '@openmodex/react';
+
+function CompletionApp() {
+  const { completion, input, setInput, complete, isLoading, stop } = useCompletion({
+    apiKey: 'omx_sk_...',
+    model: 'gpt-4o',
+  });
+
+  return (
+    <div>
+      <input value={input} onChange={(e) => setInput(e.target.value)} />
+      <button onClick={() => complete()} disabled={isLoading}>Complete</button>
+      {isLoading && <button onClick={stop}>Stop</button>}
+      <p>{completion}</p>
+    </div>
+  );
+}
+```
+
+## useModels
+
+利用可能なモデルを取得します。
+
+```tsx
+import { useModels } from '@openmodex/react';
+
+function ModelList() {
+  const { models, isLoading, error, refetch } = useModels({
+    apiKey: 'omx_sk_...',
+  });
+
+  if (isLoading) return <p>Loading models...</p>;
+  if (error) return <p>Error: {error.message}</p>;
+
+  return (
+    <ul>
+      {models.map((m) => (
+        <li key={m.id}>
+          <strong>{m.name}</strong> — {m.provider}
+          <br />
+          <small>{m.description}</small>
+        </li>
+      ))}
+    </ul>
+  );
+}
+```
+
+## リンク
+
+- [npm](https://www.npmjs.com/package/@openmodex/react)
+- [GitHub](https://github.com/openmodexlabs/openmodex-packages/tree/main/packages/react)

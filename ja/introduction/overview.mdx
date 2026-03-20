@@ -1,0 +1,77 @@
+---
+title: "OpenModexとは？"
+description: "1つのAPI、100以上のAIモデル。インテリジェントルーティング、自動フォールバック、統合課金。"
+---
+
+## ユニバーサルAIゲートウェイ
+
+OpenModexは、すべての主要プロバイダーの100以上の大規模言語モデルに、単一のOpenAI互換APIを通じてアクセスできる統合APIゲートウェイです。
+
+複数のAPIキー、異なるSDK、各AIプロバイダーごとの別々の課金を管理する代わりに、OpenModexでは以下のことが可能です：
+
+- **1つのAPIキー**でOpenAI、Anthropic、Google Gemini、DeepSeek、Mistral、Qwenなどにアクセス
+- **モデルを即座に切り替え** — コードベース全体ではなく、1つのパラメータを変更するだけ
+- **インテリジェントなルーティング** — コスト、レイテンシー、品質に基づいてOpenModexが最適なモデルを選択
+- **グレースフルなフェイルオーバー** — 自動フォールバックにより、プロバイダーがダウンしてもアプリが稼働し続けます
+- **コスト削減** — プロンプトキャッシュ、コスト最適化ルーティング、透明性のある料金体系
+
+## 仕組み
+
+<Steps>
+  <Step title="APIキーを取得">
+    [openmodex.com](https://openmodex.com)でサインアップし、ダッシュボードからAPIキーを作成します。
+  </Step>
+  <Step title="コードをOpenModexに向ける">
+    プロバイダーのベースURLを`https://api.openmodex.com/v1`に置き換えます。すでにOpenAI SDKを使用している場合は、1行の変更で済みます。
+  </Step>
+  <Step title="任意のモデルを選択">
+    `gpt-4o`、`claude-3.5-sonnet`、`gemini-2.0-flash`、`deepseek-chat`など、サポートされている任意のモデルを名前で使用できます。
+  </Step>
+</Steps>
+
+## OpenAI互換
+
+すでにOpenAI APIを使用している場合、OpenModexへの切り替えは簡単です：
+
+```typescript
+import OpenAI from 'openai';
+
+const client = new OpenAI({
+  apiKey: 'omx_sk_...',                      // your OpenModex key
+  baseURL: 'https://api.openmodex.com/v1',   // point to OpenModex
+});
+
+// Everything else stays the same
+const response = await client.chat.completions.create({
+  model: 'gpt-4o',  // or any other model
+  messages: [{ role: 'user', content: 'Hello!' }],
+});
+```
+
+## 対応プロバイダー
+
+| プロバイダー | モデル | 特徴 |
+|----------|--------|-----------|
+| **OpenAI** | GPT-4o, GPT-4o-mini, o1, o3 | 業界標準 |
+| **Anthropic** | Claude 3.5 Sonnet, Claude 3 Opus | 長文コンテキストに最適 |
+| **Google** | Gemini 2.0 Flash, Gemini 1.5 Pro | マルチモーダル + 高速 |
+| **DeepSeek** | DeepSeek-V3, DeepSeek-R1 | コスト効率の高い推論 |
+| **Mistral** | Mistral Large, Mistral Small | 欧州AI |
+| **Qwen** | Qwen2.5, Qwen-Max | 中国語最適化 |
+
+## 次のステップ
+
+<CardGroup cols={2}>
+  <Card title="クイックスタート" icon="rocket" href="/ja/introduction/quickstart">
+    2分以内に最初のAPIコールを実行できます。
+  </Card>
+  <Card title="APIリファレンス" icon="code" href="/ja/api-reference/overview">
+    完全なAPIドキュメントをご覧ください。
+  </Card>
+  <Card title="SDK" icon="puzzle-piece" href="/ja/sdks/overview">
+    Node.js、Python、Go、React向けの公式SDK。
+  </Card>
+  <Card title="スマートルーティング" icon="route" href="/ja/features/smart-routing">
+    インテリジェントルーティングによるコスト削減と信頼性向上について学びます。
+  </Card>
+</CardGroup>

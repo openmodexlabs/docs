@@ -1,0 +1,69 @@
+---
+title: "Why OpenModex?"
+description: "The problems OpenModex solves and why teams choose a unified AI gateway."
+---
+
+## The Problem
+
+Building with AI models today means dealing with fragmented infrastructure:
+
+- **Multiple SDKs** — OpenAI, Anthropic, Google, and others each have their own client libraries, auth flows, and response formats
+- **Vendor lock-in** — switching models means rewriting integration code
+- **No reliability story** — when a provider goes down, your app goes down
+- **Invisible costs** — separate billing across providers makes optimization impossible
+- **No routing intelligence** — you hardcode which model to use, even when a cheaper or faster option exists
+
+## How OpenModex Solves This
+
+<CardGroup cols={2}>
+  <Card title="One API, All Models" icon="plug">
+    Access 100+ models from OpenAI, Anthropic, Google, DeepSeek, Mistral, and Qwen through a single OpenAI-compatible endpoint.
+  </Card>
+  <Card title="Zero Lock-in" icon="arrows-rotate">
+    Switch models by changing one string parameter. Your code, your SDKs, your infrastructure — nothing else changes.
+  </Card>
+  <Card title="Built-in Reliability" icon="shield-check">
+    Automatic fallbacks, circuit breakers, and health monitoring keep your app running even when providers fail.
+  </Card>
+  <Card title="Cost Intelligence" icon="chart-line">
+    Smart routing, prompt caching, and per-request cost tracking help you optimize spending without sacrificing quality.
+  </Card>
+</CardGroup>
+
+## Who Uses OpenModex
+
+### Startups & Product Teams
+
+Ship AI features fast without building provider abstraction layers. Start with one model, easily A/B test others, and scale without re-architecture.
+
+### Platform & Infrastructure Teams
+
+Centralize AI API access across your organization. Enforce rate limits, track costs per team, and maintain a single integration point.
+
+### Agencies & Consultancies
+
+Build client projects that aren't tied to a single provider. Recommend the best model for each use case and switch instantly when the landscape changes.
+
+## Key Differentiators
+
+| | Direct API | Other Gateways | OpenModex |
+|--|:---:|:---:|:---:|
+| OpenAI-compatible API | — | Partial | Full |
+| Smart routing (cost/latency/quality) | — | Basic | Advanced |
+| Automatic failover + circuit breaker | — | Limited | Built-in |
+| Prompt caching | — | — | Built-in |
+| Model comparison API | — | — | Built-in |
+| Transparent pricing | — | Variable | Pass-through |
+| BYOK (Bring Your Own Key) | — | — | Supported |
+| Official SDKs (Node, Python, Go, React) | — | Partial | Full |
+
+## Get Started
+
+<CardGroup cols={2}>
+  <Card title="Quickstart" icon="rocket" href="/introduction/quickstart">
+    Make your first API call in 2 minutes.
+  </Card>
+  <Card title="Architecture" icon="sitemap" href="/platform/architecture">
+    Understand how OpenModex works under the hood.
+  </Card>
+</CardGroup>

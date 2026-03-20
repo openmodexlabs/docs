@@ -1,0 +1,86 @@
+---
+title: "身份验证"
+description: "使用 Bearer 令牌验证您的 API 请求。"
+---
+
+## API 密钥
+
+所有 API 请求都需要在 `Authorization` 头中传递 API 密钥：
+
+```bash
+Authorization: Bearer omx_sk_YOUR_API_KEY
+```
+
+API 密钥在您的[控制面板](https://openmodex.com/dashboard/api-keys)中创建和管理。
+
+## 密钥格式
+
+OpenModex API 密钥遵循以下格式：
+
+```
+omx_sk_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+```
+
+- `omx_` — OpenModex 前缀
+- `sk_` — 密钥标识符
+- 后面跟随一个随机字母数字字符串
+
+## 使用方法
+
+<CodeGroup>
+```bash cURL
+curl https://api.openmodex.com/v1/chat/completions \
+  -H "Authorization: Bearer omx_sk_YOUR_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{"model": "gpt-4o", "messages": [{"role": "user", "content": "Hi"}]}'
+```
+
+```typescript Node.js
+import OpenModex from '@openmodex/sdk';
+
+// Pass directly
+const client = new OpenModex({ apiKey: 'omx_sk_YOUR_KEY' });
+
+// Or use environment variable (auto-detected)
+// OPENMODEX_API_KEY=omx_sk_YOUR_KEY
+const client = new OpenModex();
+```
+
+```python Python
+from openmodex import OpenModex
+
+# Pass directly
+client = OpenModex(api_key="omx_sk_YOUR_KEY")
+
+# Or use environment variable (auto-detected)
+# OPENMODEX_API_KEY=omx_sk_YOUR_KEY
+client = OpenModex()
+```
+</CodeGroup>
+
+## 环境变量
+
+所有官方 SDK 会自动读取 `OPENMODEX_API_KEY` 环境变量：
+
+```bash
+export OPENMODEX_API_KEY=omx_sk_YOUR_KEY
+```
+
+## 安全最佳实践
+
+<Warning>
+  切勿在客户端代码、公开仓库或浏览器请求中暴露您的 API 密钥。API 密钥具有计费权限，应妥善保密。
+</Warning>
+
+- **使用环境变量** — 切勿在源代码中硬编码密钥
+- **定期轮换密钥** — 从控制面板创建新密钥并撤销旧密钥
+- **使用独立密钥** 分别用于开发和生产环境
+- **设置权限** — 尽可能将密钥限制在特定模型或速率限制范围内
+
+## 错误响应
+
+| 状态码 | 含义 |
+|--------|---------|
+| `401 Unauthorized` | API 密钥缺失或无效 |
+| `403 Forbidden` | 密钥无权执行此操作 |
+| `429 Too Many Requests` | 超出速率限制 |

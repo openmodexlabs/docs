@@ -1,0 +1,173 @@
+---
+title: "ユースケース"
+description: "OpenModexを使った一般的なパターンとユースケース。"
+---
+
+## AI搭載チャットアプリケーション
+
+リアルタイムでレスポンスをストリーミングし、会話ごとにモデルを切り替える対話型インターフェースを構築します。
+
+```typescript
+import OpenModex from '@openmodex/sdk';
+
+const client = new OpenModex({
+  apiKey: process.env.OPENMODEX_API_KEY,
+  fallbackModels: ['claude-3.5-sonnet', 'gemini-2.0-flash'],
+});
+
+// Use GPT-4o for complex questions, mini for simple ones
+const stream = await client.chat.completions.create({
+  model: isComplexQuery ? 'gpt-4o' : 'gpt-4o-mini',
+  messages: conversationHistory,
+  stream: true,
+});
+
+for await (const chunk of stream) {
+  process.stdout.write(chunk.choices[0]?.delta?.content ?? '');
+}
+```
+
+**OpenModexを使う理由：** 自動フォールバックにより、プロバイダーに問題が発生してもチャットの可用性が維持されます。ストリーミングはすべてのプロバイダーで同一に動作します。
+
+---
+
+## RAG（検索拡張生成）
+
+検索用のエンベディングと生成用のチャット補完を組み合わせます。
+
+```typescript
+// 1. Create embeddings for your knowledge base
+const embedding = await client.embeddings.create({
+  model: 'text-embedding-3-small',
+  input: userQuery,
+});
+
+// 2. Search your vector database
+const relevantDocs = await vectorDB.search(embedding.data[0].embedding);
+
+// 3. Generate an answer with context
+const response = await client.chat.completions.create({
+  model: 'gpt-4o',
+  messages: [
+    { role: 'system', content: `Answer based on this context:\n${relevantDocs}` },
+    { role: 'user', content: userQuery },
+  ],
+  routing: { strategy: 'quality_optimized' },
+});
+```
+
+**OpenModexを使う理由：** 安価なエンベディングモデルと高価な生成モデルを同じAPIコールフローで使用できます。ルーティングにより生成ステップで最高品質が保証されます。
+
+---
+
+## コンテンツ生成パイプライン
+
+コスト最適化ルーティングで大規模にコンテンツを生成します。
+
+```typescript
+// Generate 1000 product descriptions cost-efficiently
+const descriptions = await Promise.all(
+  products.map(async (product) => {
+    const response = await client.chat.completions.create({
+      model: 'gpt-4o-mini', // cost-effective for structured tasks
+      messages: [
+        { role: 'system', content: 'Write a 100-word product description.' },
+        { role: 'user', content: JSON.stringify(product) },
+      ],
+      routing: { strategy: 'cost_optimized' },
+      cache: { enabled: true, ttl: 86400 }, // cache for 24h
+    });
+    return response.choices[0].message.content;
+  })
+);
+```
+
+**OpenModexを使う理由：** コスト最適化ルーティングとプロンプトキャッシュにより、バッチワークロードのコストが大幅に削減されます。自動リトライが一時的な障害を処理します。
+
+---
+
+## コードアシスタント
+
+コード特化の最良モデルを使ってコード生成ツールを構築します。
+
+```typescript
+const response = await client.chat.completions.create({
+  model: 'claude-3.5-sonnet', // best at code
+  messages: [
+    { role: 'system', content: 'You are a senior software engineer.' },
+    { role: 'user', content: `Review this code and suggest improvements:\n${code}` },
+  ],
+  routing: {
+    fallback: ['deepseek-chat', 'gpt-4o'], // code-capable fallbacks
+  },
+});
+```
+
+**OpenModexを使う理由：** ユースケースに最適なコード生成モデルを簡単にテストできます。他のコード対応モデルへのフォールバックにより可用性が確保されます。
+
+---
+
+## マルチモデルA/Bテスト
+
+同じプロンプトに対するモデル出力を比較して品質を評価します。
+
+```typescript
+// Compare responses from different models
+const comparison = await client.models.compare([
+  'openai/gpt-4o',
+  'anthropic/claude-3.5-sonnet',
+  'google/gemini-2.0-flash',
+]);
+
+// Run the same prompt against multiple models
+const results = await Promise.all(
+  ['gpt-4o', 'claude-3.5-sonnet', 'gemini-2.0-flash'].map(async (model) => {
+    const response = await client.chat.completions.create({
+      model,
+      messages: [{ role: 'user', content: testPrompt }],
+    });
+    return {
+      model,
+      content: response.choices[0].message.content,
+      cost: response.usage?.cost_usd,
+      latency: response.openmodex?.latency_ms,
+    };
+  })
+);
+```
+
+**OpenModexを使う理由：** 1つのAPIキー、1つのSDK、1つの課金アカウント。別々のインテグレーションを管理することなく、プロバイダー間でコスト、品質、レイテンシーを比較できます。
+
+---
+
+## リアルタイムReactチャットUI
+
+Reactフックを使ったインタラクティブなAIチャットインターフェースを構築します。
+
+```tsx
+import { useChat } from '@openmodex/react';
+
+function SupportChat() {
+  const { messages, input, setInput, sendMessage, isLoading, stop } = useChat({
+    apiKey: process.env.NEXT_PUBLIC_OPENMODEX_KEY,
+    model: 'gpt-4o-mini',
+    system: 'You are a helpful customer support agent for Acme Corp.',
+  });
+
+  return (
+    <div className="chat-container">
+      {messages.map((m) => (
+        <div key={m.id} className={`message ${m.role}`}>
+          {m.content}
+        </div>
+      ))}
+      <form onSubmit={(e) => { e.preventDefault(); sendMessage(); }}>
+        <input value={input} onChange={(e) => setInput(e.target.value)} />
+        <button disabled={isLoading}>Send</button>
+      </form>
+    </div>
+  );
+}
+```
+
+**OpenModexを使う理由：** `@openmodex/react`フックがストリーミング、メッセージ状態、中断サポートをすぐに使える形で提供します。

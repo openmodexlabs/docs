@@ -1,0 +1,136 @@
+---
+title: "Architecture"
+description: "Comment OpenModex route, optimise et délivre les réponses des modèles d'IA."
+---
+
+## Vue d'ensemble du système
+
+OpenModex se place entre votre application et les fournisseurs de modèles d'IA. Chaque requête passe par un pipeline de middleware intelligent avant d'atteindre le fournisseur optimal.
+
+```
+Your App → OpenModex Gateway → [ Auth → Routing → Caching → Provider ] → Response
+```
+
+## Flux de requête
+
+<Steps>
+  <Step title="Authentification">
+    Votre clé API est validée et associée à votre compte, votre équipe et vos limites de débit.
+  </Step>
+  <Step title="Limitation de débit">
+    La requête est vérifiée par rapport aux limites de débit de votre niveau (par clé, par minute). Utilise des ensembles triés Redis pour une application précise par fenêtre glissante.
+  </Step>
+  <Step title="Vérification du cache">
+    Si la mise en cache des prompts est activée, OpenModex vérifie l'existence d'une réponse en cache correspondant exactement. Les résultats en cache sont retournés instantanément sans coût fournisseur.
+  </Step>
+  <Step title="Décision de routage">
+    Le moteur de routage sélectionne le fournisseur optimal en fonction de votre stratégie (coût, latence ou qualité), de l'état de santé actuel du fournisseur et de la configuration de basculement.
+  </Step>
+  <Step title="Requête au fournisseur">
+    La requête est traduite dans le format du fournisseur cible et transmise. OpenModex prend en charge le streaming SSE en temps réel.
+  </Step>
+  <Step title="Réponse + Métadonnées">
+    La réponse du fournisseur est normalisée au format OpenAI, enrichie des métadonnées OpenModex (informations de routage, coût, latence) et renvoyée à votre application.
+  </Step>
+</Steps>
+
+## Composants principaux
+
+### Passerelle API
+
+- **API REST compatible OpenAI** — remplacement direct de l'API OpenAI
+- **Streaming SSE** — livraison en temps réel token par token
+- **Idempotence** — nouvelles tentatives sûres avec l'en-tête `Idempotency-Key` (TTL de 24h)
+
+### Moteur de routage
+
+Le moteur de routage maintient une vue en temps réel de l'état de santé et des performances des fournisseurs :
+
+| Stratégie | Comportement |
+|----------|----------|
+| **Par défaut** | Route vers le fournisseur spécifié |
+| **Optimisé en coût** | Choisit le fournisseur le moins cher pour le modèle demandé |
+| **Optimisé en latence** | Choisit le fournisseur disponible le plus rapide |
+| **Optimisé en qualité** | Choisit le fournisseur avec les meilleurs scores de qualité |
+
+### Disjoncteur
+
+L'état de santé des fournisseurs est surveillé automatiquement :
+
+1. **Fermé** — les requêtes sont routées normalement
+2. **Semi-ouvert** — après des échecs consécutifs, le trafic est réduit
+3. **Ouvert** — le fournisseur est temporairement retiré du pool de routage
+4. **Récupération** — des sondes de santé périodiques rétablissent le fournisseur
+
+### Adaptateurs de fournisseurs
+
+Chaque fournisseur d'IA est encapsulé dans un adaptateur standardisé qui gère :
+
+- La traduction du format de requête (format OpenAI → format natif du fournisseur)
+- La normalisation des réponses (natif du fournisseur → format OpenAI)
+- Le mappage des erreurs vers des codes d'erreur cohérents
+- La traduction du protocole de streaming
+
+**Fournisseurs pris en charge :**
+
+| Fournisseur | Adaptateur | Modèles |
+|----------|---------|--------|
+| OpenAI | Natif | GPT-4o, GPT-4o-mini, o1, o3 |
+| Anthropic | Traduit | Claude 3.5 Sonnet, Claude 3 Opus |
+| Google | Traduit | Gemini 2.0 Flash, Gemini 1.5 Pro |
+| DeepSeek | Traduit | DeepSeek-V3, DeepSeek-R1 |
+| Mistral | Traduit | Mistral Large, Mistral Small |
+| Qwen | Traduit | Qwen2.5, Qwen-Max |
+
+### Couche de cache
+
+- **Cache par correspondance exacte** — hash de (modèle + messages + paramètres)
+- **TTL configurable** — de 60s à 24h par requête
+- **Basé sur Redis** — recherches en cache en moins d'une milliseconde
+- **Économies** — les réponses en cache sont facturées à environ 50 % du tarif d'entrée, sans coût de sortie
+
+### Pipeline de facturation
+
+1. Chaque requête émet un événement de facturation vers Kafka
+2. Les événements sont consommés de manière asynchrone et persistés
+3. Les soldes de compte sont mis à jour de manière atomique via des scripts Redis Lua
+4. Les analyses sont envoyées vers Apache Doris pour les tableaux de bord et les rapports
+
+## Infrastructure
+
+| Composant | Technologie |
+|-----------|-----------|
+| Passerelle API | Go + Gin Framework |
+| Cache et limitation de débit | Redis 7.0+ |
+| File de messages | Apache Kafka |
+| Entrepôt d'analyses | Apache Doris |
+| Chiffrement des clés | AWS KMS (chiffrement par enveloppe AES-256) |
+| Génération d'identifiants | Snowflake IDs |
+
+## Sécurité
+
+- Les **clés API** sont hachées au repos ; seul le préfixe est stocké pour la recherche
+- Les **clés fournisseur BYOK** sont chiffrées avec le chiffrement par enveloppe AWS KMS
+- La **limitation de débit** utilise des opérations atomiques Redis pour éviter les conditions de concurrence
+- **Tout le trafic** est chiffré avec TLS 1.3
+- Les **mots de passe** sont hachés avec Argon2id
+
+## Diagramme de flux de données
+
+```
+┌─────────────┐     ┌──────────────────────────────────────────────┐
+│  Your App   │────▶│  OpenModex API Gateway                       │
+│             │◀────│                                              │
+└─────────────┘     │  ┌──────┐  ┌────────┐  ┌───────┐  ┌──────┐ │
+                    │  │ Auth │─▶│ Router │─▶│ Cache │─▶│ Send │ │
+                    │  └──────┘  └────────┘  └───────┘  └──┬───┘ │
+                    │                                      │     │
+                    └──────────────────────────────────────┼─────┘
+                                                           │
+                    ┌──────────────────────────────────────┼─────┐
+                    │  AI Providers                        ▼     │
+                    │  ┌────────┐ ┌──────────┐ ┌────────┐       │
+                    │  │ OpenAI │ │ Anthropic│ │ Google │  ...  │
+                    │  └────────┘ └──────────┘ └────────┘       │
+                    └────────────────────────────────────────────┘
+```

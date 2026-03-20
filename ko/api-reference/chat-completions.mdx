@@ -1,0 +1,190 @@
+---
+title: "채팅 완성 생성"
+description: "POST /v1/chat/completions — 대화에 대한 모델 응답을 생성합니다."
+api: "POST /chat/completions"
+---
+
+## 요청 본문
+
+<ParamField body="model" type="string" required>
+  사용할 모델 ID (예: `gpt-4o`, `claude-3.5-sonnet`, `gemini-2.0-flash`).
+</ParamField>
+
+<ParamField body="messages" type="array" required>
+  대화를 구성하는 메시지 목록입니다.
+  <Expandable title="메시지 객체">
+    <ParamField body="role" type="string" required>
+      `system`, `user`, `assistant` 또는 `tool` 중 하나입니다.
+    </ParamField>
+    <ParamField body="content" type="string" required>
+      메시지의 내용입니다.
+    </ParamField>
+    <ParamField body="name" type="string">
+      참여자의 선택적 이름입니다.
+    </ParamField>
+  </Expandable>
+</ParamField>
+
+<ParamField body="stream" type="boolean" default={false}>
+  `true`이면 Server-Sent Events (SSE) 스트림을 반환합니다.
+</ParamField>
+
+<ParamField body="temperature" type="number" default={1}>
+  0에서 2 사이의 샘플링 온도입니다. 낮은 값은 더 결정적입니다.
+</ParamField>
+
+<ParamField body="max_tokens" type="integer">
+  생성할 최대 토큰 수입니다.
+</ParamField>
+
+<ParamField body="top_p" type="number" default={1}>
+  핵 샘플링 파라미터입니다.
+</ParamField>
+
+<ParamField body="stop" type="string | string[]">
+  생성을 중단시키는 정지 시퀀스입니다.
+</ParamField>
+
+<ParamField body="frequency_penalty" type="number" default={0}>
+  토큰 빈도에 대한 페널티입니다 (-2.0에서 2.0).
+</ParamField>
+
+<ParamField body="presence_penalty" type="number" default={0}>
+  토큰 존재에 대한 페널티입니다 (-2.0에서 2.0).
+</ParamField>
+
+<ParamField body="tools" type="array">
+  모델이 호출할 수 있는 도구 목록입니다 (function calling).
+</ParamField>
+
+<ParamField body="tool_choice" type="string | object">
+  어떤 도구를 호출할지 제어합니다. `auto`, `none` 또는 특정 도구입니다.
+</ParamField>
+
+<ParamField body="response_format" type="object">
+  특정 출력 형식을 강제합니다 (예: `{"type": "json_object"}`).
+</ParamField>
+
+<ParamField body="seed" type="integer">
+  재현성을 위한 결정적 샘플링 시드입니다.
+</ParamField>
+
+### OpenModex 확장
+
+<ParamField body="routing" type="object">
+  이 요청에 대한 지능형 라우팅을 설정합니다.
+  <Expandable title="라우팅 객체">
+    <ParamField body="strategy" type="string">
+      `cost_optimized`, `latency_optimized` 또는 `quality_optimized`.
+    </ParamField>
+    <ParamField body="fallback" type="string[]">
+      서버 측 폴백 모델 체인입니다.
+    </ParamField>
+    <ParamField body="allow_upgrade" type="boolean">
+      동일한 가격 티어에서 더 우수한 모델로 라우팅을 허용합니다.
+    </ParamField>
+  </Expandable>
+</ParamField>
+
+<ParamField body="cache" type="object">
+  프롬프트 캐싱을 설정합니다.
+  <Expandable title="캐시 객체">
+    <ParamField body="enabled" type="boolean">
+      이 요청에 대한 프롬프트 캐싱을 활성화합니다.
+    </ParamField>
+    <ParamField body="ttl" type="integer">
+      캐시 유효 시간(초)입니다.
+    </ParamField>
+  </Expandable>
+</ParamField>
+
+## 응답
+
+```json
+{
+  "id": "chatcmpl-abc123",
+  "object": "chat.completion",
+  "created": 1700000000,
+  "model": "gpt-4o-2024-08-06",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "Hello! How can I help you today?"
+      },
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "prompt_tokens": 10,
+    "completion_tokens": 9,
+    "total_tokens": 19,
+    "cost_usd": 0.000145
+  },
+  "openmodex": {
+    "request_id": "req_abc123",
+    "model_used": "gpt-4o-2024-08-06",
+    "provider": "openai",
+    "cache_hit": false,
+    "routing_strategy": "default",
+    "fallback_used": false,
+    "latency_ms": 850
+  }
+}
+```
+
+## 예제
+
+<CodeGroup>
+```bash cURL
+curl https://api.openmodex.com/v1/chat/completions \
+  -H "Authorization: Bearer omx_sk_YOUR_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "model": "gpt-4o",
+    "messages": [
+      {"role": "system", "content": "You are a helpful assistant."},
+      {"role": "user", "content": "What is the capital of France?"}
+    ],
+    "temperature": 0.7,
+    "max_tokens": 100
+  }'
+```
+
+```typescript Node.js
+import OpenModex from '@openmodex/sdk';
+
+const client = new OpenModex({ apiKey: 'omx_sk_YOUR_KEY' });
+
+const response = await client.chat.completions.create({
+  model: 'gpt-4o',
+  messages: [
+    { role: 'system', content: 'You are a helpful assistant.' },
+    { role: 'user', content: 'What is the capital of France?' },
+  ],
+  temperature: 0.7,
+  max_tokens: 100,
+});
+
+console.log(response.choices[0].message.content);
+```
+
+```python Python
+from openmodex import OpenModex
+
+client = OpenModex(api_key="omx_sk_YOUR_KEY")
+
+response = client.chat.completions.create(
+    model="gpt-4o",
+    messages=[
+        {"role": "system", "content": "You are a helpful assistant."},
+        {"role": "user", "content": "What is the capital of France?"},
+    ],
+    temperature=0.7,
+    max_tokens=100,
+)
+
+print(response.choices[0].message.content)
+```
+</CodeGroup>

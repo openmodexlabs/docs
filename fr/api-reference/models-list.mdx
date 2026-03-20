@@ -1,0 +1,55 @@
+---
+title: "Lister les modèles"
+description: "GET /v1/models — Lister tous les modèles disponibles."
+api: "GET /models"
+---
+
+## Réponse
+
+```json
+{
+  "object": "list",
+  "data": [
+    {
+      "id": "openai/gpt-4o",
+      "object": "model",
+      "name": "GPT-4o",
+      "provider": "openai",
+      "description": "Most capable GPT-4 model with vision",
+      "category": ["chat", "vision"],
+      "context_length": 128000,
+      "max_output_tokens": 16384,
+      "features": ["streaming", "function_calling", "json_mode", "vision"],
+      "pricing": {
+        "openmodex_input_per_m": 2.50,
+        "openmodex_output_per_m": 10.00,
+        "currency": "USD"
+      }
+    }
+  ],
+  "total": 100,
+  "has_more": false
+}
+```
+
+## Exemple
+
+<CodeGroup>
+```bash cURL
+curl https://api.openmodex.com/v1/models \
+  -H "Authorization: Bearer omx_sk_YOUR_KEY"
+```
+
+```typescript Node.js
+const models = await client.models.list();
+for (const model of models.data) {
+  console.log(`${model.id} — ${model.name} (${model.provider})`);
+}
+```
+
+```python Python
+models = client.models.list()
+for model in models.data:
+    print(f"{model.id} — {model.name} ({model.provider})")
+```
+</CodeGroup>

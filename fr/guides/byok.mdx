@@ -1,0 +1,86 @@
+---
+title: "Bring Your Own Key (BYOK)"
+description: "Utilisez vos propres clés API fournisseur avec OpenModex pour bénéficier de remises sur volume et d'accords personnalisés."
+---
+
+## Vue d'ensemble
+
+BYOK vous permet d'utiliser vos propres clés API fournisseur (OpenAI, Anthropic, etc.) tout en bénéficiant du routage, de la surveillance, des basculements et de la facturation unifiée d'OpenModex.
+
+C'est idéal lorsque :
+
+- Vous avez des **remises sur volume** ou des accords entreprise avec les fournisseurs
+- Vous devez utiliser un **compte fournisseur spécifique** pour la conformité
+- Vous souhaitez une **facturation directe** avec le fournisseur pour certains modèles
+
+## Configuration
+
+<Steps>
+  <Step title="Accéder aux clés fournisseur">
+    Ouvrez le [tableau de bord](https://openmodex.com/dashboard) → **Settings** → **Provider Keys**.
+  </Step>
+  <Step title="Ajouter une clé fournisseur">
+    Cliquez sur **Add Key**, sélectionnez le fournisseur et collez votre clé API.
+  </Step>
+  <Step title="Vérifier">
+    OpenModex validera la clé avec une requête de test. Une fois vérifiée, les requêtes pour ce fournisseur utiliseront votre clé.
+  </Step>
+</Steps>
+
+## Sécurité
+
+<Info>
+  Toutes les clés fournisseur sont chiffrées au repos avec le **chiffrement par enveloppe AWS KMS** (AES-256). OpenModex ne journalise ni n'expose jamais vos clés fournisseur.
+</Info>
+
+- Les clés sont chiffrées immédiatement lors de la soumission
+- Seul le préfixe de la clé est stocké pour identification (par exemple, `sk-...abc`)
+- Le déchiffrement se fait uniquement en mémoire au moment de la requête
+- Les clés ne sont jamais incluses dans les logs, les analyses ou les réponses API
+
+## Comment le routage fonctionne avec BYOK
+
+Lorsque vous avez une clé BYOK configurée pour un fournisseur :
+
+1. Les requêtes ciblant ce fournisseur utilisent **votre clé** au lieu du pool partagé d'OpenModex
+2. Vous êtes facturé directement par le fournisseur — OpenModex ne facture pas les tokens de modèle
+3. Vous payez toujours les frais d'abonnement OpenModex pour les fonctionnalités de la plateforme
+4. Le routage, la mise en cache, les basculements et la surveillance continuent de fonctionner normalement
+
+### Configuration mixte
+
+Vous pouvez configurer BYOK pour certains fournisseurs et utiliser les clés gérées par OpenModex pour les autres :
+
+```
+OpenAI     → Your key (BYOK)
+Anthropic  → OpenModex managed
+Google     → Your key (BYOK)
+DeepSeek   → OpenModex managed
+```
+
+Dans ce cas :
+- Les requêtes GPT-4o utilisent votre clé OpenAI (facturé par OpenAI)
+- Les requêtes Claude utilisent la clé d'OpenModex (facturé par OpenModex)
+- Les basculements entre fournisseurs BYOK et gérés fonctionnent de manière transparente
+
+## Gestion des clés
+
+Depuis le tableau de bord des clés fournisseur :
+
+| Action | Description |
+|--------|-------------|
+| **Ajouter** | Ajouter une nouvelle clé fournisseur |
+| **Tester** | Vérifier que la clé fonctionne avec une requête de test |
+| **Effectuer une rotation** | Remplacer la valeur de la clé (met à jour le chiffrement) |
+| **Supprimer** | Supprimer la clé ; les requêtes reviennent aux clés gérées par OpenModex |
+
+## Fournisseurs pris en charge
+
+| Fournisseur | Format de clé | Support BYOK |
+|----------|-----------|:---:|
+| OpenAI | `sk-...` | Pris en charge |
+| Anthropic | `sk-ant-...` | Pris en charge |
+| Google | Service Account JSON | Pris en charge |
+| DeepSeek | `sk-...` | Pris en charge |
+| Mistral | `...` | Pris en charge |
+| Qwen | `sk-...` | Pris en charge |

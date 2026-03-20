@@ -1,0 +1,69 @@
+---
+title: "為什麼選擇 OpenModex？"
+description: "OpenModex 解決的問題，以及團隊為何選擇統一 AI 閘道器。"
+---
+
+## 問題所在
+
+如今使用 AI 模型進行開發意味著要面對碎片化的基礎架構：
+
+- **多個 SDK** — OpenAI、Anthropic、Google 等各有自己的用戶端程式庫、身分驗證流程和回應格式
+- **供應商鎖定** — 切換模型意味著重寫整合程式碼
+- **缺乏可靠性方案** — 當供應商中斷時，您的應用程式也會跟著中斷
+- **隱形成本** — 分散在各供應商的帳單使最佳化變得不可能
+- **缺乏路由智慧** — 即使存在更便宜或更快的選項，您也只能寫死使用哪個模型
+
+## OpenModex 如何解決這些問題
+
+<CardGroup cols={2}>
+  <Card title="一個 API，所有模型" icon="plug">
+    透過單一 OpenAI 相容端點存取來自 OpenAI、Anthropic、Google、DeepSeek、Mistral 和 Qwen 的 100+ 模型。
+  </Card>
+  <Card title="零鎖定" icon="arrows-rotate">
+    只需更改一個字串參數即可切換模型。您的程式碼、SDK、基礎架構 — 其他都不需要更動。
+  </Card>
+  <Card title="內建可靠性" icon="shield-check">
+    自動容錯備援、斷路器和健康監控，即使供應商故障也能保持您的應用程式正常運行。
+  </Card>
+  <Card title="成本智慧" icon="chart-line">
+    智慧路由、提示快取和逐請求成本追蹤，幫助您在不犧牲品質的情況下最佳化支出。
+  </Card>
+</CardGroup>
+
+## 誰在使用 OpenModex
+
+### 新創公司與產品團隊
+
+快速推出 AI 功能，無需自行建構供應商抽象層。從一個模型開始，輕鬆進行 A/B 測試，並在無需重新架構的情況下擴展。
+
+### 平台與基礎架構團隊
+
+集中管理整個組織的 AI API 存取。強制執行速率限制、按團隊追蹤成本，並維護單一整合點。
+
+### 代理商與顧問公司
+
+建構不綁定單一供應商的客戶專案。為每個使用案例推薦最佳模型，並在市場變化時即時切換。
+
+## 關鍵差異化優勢
+
+| | 直接 API | 其他閘道器 | OpenModex |
+|--|:---:|:---:|:---:|
+| OpenAI 相容 API | — | 部分 | 完整 |
+| 智慧路由（成本/延遲/品質） | — | 基礎 | 進階 |
+| 自動故障轉移 + 斷路器 | — | 有限 | 內建 |
+| 提示快取 | — | — | 內建 |
+| 模型比較 API | — | — | 內建 |
+| 透明定價 | — | 不一定 | 透傳 |
+| BYOK（自帶金鑰） | — | — | 支援 |
+| 官方 SDK（Node、Python、Go、React） | — | 部分 | 完整 |
+
+## 開始使用
+
+<CardGroup cols={2}>
+  <Card title="快速開始" icon="rocket" href="/zh-Hant/introduction/quickstart">
+    在 2 分鐘內完成您的第一個 API 呼叫。
+  </Card>
+  <Card title="架構" icon="sitemap" href="/zh-Hant/platform/architecture">
+    了解 OpenModex 底層的運作原理。
+  </Card>
+</CardGroup>

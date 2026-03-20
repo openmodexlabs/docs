@@ -1,0 +1,94 @@
+---
+title: "Comparar Modelos"
+description: "GET /v1/models/compare — Comparar múltiples modelos lado a lado."
+api: "GET /models/compare"
+---
+
+## Parámetros de Consulta
+
+<ParamField query="models" type="string" required>
+  Lista de IDs de modelo separados por coma para comparar (por ejemplo, `openai/gpt-4o,anthropic/claude-3.5-sonnet`).
+</ParamField>
+
+## Respuesta
+
+```json
+{
+  "object": "model_comparison",
+  "models": ["openai/gpt-4o", "anthropic/claude-3.5-sonnet"],
+  "comparison": {
+    "openai/gpt-4o": {
+      "name": "GPT-4o",
+      "provider": "openai",
+      "context_length": 128000,
+      "pricing": {
+        "openmodex_input_per_m": 2.50,
+        "openmodex_output_per_m": 10.00
+      },
+      "performance": {
+        "latency_p50_ms": 800,
+        "availability": 99.9
+      },
+      "quality_scores": {
+        "overall": 92,
+        "code": 90,
+        "math": 88,
+        "reasoning": 91
+      }
+    },
+    "anthropic/claude-3.5-sonnet": {
+      "name": "Claude 3.5 Sonnet",
+      "provider": "anthropic",
+      "context_length": 200000,
+      "pricing": {
+        "openmodex_input_per_m": 3.00,
+        "openmodex_output_per_m": 15.00
+      },
+      "performance": {
+        "latency_p50_ms": 900,
+        "availability": 99.8
+      },
+      "quality_scores": {
+        "overall": 93,
+        "code": 93,
+        "math": 90,
+        "reasoning": 94
+      }
+    }
+  },
+  "highlights": {
+    "cheapest": "openai/gpt-4o",
+    "fastest": "openai/gpt-4o",
+    "best_quality": "anthropic/claude-3.5-sonnet",
+    "best_code": "anthropic/claude-3.5-sonnet",
+    "longest_context": "anthropic/claude-3.5-sonnet"
+  }
+}
+```
+
+## Ejemplo
+
+<CodeGroup>
+```bash cURL
+curl "https://api.openmodex.com/v1/models/compare?models=openai/gpt-4o,anthropic/claude-3.5-sonnet" \
+  -H "Authorization: Bearer omx_sk_YOUR_KEY"
+```
+
+```typescript Node.js
+const comparison = await client.models.compare([
+  'openai/gpt-4o',
+  'anthropic/claude-3.5-sonnet',
+]);
+
+console.log(comparison.highlights);
+```
+
+```python Python
+comparison = client.models.compare([
+    "openai/gpt-4o",
+    "anthropic/claude-3.5-sonnet",
+])
+
+print(comparison.highlights)
+```
+</CodeGroup>

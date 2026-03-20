@@ -1,0 +1,77 @@
+---
+title: "自動フォールバック"
+description: "AIプロバイダーがダウンしてもアプリの稼働を維持します。"
+---
+
+## 概要
+
+フォールバックは、プライマリモデルが失敗した場合に自動的に代替モデルに切り替えることで、アプリケーションの信頼性を確保します。OpenModexはサーバーサイドとクライアントサイドの両方のフォールバックをサポートしています。
+
+## サーバーサイドフォールバック
+
+リクエストごとに設定します。OpenModexがサーバー上でフェイルオーバーを処理します：
+
+```typescript
+const response = await client.chat.completions.create({
+  model: 'gpt-4o',
+  messages: [{ role: 'user', content: 'Hello!' }],
+  routing: {
+    fallback: ['claude-3.5-sonnet', 'gemini-2.0-flash'],
+  },
+});
+```
+
+**仕組み：**
+1. `gpt-4o`を試行
+2. 失敗した場合（5xx、レート制限、タイムアウト）→ `claude-3.5-sonnet`を試行
+3. それも失敗した場合 → `gemini-2.0-flash`を試行
+4. すべて失敗した場合 → エラーを返す
+
+## クライアントサイドフォールバック
+
+SDKクライアントで設定します。すべてのリクエストに適用されます：
+
+<CodeGroup>
+```typescript Node.js
+import OpenModex from '@openmodex/sdk';
+
+const client = new OpenModex({
+  apiKey: 'omx_sk_...',
+  fallbackModels: ['claude-3.5-sonnet', 'gemini-2.0-flash'],
+});
+
+// If the requested model fails, the SDK automatically retries
+// with each fallback model
+const response = await client.chat.completions.create({
+  model: 'gpt-4o',
+  messages: [{ role: 'user', content: 'Hello!' }],
+});
+```
+
+```go Go
+client := openmodex.NewClient("omx_sk_...",
+    openmodex.WithFallbackModels("claude-3.5-sonnet", "gemini-2.0-flash"),
+)
+```
+</CodeGroup>
+
+## フォールバックがトリガーされる条件
+
+フォールバックは以下によってトリガーされます：
+- **5xxエラー** — プロバイダーからのサーバーエラー
+- **429エラー** — レート制限超過
+- **タイムアウト** — リクエストが時間内に完了しなかった
+- **ネットワークエラー** — 接続障害
+
+フォールバックは以下では**トリガーされません**：
+- **4xxエラー**（429を除く） — リクエストに問題があることを示します
+- **成功したレスポンス** — コンテンツが予期しないものであっても
+
+## フォールバックの使用確認
+
+```typescript
+const response = await client.chat.completions.create({...});
+
+console.log(response.openmodex?.model_used);     // actual model that responded
+console.log(response.openmodex?.fallback_used);   // true if fallback was used
+```

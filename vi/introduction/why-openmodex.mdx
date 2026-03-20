@@ -1,0 +1,69 @@
+---
+title: "Tại sao chọn OpenModex?"
+description: "Những vấn đề OpenModex giải quyết và lý do các đội nhóm chọn cổng AI hợp nhất."
+---
+
+## Vấn Đề
+
+Xây dựng với các mô hình AI ngày nay đồng nghĩa với việc đối mặt với cơ sở hạ tầng phân mảnh:
+
+- **Nhiều SDK** — OpenAI, Anthropic, Google và các nhà cung cấp khác đều có thư viện client, quy trình xác thực và định dạng phản hồi riêng
+- **Phụ thuộc nhà cung cấp** — chuyển đổi mô hình nghĩa là phải viết lại mã tích hợp
+- **Không có giải pháp độ tin cậy** — khi nhà cung cấp gặp sự cố, ứng dụng của bạn cũng gặp sự cố
+- **Chi phí không minh bạch** — thanh toán riêng biệt giữa các nhà cung cấp khiến việc tối ưu hóa trở nên bất khả thi
+- **Không có trí tuệ định tuyến** — bạn phải cố định mô hình sử dụng, ngay cả khi có lựa chọn rẻ hơn hoặc nhanh hơn
+
+## Cách OpenModex Giải Quyết
+
+<CardGroup cols={2}>
+  <Card title="Một API, Tất Cả Mô Hình" icon="plug">
+    Truy cập hơn 100 mô hình từ OpenAI, Anthropic, Google, DeepSeek, Mistral và Qwen thông qua một endpoint duy nhất tương thích với OpenAI.
+  </Card>
+  <Card title="Không Phụ Thuộc Nhà Cung Cấp" icon="arrows-rotate">
+    Chuyển đổi mô hình bằng cách thay đổi một tham số chuỗi. Mã nguồn, SDK, cơ sở hạ tầng của bạn — không có gì khác thay đổi.
+  </Card>
+  <Card title="Độ Tin Cậy Tích Hợp" icon="shield-check">
+    Chuyển đổi dự phòng tự động, bộ ngắt mạch và giám sát sức khỏe giữ cho ứng dụng của bạn hoạt động ngay cả khi nhà cung cấp gặp lỗi.
+  </Card>
+  <Card title="Trí Tuệ Chi Phí" icon="chart-line">
+    Định tuyến thông minh, bộ nhớ đệm prompt và theo dõi chi phí theo từng yêu cầu giúp bạn tối ưu hóa chi tiêu mà không hy sinh chất lượng.
+  </Card>
+</CardGroup>
+
+## Ai Sử Dụng OpenModex
+
+### Startup và Đội Sản Phẩm
+
+Triển khai tính năng AI nhanh chóng mà không cần xây dựng lớp trừu tượng nhà cung cấp. Bắt đầu với một mô hình, dễ dàng thử nghiệm A/B với các mô hình khác và mở rộng quy mô mà không cần kiến trúc lại.
+
+### Đội Nền Tảng và Cơ Sở Hạ Tầng
+
+Tập trung hóa quyền truy cập API AI trên toàn tổ chức. Áp dụng giới hạn tốc độ, theo dõi chi phí theo từng đội và duy trì một điểm tích hợp duy nhất.
+
+### Đại Lý và Công Ty Tư Vấn
+
+Xây dựng dự án cho khách hàng mà không bị ràng buộc với một nhà cung cấp duy nhất. Đề xuất mô hình tốt nhất cho từng trường hợp sử dụng và chuyển đổi ngay lập tức khi thị trường thay đổi.
+
+## Điểm Khác Biệt Chính
+
+| | API Trực tiếp | Cổng Khác | OpenModex |
+|--|:---:|:---:|:---:|
+| API tương thích OpenAI | — | Một phần | Đầy đủ |
+| Định tuyến thông minh (chi phí/độ trễ/chất lượng) | — | Cơ bản | Nâng cao |
+| Chuyển đổi dự phòng tự động + bộ ngắt mạch | — | Hạn chế | Tích hợp sẵn |
+| Bộ nhớ đệm prompt | — | — | Tích hợp sẵn |
+| API so sánh mô hình | — | — | Tích hợp sẵn |
+| Giá minh bạch | — | Thay đổi | Chuyển tiếp |
+| BYOK (Mang Khóa Riêng) | — | — | Hỗ trợ |
+| SDK chính thức (Node, Python, Go, React) | — | Một phần | Đầy đủ |
+
+## Bắt Đầu
+
+<CardGroup cols={2}>
+  <Card title="Bắt đầu nhanh" icon="rocket" href="/vi/introduction/quickstart">
+    Thực hiện lệnh gọi API đầu tiên trong 2 phút.
+  </Card>
+  <Card title="Kiến trúc" icon="sitemap" href="/vi/platform/architecture">
+    Hiểu cách OpenModex hoạt động bên trong.
+  </Card>
+</CardGroup>

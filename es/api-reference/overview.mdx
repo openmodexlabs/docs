@@ -1,0 +1,98 @@
+---
+title: "Descripción General de la API"
+description: "Referencia de la API de OpenModex — endpoints compatibles con OpenAI con funciones mejoradas."
+---
+
+## URL Base
+
+```
+https://api.openmodex.com/v1
+```
+
+Todos los endpoints de la API son compatibles con OpenAI. Si ya está usando la API de OpenAI, puede cambiar modificando la URL base y la clave API.
+
+## Autenticación
+
+Incluya su clave API en el encabezado `Authorization`:
+
+```
+Authorization: Bearer omx_sk_YOUR_API_KEY
+```
+
+## Endpoints
+
+| Método | Endpoint | Descripción |
+|--------|----------|-------------|
+| `POST` | `/chat/completions` | Crear un chat completion |
+| `POST` | `/completions` | Crear un text completion (legacy) |
+| `POST` | `/embeddings` | Crear embeddings |
+| `GET` | `/models` | Listar modelos disponibles |
+| `GET` | `/models/:id` | Obtener un modelo |
+| `GET` | `/models/compare` | Comparar modelos lado a lado |
+
+## Formato de Solicitud
+
+Todas las solicitudes `POST` aceptan cuerpos JSON con `Content-Type: application/json`.
+
+## Formato de Respuesta
+
+Todas las respuestas devuelven JSON. Las respuestas exitosas incluyen los datos directamente. Las respuestas de error siguen este formato:
+
+```json
+{
+  "error": {
+    "message": "Human-readable error message",
+    "type": "invalid_request_error",
+    "code": "invalid_api_key"
+  }
+}
+```
+
+## Códigos de Estado HTTP
+
+| Código | Descripción |
+|------|-------------|
+| `200` | Éxito |
+| `400` | Solicitud incorrecta — verifique sus parámetros |
+| `401` | No autorizado — clave API inválida o faltante |
+| `403` | Prohibido — permisos insuficientes |
+| `404` | No encontrado — endpoint o modelo inválido |
+| `429` | Límite de velocidad — reduzca la velocidad o actualice su plan |
+| `500` | Error del servidor — reintente con backoff |
+| `502` | Bad gateway — error del proveedor upstream |
+| `503` | Servicio no disponible — interrupción temporal |
+
+## Metadatos de Respuesta OpenModex
+
+Cada respuesta incluye un campo opcional `openmodex` con metadatos de enrutamiento y rendimiento:
+
+```json
+{
+  "id": "chatcmpl-abc123",
+  "choices": [...],
+  "usage": {...},
+  "openmodex": {
+    "request_id": "req_abc123",
+    "model_used": "gpt-4o-2024-08-06",
+    "provider": "openai",
+    "cache_hit": false,
+    "routing_strategy": "cost_optimized",
+    "fallback_used": false,
+    "latency_ms": 1250
+  }
+}
+```
+
+## Idempotencia
+
+Para solicitudes `POST`, puede enviar un encabezado `Idempotency-Key` para asegurar que la misma solicitud no se procese dos veces:
+
+```bash
+curl https://api.openmodex.com/v1/chat/completions \
+  -H "Authorization: Bearer omx_sk_..." \
+  -H "Idempotency-Key: my-unique-key-123" \
+  -H "Content-Type: application/json" \
+  -d '...'
+```
+
+Las claves de idempotencia son válidas por 24 horas.

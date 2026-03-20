@@ -1,0 +1,106 @@
+---
+title: "スマートルーティング"
+description: "コスト、レイテンシー、品質に基づいてリクエストを最適なモデルに自動ルーティングします。"
+---
+
+## 概要
+
+OpenModexのインテリジェントルーティングエンジンは、各リクエストに対して最適なプロバイダーを自動的に選択します。単一のプロバイダーをハードコーディングする代わりに、優先事項に基づいてOpenModexに選択を任せることができます。
+
+## ルーティング戦略
+
+### コスト最適化
+
+リクエストを処理できる最も安価なプロバイダーにルーティングします：
+
+```typescript
+const response = await client.chat.completions.create({
+  model: 'gpt-4o',
+  messages: [{ role: 'user', content: 'Summarize this article...' }],
+  routing: {
+    strategy: 'cost_optimized',
+  },
+});
+```
+
+### レイテンシー最適化
+
+最も高速な利用可能なプロバイダーにルーティングします：
+
+```typescript
+const response = await client.chat.completions.create({
+  model: 'gpt-4o',
+  messages: [{ role: 'user', content: 'Quick answer needed...' }],
+  routing: {
+    strategy: 'latency_optimized',
+  },
+});
+```
+
+### 品質最適化
+
+最も高い品質スコアを持つプロバイダーにルーティングします：
+
+```typescript
+const response = await client.chat.completions.create({
+  model: 'gpt-4o',
+  messages: [{ role: 'user', content: 'Write a detailed analysis...' }],
+  routing: {
+    strategy: 'quality_optimized',
+  },
+});
+```
+
+## サーバーサイドフォールバック
+
+プライマリモデルが失敗した場合に自動的に実行されるフォールバックチェーンを定義します：
+
+```typescript
+const response = await client.chat.completions.create({
+  model: 'gpt-4o',
+  messages: [{ role: 'user', content: 'Hello!' }],
+  routing: {
+    fallback: ['claude-3.5-sonnet', 'gemini-2.0-flash'],
+  },
+});
+```
+
+`gpt-4o`が利用できない場合（5xxまたはレート制限）、OpenModexは自動的に`claude-3.5-sonnet`を試し、次に`gemini-2.0-flash`を試します。
+
+## アップグレード許可
+
+同じ価格帯でより高性能なモデルが利用可能な場合に、OpenModexがそのモデルにルーティングすることを許可します：
+
+```typescript
+const response = await client.chat.completions.create({
+  model: 'gpt-4o-mini',
+  messages: [{ role: 'user', content: 'Hello!' }],
+  routing: {
+    allow_upgrade: true,
+  },
+});
+```
+
+## サーキットブレーカー
+
+OpenModexはプロバイダーの健全性をリアルタイムで監視します。プロバイダーが障害を起こし始めると：
+
+1. **正常** — リクエストは通常通りルーティング
+2. **劣化** — 連続した障害後、トラフィックが削減される
+3. **オープン** — プロバイダーがルーティングから一時的に除外される
+4. **リカバリー** — 定期的なヘルスチェックによりプロバイダーが復元される
+
+これは自動的に行われます — 設定は必要ありません。
+
+## 結果の確認
+
+すべてのレスポンスにルーティングメタデータが含まれます：
+
+```typescript
+const response = await client.chat.completions.create({...});
+
+console.log(response.openmodex?.provider);          // "openai"
+console.log(response.openmodex?.routing_strategy);   // "cost_optimized"
+console.log(response.openmodex?.fallback_used);      // false
+console.log(response.openmodex?.latency_ms);         // 850
+```

@@ -1,0 +1,106 @@
+---
+title: "対応モデル"
+description: "OpenModexゲートウェイで利用可能なすべてのAIモデルとプロバイダー。"
+---
+
+## 概要
+
+OpenModexは、単一のAPIを通じて6つの主要AIプロバイダーから100以上のモデルへのアクセスを提供します。すべてのモデルは同じOpenAI互換エンドポイントからアクセスできます。
+
+<Tip>
+  リアルタイムの料金と可用性については[モデルAPI](/ja/api-reference/models-list)を、モデルの並列評価には[比較API](/ja/api-reference/models-compare)をご利用ください。
+</Tip>
+
+## OpenAI
+
+| モデル | コンテキスト | 最適な用途 | 機能 |
+|-------|--------:|----------|----------|
+| `gpt-4o` | 128K | 汎用、ビジョン | ストリーミング、Function Calling、JSON Mode、Vision |
+| `gpt-4o-mini` | 128K | コスト効率の高いタスク | ストリーミング、Function Calling、JSON Mode |
+| `o1` | 200K | 複雑な推論 | Chain-of-thought |
+| `o3` | 200K | 高度な推論 | Chain-of-thought |
+| `gpt-4-turbo` | 128K | レガシー互換性 | ストリーミング、Function Calling、Vision |
+
+## Anthropic
+
+| モデル | コンテキスト | 最適な用途 | 機能 |
+|-------|--------:|----------|----------|
+| `claude-3.5-sonnet` | 200K | コード、分析、長文コンテキスト | ストリーミング、Tool Use |
+| `claude-3-opus` | 200K | 複雑なタスク、リサーチ | ストリーミング、Tool Use |
+| `claude-3-haiku` | 200K | 高速、コスト効率 | ストリーミング、Tool Use |
+
+## Google
+
+| モデル | コンテキスト | 最適な用途 | 機能 |
+|-------|--------:|----------|----------|
+| `gemini-2.0-flash` | 1M | 速度、マルチモーダル | ストリーミング、Function Calling、Vision |
+| `gemini-1.5-pro` | 2M | 長文ドキュメント、分析 | ストリーミング、Function Calling、Vision |
+| `gemini-1.5-flash` | 1M | 速度と品質のバランス | ストリーミング、Function Calling |
+
+## DeepSeek
+
+| モデル | コンテキスト | 最適な用途 | 機能 |
+|-------|--------:|----------|----------|
+| `deepseek-chat` | 128K | 汎用、コスト削減 | ストリーミング |
+| `deepseek-reasoner` | 128K | 推論、数学、コード | ストリーミング、Chain-of-thought |
+
+## Mistral
+
+| モデル | コンテキスト | 最適な用途 | 機能 |
+|-------|--------:|----------|----------|
+| `mistral-large` | 128K | エンタープライズ、多言語 | ストリーミング、Function Calling |
+| `mistral-small` | 128K | コスト効率、高速 | ストリーミング |
+| `codestral` | 32K | コード生成 | ストリーミング |
+
+## Qwen
+
+| モデル | コンテキスト | 最適な用途 | 機能 |
+|-------|--------:|----------|----------|
+| `qwen-max` | 128K | 中国語、汎用 | ストリーミング |
+| `qwen2.5-72b` | 128K | オープンウェイト、汎用性 | ストリーミング |
+| `qwen2.5-coder` | 128K | コード生成 | ストリーミング |
+
+## エンベディングモデル
+
+| モデル | 次元数 | プロバイダー | 最適な用途 |
+|-------|----------:|----------|----------|
+| `text-embedding-3-small` | 1536 | OpenAI | コスト効率の高いエンベディング |
+| `text-embedding-3-large` | 3072 | OpenAI | 高精度エンベディング |
+| `text-embedding-ada-002` | 1536 | OpenAI | レガシー互換性 |
+
+## モデルの選び方
+
+ルーティング戦略を使用するか、以下のクイックガイドを参考にしてください：
+
+| 優先事項 | 推奨 |
+|----------|-------------|
+| **最安値** | `gpt-4o-mini`, `deepseek-chat`, `gemini-2.0-flash` |
+| **最速** | `gemini-2.0-flash`, `gpt-4o-mini`, `claude-3-haiku` |
+| **最高品質** | `gpt-4o`, `claude-3.5-sonnet`, `gemini-1.5-pro` |
+| **コードに最適** | `claude-3.5-sonnet`, `deepseek-reasoner`, `codestral` |
+| **最長コンテキスト** | `gemini-1.5-pro` (2M), `gemini-2.0-flash` (1M) |
+| **最高の推論** | `o3`, `o1`, `deepseek-reasoner` |
+
+または、OpenModexに自動的に判断させることもできます：
+
+```typescript
+const response = await client.chat.completions.create({
+  model: 'auto',
+  messages: [{ role: 'user', content: 'Hello!' }],
+  routing: { strategy: 'cost_optimized' },
+});
+```
+
+## ライブモデルデータ
+
+リアルタイムの料金、可用性、品質スコアについては：
+
+```bash
+# List all models with pricing
+curl https://api.openmodex.com/v1/models \
+  -H "Authorization: Bearer omx_sk_YOUR_KEY"
+
+# Compare specific models
+curl "https://api.openmodex.com/v1/models/compare?models=openai/gpt-4o,anthropic/claude-3.5-sonnet" \
+  -H "Authorization: Bearer omx_sk_YOUR_KEY"
+```

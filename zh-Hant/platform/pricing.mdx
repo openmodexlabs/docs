@@ -1,0 +1,95 @@
+---
+title: "定價"
+description: "透明的按量付費定價，模型成本透傳。"
+---
+
+## 定價方式
+
+OpenModex 採用**按量付費**定價。您只需為消耗的 token 付費，費率透明透傳。
+
+<Info>
+  OpenModex 收取與底層供應商相同的每 token 費率。模型成本沒有任何隱藏加價。
+</Info>
+
+## 訂閱方案
+
+| | Free | Pro | Enterprise |
+|--|:---:|:---:|:---:|
+| **價格** | $0/月 | $29/月 | 自訂 |
+| **請求數/分鐘** | 30 | 120 | 300+ |
+| **Token 數/分鐘** | 60,000 | 500,000 | 自訂 |
+| **模型** | 全部 | 全部 | 全部 + 自訂 |
+| **智慧路由** | 基礎 | 完整 | 完整 + 自訂 |
+| **提示快取** | — | 包含 | 包含 |
+| **容錯備援** | 1 層 | 無限 | 無限 |
+| **BYOK** | — | 包含 | 包含 |
+| **支援** | 社群 | 電子郵件 | 專屬 |
+| **分析** | 基礎 | 完整 | 完整 + 匯出 |
+| **團隊管理** | — | 最多 5 人 | 無限 |
+
+## Token 定價
+
+模型成本按供應商費率透傳。透過 [Models API](/zh-Hant/api-reference/models-list) 或[控制台](https://openmodex.com/dashboard)查看即時定價。
+
+### 熱門模型
+
+| 模型 | 輸入（每 1M token） | 輸出（每 1M token） |
+|-------|---------------------:|----------------------:|
+| `gpt-4o` | $2.50 | $10.00 |
+| `gpt-4o-mini` | $0.15 | $0.60 |
+| `claude-3.5-sonnet` | $3.00 | $15.00 |
+| `claude-3-haiku` | $0.25 | $1.25 |
+| `gemini-2.0-flash` | $0.10 | $0.40 |
+| `gemini-1.5-pro` | $1.25 | $5.00 |
+| `deepseek-chat` | $0.14 | $0.28 |
+| `mistral-large` | $2.00 | $6.00 |
+| `text-embedding-3-small` | $0.02 | — |
+
+### 快取回應
+
+提示快取可大幅降低成本：
+
+| | 標準 | 快取 |
+|--|--------:|-------:|
+| 輸入 token | 100% | ~50% |
+| 輸出 token | 100% | $0 |
+| 延遲 | 正常 | <10ms |
+
+## 成本追蹤
+
+每個 API 回應都包含成本資料：
+
+```json
+{
+  "usage": {
+    "prompt_tokens": 150,
+    "completion_tokens": 50,
+    "total_tokens": 200,
+    "cost_usd": 0.001
+  }
+}
+```
+
+## 餘額與付款
+
+- 透過信用卡（Stripe）或加密貨幣**儲值**
+- 在[控制台](https://openmodex.com/dashboard)中**查看餘額**和交易紀錄
+- **設定提醒**以接收餘額不足通知
+- Pro 和 Enterprise 方案可使用**自動儲值**
+
+## 成本最佳化技巧
+
+<CardGroup cols={2}>
+  <Card title="使用智慧路由" icon="route" href="/zh-Hant/features/smart-routing">
+    讓 OpenModex 選擇符合您品質門檻的最便宜模型。
+  </Card>
+  <Card title="啟用快取" icon="bolt" href="/zh-Hant/features/prompt-caching">
+    快取重複的提示以消除冗餘的 API 呼叫。
+  </Card>
+  <Card title="適當選擇模型大小" icon="gauge" href="/zh-Hant/guides/best-practices">
+    簡單任務使用較小的模型 — `gpt-4o-mini` 比 `gpt-4o` 便宜 15 倍。
+  </Card>
+  <Card title="自帶金鑰" icon="key" href="/zh-Hant/guides/byok">
+    使用您自己的供應商金鑰享受批量折扣。
+  </Card>
+</CardGroup>

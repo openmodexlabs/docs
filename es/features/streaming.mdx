@@ -1,0 +1,98 @@
+---
+title: "Streaming"
+description: "Respuestas en tiempo real token por token vía Server-Sent Events."
+---
+
+## Descripción General
+
+El streaming le permite recibir tokens de respuesta a medida que se generan, en lugar de esperar a la respuesta completa. Esto mejora drásticamente la latencia percibida para sus usuarios.
+
+## Cuándo Usar Streaming
+
+- **Interfaces de chat** — muestre indicadores de escritura y texto en tiempo real
+- **Respuestas largas** — no haga esperar a los usuarios por la respuesta completa
+- **Generación de código** — muestre el código a medida que se escribe
+
+## Cómo Funciona
+
+1. Establezca `stream: true` en su solicitud
+2. OpenModex abre una conexión SSE (Server-Sent Events)
+3. Los tokens se envían como eventos `data:` a medida que se generan
+4. El stream termina con `data: [DONE]`
+
+## Ejemplos
+
+<CodeGroup>
+```typescript Node.js SDK
+const stream = await client.chat.completions.create({
+  model: 'gpt-4o',
+  messages: [{ role: 'user', content: 'Tell me a story.' }],
+  stream: true,
+});
+
+for await (const chunk of stream) {
+  process.stdout.write(chunk.choices[0]?.delta?.content ?? '');
+}
+```
+
+```python Python SDK
+stream = client.chat.completions.create(
+    model="gpt-4o",
+    messages=[{"role": "user", "content": "Tell me a story."}],
+    stream=True,
+)
+
+for chunk in stream:
+    content = chunk.choices[0].delta.content
+    if content:
+        print(content, end="", flush=True)
+```
+
+```go Go SDK
+stream, _ := client.Chat.Completions.CreateStream(ctx, &openmodex.ChatCompletionParams{
+    Model:    "gpt-4o",
+    Messages: []openmodex.ChatMessage{{Role: "user", Content: "Tell me a story."}},
+})
+
+for chunk, err := range stream.Iter() {
+    if err != nil { break }
+    fmt.Print(chunk.Choices[0].Delta.Content)
+}
+```
+
+```tsx React
+import { useChat } from '@openmodex/react';
+
+function Chat() {
+  const { messages, input, setInput, sendMessage, isLoading } = useChat({
+    apiKey: 'omx_sk_...',
+    model: 'gpt-4o',
+  });
+
+  return (
+    <div>
+      {messages.map((m) => (
+        <div key={m.id}>{m.role}: {m.content}</div>
+      ))}
+      <input value={input} onChange={(e) => setInput(e.target.value)} />
+      <button onClick={() => sendMessage()}>Send</button>
+    </div>
+  );
+}
+```
+</CodeGroup>
+
+## Streaming + Respaldos
+
+El streaming funciona perfectamente con los respaldos. Si el modelo principal falla antes de que comience el streaming, OpenModex reintenta automáticamente con el modelo de respaldo:
+
+```typescript
+const stream = await client.chat.completions.create({
+  model: 'gpt-4o',
+  messages: [{ role: 'user', content: 'Hello!' }],
+  stream: true,
+  routing: {
+    fallback: ['claude-3.5-sonnet'],
+  },
+});
+```

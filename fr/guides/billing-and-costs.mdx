@@ -1,0 +1,57 @@
+---
+title: "Facturation et coûts"
+description: "Comprendre le fonctionnement de la facturation OpenModex."
+---
+
+## Comment fonctionne la facturation
+
+OpenModex utilise un modèle de facturation à l'usage. Vous êtes facturé en fonction de :
+
+- **Tokens d'entrée** — les tokens de votre prompt/messages
+- **Tokens de sortie** — les tokens générés par le modèle
+- **Tarification du modèle** — chaque modèle a son propre tarif par token
+
+## Tarification
+
+OpenModex transmet les tarifs des fournisseurs avec des marges transparentes. Consultez les tarifs actuels :
+
+- [Page de tarification](https://openmodex.com/pricing)
+- [API Models](/fr/api-reference/models-list) — inclut les tarifs par modèle
+
+## Suivi des coûts
+
+Chaque réponse inclut les informations de coût :
+
+```json
+{
+  "usage": {
+    "prompt_tokens": 150,
+    "completion_tokens": 50,
+    "total_tokens": 200,
+    "cost_usd": 0.001
+  }
+}
+```
+
+## Analyses du tableau de bord
+
+Le [tableau de bord](https://openmodex.com/dashboard) fournit :
+
+- **Dépenses en temps réel** — solde actuel et taux de consommation
+- **Répartition par modèle** — coût et utilisation par modèle
+- **Tendances quotidiennes** — dépenses au fil du temps
+- **Analyses par clé** — suivi des coûts par clé API
+
+## Économiser de l'argent
+
+1. **Utilisez le routage optimisé en coût** — laissez OpenModex choisir le modèle le moins cher
+2. **Activez la mise en cache** — évitez de payer pour des requêtes répétées
+3. **Choisissez des modèles plus petits** — `gpt-4o-mini` est 10 fois moins cher que `gpt-4o`
+4. **Définissez max_tokens** — limitez la longueur de sortie pour contrôler les coûts
+5. **Utilisez BYOK** — apportez vos propres clés fournisseur pour des remises sur volume
+
+## Solde et paiements
+
+- Ajoutez des fonds par **carte de crédit** (Stripe) ou **cryptomonnaie**
+- Consultez le solde et l'historique des transactions dans le tableau de bord
+- Configurez des alertes de solde bas pour éviter les interruptions de service

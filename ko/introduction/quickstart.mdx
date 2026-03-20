@@ -1,0 +1,154 @@
+---
+title: "빠른 시작"
+description: "2분 안에 OpenModex에 첫 번째 API 호출을 해보세요."
+---
+
+## 1. API 키 받기
+
+[openmodex.com](https://openmodex.com)에서 가입하고 [대시보드](https://openmodex.com/dashboard/api-keys)에서 API 키를 생성하세요.
+
+키는 다음과 같은 형식입니다: `omx_sk_xxxxxxxxxxxxxxxx`
+
+## 2. 첫 번째 요청 보내기
+
+<CodeGroup>
+```bash cURL
+curl https://api.openmodex.com/v1/chat/completions \
+  -H "Authorization: Bearer omx_sk_YOUR_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "model": "gpt-4o",
+    "messages": [{"role": "user", "content": "Hello!"}]
+  }'
+```
+
+```typescript Node.js
+import OpenModex from '@openmodex/sdk';
+
+const client = new OpenModex({ apiKey: 'omx_sk_YOUR_KEY' });
+
+const response = await client.chat.completions.create({
+  model: 'gpt-4o',
+  messages: [{ role: 'user', content: 'Hello!' }],
+});
+
+console.log(response.choices[0].message.content);
+```
+
+```python Python
+from openmodex import OpenModex
+
+client = OpenModex(api_key="omx_sk_YOUR_KEY")
+
+response = client.chat.completions.create(
+    model="gpt-4o",
+    messages=[{"role": "user", "content": "Hello!"}],
+)
+
+print(response.choices[0].message.content)
+```
+
+```go Go
+package main
+
+import (
+    "context"
+    "fmt"
+    openmodex "github.com/openmodexlabs/openmodex-sdk-go"
+)
+
+func main() {
+    client := openmodex.NewClient("omx_sk_YOUR_KEY")
+
+    resp, _ := client.Chat.Completions.Create(context.Background(), &openmodex.ChatCompletionParams{
+        Model:    "gpt-4o",
+        Messages: []openmodex.ChatMessage{{Role: "user", Content: "Hello!"}},
+    })
+
+    fmt.Println(resp.Choices[0].Message.Content)
+}
+```
+</CodeGroup>
+
+## 3. 스트리밍 사용해보기
+
+실시간 토큰별 응답을 받으세요:
+
+<CodeGroup>
+```bash cURL
+curl https://api.openmodex.com/v1/chat/completions \
+  -H "Authorization: Bearer omx_sk_YOUR_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "model": "gpt-4o",
+    "messages": [{"role": "user", "content": "Write a haiku about code."}],
+    "stream": true
+  }'
+```
+
+```typescript Node.js
+const stream = await client.chat.completions.create({
+  model: 'gpt-4o',
+  messages: [{ role: 'user', content: 'Write a haiku about code.' }],
+  stream: true,
+});
+
+for await (const chunk of stream) {
+  process.stdout.write(chunk.choices[0]?.delta?.content ?? '');
+}
+```
+
+```python Python
+stream = client.chat.completions.create(
+    model="gpt-4o",
+    messages=[{"role": "user", "content": "Write a haiku about code."}],
+    stream=True,
+)
+
+for chunk in stream:
+    content = chunk.choices[0].delta.content
+    if content:
+        print(content, end="", flush=True)
+```
+</CodeGroup>
+
+## 4. 다른 모델 사용해보기
+
+파라미터 하나만 변경하여 모델을 전환하세요 — 코드 변경이 필요 없습니다:
+
+```typescript
+// Use Claude
+const response1 = await client.chat.completions.create({
+  model: 'claude-3.5-sonnet',
+  messages: [{ role: 'user', content: 'Explain quantum computing.' }],
+});
+
+// Use Gemini
+const response2 = await client.chat.completions.create({
+  model: 'gemini-2.0-flash',
+  messages: [{ role: 'user', content: 'Explain quantum computing.' }],
+});
+
+// Use DeepSeek
+const response3 = await client.chat.completions.create({
+  model: 'deepseek-chat',
+  messages: [{ role: 'user', content: 'Explain quantum computing.' }],
+});
+```
+
+## 다음 단계
+
+<CardGroup cols={2}>
+  <Card title="인증" icon="key" href="/ko/introduction/authentication">
+    API 키 인증 및 보안에 대해 알아보세요.
+  </Card>
+  <Card title="스마트 라우팅" icon="route" href="/ko/features/smart-routing">
+    각 요청에 최적의 모델로 자동 라우팅하세요.
+  </Card>
+  <Card title="SDK 설치" icon="download" href="/ko/sdks/overview">
+    사용하시는 언어에 맞는 타입 안전 클라이언트를 받으세요.
+  </Card>
+  <Card title="API 레퍼런스" icon="book" href="/ko/api-reference/overview">
+    사용 가능한 모든 엔드포인트를 살펴보세요.
+  </Card>
+</CardGroup>

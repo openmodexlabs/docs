@@ -1,0 +1,106 @@
+---
+title: "지원 모델"
+description: "OpenModex 게이트웨이를 통해 사용 가능한 모든 AI 모델 및 제공업체입니다."
+---
+
+## 개요
+
+OpenModex는 단일 API를 통해 6개 주요 AI 제공업체의 100개 이상의 모델에 대한 접근을 제공합니다. 모든 모델은 동일한 OpenAI 호환 엔드포인트를 통해 접근할 수 있습니다.
+
+<Tip>
+  [모델 API](/ko/api-reference/models-list)를 사용하여 실시간 가격 및 가용성을 확인하거나, [비교 API](/ko/api-reference/models-compare)를 사용하여 모델을 나란히 평가하세요.
+</Tip>
+
+## OpenAI
+
+| 모델 | 컨텍스트 | 최적 용도 | 기능 |
+|-------|--------:|----------|----------|
+| `gpt-4o` | 128K | 범용, 비전 | Streaming, Function Calling, JSON Mode, Vision |
+| `gpt-4o-mini` | 128K | 비용 효율적 작업 | Streaming, Function Calling, JSON Mode |
+| `o1` | 200K | 복잡한 추론 | Chain-of-thought |
+| `o3` | 200K | 고급 추론 | Chain-of-thought |
+| `gpt-4-turbo` | 128K | 레거시 호환 | Streaming, Function Calling, Vision |
+
+## Anthropic
+
+| 모델 | 컨텍스트 | 최적 용도 | 기능 |
+|-------|--------:|----------|----------|
+| `claude-3.5-sonnet` | 200K | 코드, 분석, 긴 컨텍스트 | Streaming, Tool Use |
+| `claude-3-opus` | 200K | 복잡한 작업, 연구 | Streaming, Tool Use |
+| `claude-3-haiku` | 200K | 빠르고 비용 효율적 | Streaming, Tool Use |
+
+## Google
+
+| 모델 | 컨텍스트 | 최적 용도 | 기능 |
+|-------|--------:|----------|----------|
+| `gemini-2.0-flash` | 1M | 속도, 멀티모달 | Streaming, Function Calling, Vision |
+| `gemini-1.5-pro` | 2M | 긴 문서, 분석 | Streaming, Function Calling, Vision |
+| `gemini-1.5-flash` | 1M | 속도와 품질의 균형 | Streaming, Function Calling |
+
+## DeepSeek
+
+| 모델 | 컨텍스트 | 최적 용도 | 기능 |
+|-------|--------:|----------|----------|
+| `deepseek-chat` | 128K | 범용, 비용 절감 | Streaming |
+| `deepseek-reasoner` | 128K | 추론, 수학, 코드 | Streaming, Chain-of-thought |
+
+## Mistral
+
+| 모델 | 컨텍스트 | 최적 용도 | 기능 |
+|-------|--------:|----------|----------|
+| `mistral-large` | 128K | 엔터프라이즈, 다국어 | Streaming, Function Calling |
+| `mistral-small` | 128K | 비용 효율적, 빠름 | Streaming |
+| `codestral` | 32K | 코드 생성 | Streaming |
+
+## Qwen
+
+| 모델 | 컨텍스트 | 최적 용도 | 기능 |
+|-------|--------:|----------|----------|
+| `qwen-max` | 128K | 중국어, 범용 | Streaming |
+| `qwen2.5-72b` | 128K | 오픈 웨이트, 다목적 | Streaming |
+| `qwen2.5-coder` | 128K | 코드 생성 | Streaming |
+
+## 임베딩 모델
+
+| 모델 | 차원 | 제공업체 | 최적 용도 |
+|-------|----------:|----------|----------|
+| `text-embedding-3-small` | 1536 | OpenAI | 비용 효율적 임베딩 |
+| `text-embedding-3-large` | 3072 | OpenAI | 고정밀 임베딩 |
+| `text-embedding-ada-002` | 1536 | OpenAI | 레거시 호환 |
+
+## 모델 선택 가이드
+
+라우팅 전략을 사용하거나 다음 빠른 가이드를 참고하세요:
+
+| 우선순위 | 추천 모델 |
+|----------|-------------|
+| **가장 저렴한** | `gpt-4o-mini`, `deepseek-chat`, `gemini-2.0-flash` |
+| **가장 빠른** | `gemini-2.0-flash`, `gpt-4o-mini`, `claude-3-haiku` |
+| **최고 품질** | `gpt-4o`, `claude-3.5-sonnet`, `gemini-1.5-pro` |
+| **코드에 최적** | `claude-3.5-sonnet`, `deepseek-reasoner`, `codestral` |
+| **가장 긴 컨텍스트** | `gemini-1.5-pro` (2M), `gemini-2.0-flash` (1M) |
+| **최고 추론** | `o3`, `o1`, `deepseek-reasoner` |
+
+또는 OpenModex가 자동으로 결정하게 하세요:
+
+```typescript
+const response = await client.chat.completions.create({
+  model: 'auto',
+  messages: [{ role: 'user', content: 'Hello!' }],
+  routing: { strategy: 'cost_optimized' },
+});
+```
+
+## 실시간 모델 데이터
+
+실시간 가격, 가용성, 품질 점수를 확인하세요:
+
+```bash
+# List all models with pricing
+curl https://api.openmodex.com/v1/models \
+  -H "Authorization: Bearer omx_sk_YOUR_KEY"
+
+# Compare specific models
+curl "https://api.openmodex.com/v1/models/compare?models=openai/gpt-4o,anthropic/claude-3.5-sonnet" \
+  -H "Authorization: Bearer omx_sk_YOUR_KEY"
+```

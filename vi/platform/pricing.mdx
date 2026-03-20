@@ -1,0 +1,95 @@
+---
+title: "Bảng giá"
+description: "Giá minh bạch, thanh toán theo mức sử dụng với chi phí mô hình chuyển tiếp."
+---
+
+## Cách Tính Giá
+
+OpenModex sử dụng mô hình **thanh toán theo mức sử dụng**. Bạn chỉ bị tính phí cho số token bạn tiêu thụ, với mức giá chuyển tiếp minh bạch.
+
+<Info>
+  OpenModex tính cùng mức giá theo token như nhà cung cấp gốc. Không có phí ẩn nào đối với chi phí mô hình.
+</Info>
+
+## Các Gói Đăng Ký
+
+| | Free | Pro | Enterprise |
+|--|:---:|:---:|:---:|
+| **Giá** | $0/tháng | $29/tháng | Tùy chỉnh |
+| **Yêu cầu/phút** | 30 | 120 | 300+ |
+| **Token/phút** | 60.000 | 500.000 | Tùy chỉnh |
+| **Mô hình** | Tất cả | Tất cả | Tất cả + Tùy chỉnh |
+| **Định tuyến thông minh** | Cơ bản | Đầy đủ | Đầy đủ + Tùy chỉnh |
+| **Bộ nhớ đệm prompt** | — | Bao gồm | Bao gồm |
+| **Dự phòng** | 1 cấp | Không giới hạn | Không giới hạn |
+| **BYOK** | — | Bao gồm | Bao gồm |
+| **Hỗ trợ** | Cộng đồng | Email | Chuyên dụng |
+| **Phân tích** | Cơ bản | Đầy đủ | Đầy đủ + Xuất dữ liệu |
+| **Quản lý đội nhóm** | — | Tối đa 5 | Không giới hạn |
+
+## Giá Token
+
+Chi phí mô hình được chuyển tiếp theo giá nhà cung cấp. Kiểm tra giá thời gian thực qua [API Mô hình](/vi/api-reference/models-list) hoặc [Bảng điều khiển](https://openmodex.com/dashboard).
+
+### Các Mô Hình Phổ Biến
+
+| Mô hình | Đầu vào (mỗi 1M token) | Đầu ra (mỗi 1M token) |
+|-------|---------------------:|----------------------:|
+| `gpt-4o` | $2,50 | $10,00 |
+| `gpt-4o-mini` | $0,15 | $0,60 |
+| `claude-3.5-sonnet` | $3,00 | $15,00 |
+| `claude-3-haiku` | $0,25 | $1,25 |
+| `gemini-2.0-flash` | $0,10 | $0,40 |
+| `gemini-1.5-pro` | $1,25 | $5,00 |
+| `deepseek-chat` | $0,14 | $0,28 |
+| `mistral-large` | $2,00 | $6,00 |
+| `text-embedding-3-small` | $0,02 | — |
+
+### Phản Hồi Từ Bộ Đệm
+
+Bộ nhớ đệm prompt giảm chi phí đáng kể:
+
+| | Tiêu chuẩn | Từ bộ đệm |
+|--|--------:|-------:|
+| Token đầu vào | 100% | ~50% |
+| Token đầu ra | 100% | $0 |
+| Độ trễ | Bình thường | <10ms |
+
+## Theo Dõi Chi Phí
+
+Mỗi phản hồi API đều bao gồm dữ liệu chi phí:
+
+```json
+{
+  "usage": {
+    "prompt_tokens": 150,
+    "completion_tokens": 50,
+    "total_tokens": 200,
+    "cost_usd": 0.001
+  }
+}
+```
+
+## Số Dư và Thanh Toán
+
+- **Nạp tiền** qua thẻ tín dụng (Stripe) hoặc tiền mã hóa
+- **Xem số dư** và lịch sử giao dịch trong [Bảng điều khiển](https://openmodex.com/dashboard)
+- **Đặt cảnh báo** cho thông báo số dư thấp
+- **Tự động nạp tiền** có sẵn cho gói Pro và Enterprise
+
+## Mẹo Tối Ưu Chi Phí
+
+<CardGroup cols={2}>
+  <Card title="Sử dụng định tuyến thông minh" icon="route" href="/vi/features/smart-routing">
+    Để OpenModex chọn mô hình rẻ nhất đáp ứng ngưỡng chất lượng của bạn.
+  </Card>
+  <Card title="Bật bộ nhớ đệm" icon="bolt" href="/vi/features/prompt-caching">
+    Lưu đệm các prompt lặp lại để loại bỏ các lệnh gọi API dư thừa.
+  </Card>
+  <Card title="Chọn đúng kích thước mô hình" icon="gauge" href="/vi/guides/best-practices">
+    Sử dụng mô hình nhỏ hơn cho tác vụ đơn giản — `gpt-4o-mini` rẻ hơn 15 lần so với `gpt-4o`.
+  </Card>
+  <Card title="Mang khóa riêng" icon="key" href="/vi/guides/byok">
+    Sử dụng khóa nhà cung cấp của riêng bạn để hưởng giảm giá theo khối lượng.
+  </Card>
+</CardGroup>

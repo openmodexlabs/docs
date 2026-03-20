@@ -1,0 +1,138 @@
+---
+title: "React Hooks"
+description: "用于构建 AI 驱动界面的 React hooks — useChat、useCompletion、useModels。"
+---
+
+## 安装
+
+```bash
+npm install @openmodex/react
+```
+
+需要 **React 18+**。
+
+## useChat
+
+功能完善的聊天 hook，支持流式传输、消息历史和中止功能。
+
+```tsx
+import { useChat } from '@openmodex/react';
+
+function ChatApp() {
+  const { messages, input, setInput, sendMessage, isLoading, stop, error } = useChat({
+    apiKey: 'omx_sk_...',
+    model: 'gpt-4o',
+    system: 'You are a helpful assistant.',
+    onFinish: (message) => console.log('Done:', message.content),
+    onError: (error) => console.error(error),
+  });
+
+  return (
+    <div>
+      <div>
+        {messages.map((m) => (
+          <div key={m.id}>
+            <strong>{m.role}:</strong> {m.content}
+          </div>
+        ))}
+      </div>
+
+      <form onSubmit={(e) => { e.preventDefault(); sendMessage(); }}>
+        <input
+          value={input}
+          onChange={(e) => setInput(e.target.value)}
+          placeholder="Type a message..."
+        />
+        <button type="submit" disabled={isLoading}>Send</button>
+        {isLoading && <button onClick={stop}>Stop</button>}
+      </form>
+
+      {error && <p style={{ color: 'red' }}>{error.message}</p>}
+    </div>
+  );
+}
+```
+
+### 选项
+
+| 选项 | 类型 | 默认值 | 描述 |
+|--------|------|---------|-------------|
+| `apiKey` | `string` | — | API 密钥 |
+| `baseURL` | `string` | `https://api.openmodex.com/v1` | API URL |
+| `model` | `string` | `gpt-4o` | 使用的模型 |
+| `initialMessages` | `ChatMessage[]` | `[]` | 预填充对话 |
+| `initialInput` | `string` | `''` | 初始输入值 |
+| `system` | `string` | — | 系统提示词 |
+| `onFinish` | `(message) => void` | — | 完成时调用 |
+| `onError` | `(error) => void` | — | 出错时调用 |
+
+### 返回值
+
+| 属性 | 类型 | 描述 |
+|----------|------|-------------|
+| `messages` | `ChatMessage[]` | 所有消息 |
+| `setMessages` | `Dispatch` | 设置消息 |
+| `input` | `string` | 当前输入 |
+| `setInput` | `Dispatch` | 更新输入 |
+| `sendMessage` | `(content?) => Promise` | 发送消息 |
+| `isLoading` | `boolean` | 加载状态 |
+| `error` | `Error \| null` | 最近的错误 |
+| `stop` | `() => void` | 中止流 |
+
+## useCompletion
+
+单轮补全，支持流式传输。
+
+```tsx
+import { useCompletion } from '@openmodex/react';
+
+function CompletionApp() {
+  const { completion, input, setInput, complete, isLoading, stop } = useCompletion({
+    apiKey: 'omx_sk_...',
+    model: 'gpt-4o',
+  });
+
+  return (
+    <div>
+      <input value={input} onChange={(e) => setInput(e.target.value)} />
+      <button onClick={() => complete()} disabled={isLoading}>Complete</button>
+      {isLoading && <button onClick={stop}>Stop</button>}
+      <p>{completion}</p>
+    </div>
+  );
+}
+```
+
+## useModels
+
+获取可用模型。
+
+```tsx
+import { useModels } from '@openmodex/react';
+
+function ModelList() {
+  const { models, isLoading, error, refetch } = useModels({
+    apiKey: 'omx_sk_...',
+  });
+
+  if (isLoading) return <p>Loading models...</p>;
+  if (error) return <p>Error: {error.message}</p>;
+
+  return (
+    <ul>
+      {models.map((m) => (
+        <li key={m.id}>
+          <strong>{m.name}</strong> — {m.provider}
+          <br />
+          <small>{m.description}</small>
+        </li>
+      ))}
+    </ul>
+  );
+}
+```
+
+## 链接
+
+- [npm](https://www.npmjs.com/package/@openmodex/react)
+- [GitHub](https://github.com/openmodexlabs/openmodex-packages/tree/main/packages/react)

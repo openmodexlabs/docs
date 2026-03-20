@@ -1,0 +1,107 @@
+---
+title: "SDK de Python"
+description: "SDK oficial de Python para la API de OpenModex."
+---
+
+## Instalación
+
+```bash
+pip install openmodex
+```
+
+Requiere **Python 3.8+**.
+
+## Inicio Rápido
+
+```python
+from openmodex import OpenModex
+
+client = OpenModex(api_key="omx_sk_YOUR_KEY")
+
+response = client.chat.completions.create(
+    model="gpt-4o",
+    messages=[{"role": "user", "content": "Hello!"}],
+)
+
+print(response.choices[0].message.content)
+```
+
+## Soporte Async
+
+```python
+from openmodex import AsyncOpenModex
+
+client = AsyncOpenModex(api_key="omx_sk_YOUR_KEY")
+
+response = await client.chat.completions.create(
+    model="gpt-4o",
+    messages=[{"role": "user", "content": "Hello!"}],
+)
+```
+
+## Streaming
+
+```python
+# Sync streaming
+stream = client.chat.completions.create(
+    model="gpt-4o",
+    messages=[{"role": "user", "content": "Write a story."}],
+    stream=True,
+)
+
+for chunk in stream:
+    content = chunk.choices[0].delta.content
+    if content:
+        print(content, end="", flush=True)
+
+# Async streaming
+async for chunk in await async_client.chat.completions.create(
+    model="gpt-4o",
+    messages=[{"role": "user", "content": "Write a story."}],
+    stream=True,
+):
+    content = chunk.choices[0].delta.content
+    if content:
+        print(content, end="", flush=True)
+```
+
+## Embeddings
+
+```python
+result = client.embeddings.create(
+    model="text-embedding-3-small",
+    input="Hello world",
+)
+
+print(result.data[0].embedding)
+```
+
+## Modelos
+
+```python
+# List models
+models = client.models.list()
+
+# Get model details
+model = client.models.retrieve("openai/gpt-4o")
+
+# Compare models
+comparison = client.models.compare(["openai/gpt-4o", "anthropic/claude-3.5-sonnet"])
+```
+
+## Manejo de Errores
+
+```python
+from openmodex import OpenModex, APIError
+
+try:
+    response = client.chat.completions.create(...)
+except APIError as e:
+    print(f"Status: {e.status_code}")
+    print(f"Message: {e.message}")
+```
+
+## Enlaces
+
+- [PyPI](https://pypi.org/project/openmodex/)
+- [GitHub](https://github.com/openmodexlabs/openmodex-sdk-python)
