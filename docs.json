@@ -1,6 +1,6 @@
 {
   "$schema": "https://mintlify.com/docs.json",
-  "theme": "maple",
+  "theme": "mint",
   "name": "OpenModex",
   "logo": {
     "light": "/images/logo-light.svg",
@@ -13,18 +13,6 @@
     "light": "#52525B",
     "dark": "#FAFAFA"
   },
-  "font": {
-    "headings": {
-      "family": "Inter",
-      "weight": 600
-    },
-    "body": {
-      "family": "Inter",
-      "weight": 400
-    }
-  },
-  "layout": "topnav",
-  "rounded": "default",
   "navbar": {
     "links": [
       {
