@@ -23,16 +23,1435 @@
   "security": [
     {
       "BearerAuth": []
+    },
+    {
+      "ApiKeyAuth": []
     }
   ],
+  "tags": [
+    {
+      "name": "Chat",
+      "description": "Chat completion endpoints (OpenAI-compatible)"
+    },
+    {
+      "name": "Completions",
+      "description": "Legacy text completion endpoints"
+    },
+    {
+      "name": "Embeddings",
+      "description": "Text embedding endpoints"
+    },
+    {
+      "name": "Models",
+      "description": "Model listing, retrieval, and comparison"
+    },
+    {
+      "name": "Messages",
+      "description": "Anthropic-compatible messages endpoint"
+    }
+  ],
+  "paths": {
+    "/chat/completions": {
+      "post": {
+        "operationId": "createChatCompletion",
+        "summary": "Create chat completion",
+        "description": "Creates a chat completion for the provided messages. Compatible with the OpenAI Chat Completions API format.",
+        "tags": ["Chat"],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateChatCompletionRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Chat completion response. When stream=true, returns SSE stream of ChatCompletionChunk objects.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ChatCompletionResponse"
+                }
+              },
+              "text/event-stream": {
+                "schema": {
+                  "$ref": "#/components/schemas/ChatCompletionChunk"
+                }
+              }
+            }
+          },
+          "400": { "$ref": "#/components/responses/BadRequest" },
+          "401": { "$ref": "#/components/responses/Unauthorized" },
+          "403": { "$ref": "#/components/responses/Forbidden" },
+          "404": { "$ref": "#/components/responses/NotFound" },
+          "429": { "$ref": "#/components/responses/RateLimited" },
+          "500": { "$ref": "#/components/responses/InternalError" },
+          "502": { "$ref": "#/components/responses/BadGateway" },
+          "503": { "$ref": "#/components/responses/ServiceUnavailable" }
+        }
+      }
+    },
+    "/completions": {
+      "post": {
+        "operationId": "createCompletion",
+        "summary": "Create text completion",
+        "description": "Creates a text completion for the provided prompt. This is a legacy endpoint; prefer /chat/completions for new integrations.",
+        "tags": ["Completions"],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateCompletionRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Text completion response.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CompletionResponse"
+                }
+              }
+            }
+          },
+          "400": { "$ref": "#/components/responses/BadRequest" },
+          "401": { "$ref": "#/components/responses/Unauthorized" },
+          "403": { "$ref": "#/components/responses/Forbidden" },
+          "404": { "$ref": "#/components/responses/NotFound" },
+          "429": { "$ref": "#/components/responses/RateLimited" },
+          "500": { "$ref": "#/components/responses/InternalError" },
+          "502": { "$ref": "#/components/responses/BadGateway" },
+          "503": { "$ref": "#/components/responses/ServiceUnavailable" }
+        }
+      }
+    },
+    "/embeddings": {
+      "post": {
+        "operationId": "createEmbedding",
+        "summary": "Create embeddings",
+        "description": "Creates embedding vectors for the provided input text.",
+        "tags": ["Embeddings"],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateEmbeddingRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Embedding response.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EmbeddingResponse"
+                }
+              }
+            }
+          },
+          "400": { "$ref": "#/components/responses/BadRequest" },
+          "401": { "$ref": "#/components/responses/Unauthorized" },
+          "403": { "$ref": "#/components/responses/Forbidden" },
+          "404": { "$ref": "#/components/responses/NotFound" },
+          "429": { "$ref": "#/components/responses/RateLimited" },
+          "500": { "$ref": "#/components/responses/InternalError" },
+          "502": { "$ref": "#/components/responses/BadGateway" },
+          "503": { "$ref": "#/components/responses/ServiceUnavailable" }
+        }
+      }
+    },
+    "/models": {
+      "get": {
+        "operationId": "listModels",
+        "summary": "List all models",
+        "description": "Lists all available models, including pricing, performance, and capability information.",
+        "tags": ["Models"],
+        "responses": {
+          "200": {
+            "description": "List of models.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ModelListResponse"
+                }
+              }
+            }
+          },
+          "401": { "$ref": "#/components/responses/Unauthorized" },
+          "500": { "$ref": "#/components/responses/InternalError" }
+        }
+      }
+    },
+    "/models/compare": {
+      "get": {
+        "operationId": "compareModels",
+        "summary": "Compare models",
+        "description": "Compare 2-4 models side by side across pricing, performance, quality, and capabilities.",
+        "tags": ["Models"],
+        "parameters": [
+          {
+            "name": "models",
+            "in": "query",
+            "required": true,
+            "description": "Comma-separated list of model IDs to compare (2-4 models).",
+            "schema": {
+              "type": "string"
+            },
+            "example": "gpt-4o,claude-3.5-sonnet,gemini-1.5-pro"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Model comparison response.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ModelComparisonResponse"
+                }
+              }
+            }
+          },
+          "400": { "$ref": "#/components/responses/BadRequest" },
+          "401": { "$ref": "#/components/responses/Unauthorized" },
+          "404": { "$ref": "#/components/responses/NotFound" },
+          "500": { "$ref": "#/components/responses/InternalError" }
+        }
+      }
+    },
+    "/models/{model_id}": {
+      "get": {
+        "operationId": "retrieveModel",
+        "summary": "Retrieve a specific model",
+        "description": "Retrieves detailed information about a specific model by its ID.",
+        "tags": ["Models"],
+        "parameters": [
+          {
+            "name": "model_id",
+            "in": "path",
+            "required": true,
+            "description": "The unique identifier of the model to retrieve.",
+            "schema": {
+              "type": "string"
+            },
+            "example": "gpt-4o"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Model details.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Model"
+                }
+              }
+            }
+          },
+          "401": { "$ref": "#/components/responses/Unauthorized" },
+          "404": { "$ref": "#/components/responses/NotFound" },
+          "500": { "$ref": "#/components/responses/InternalError" }
+        }
+      }
+    },
+    "/messages": {
+      "post": {
+        "operationId": "createMessage",
+        "summary": "Create message (Anthropic-compatible)",
+        "description": "Creates a message using the Anthropic Messages API format. Allows using Anthropic-style requests against any supported model.",
+        "tags": ["Messages"],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateMessageRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Message response.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MessageResponse"
+                }
+              }
+            }
+          },
+          "400": { "$ref": "#/components/responses/BadRequest" },
+          "401": { "$ref": "#/components/responses/Unauthorized" },
+          "403": { "$ref": "#/components/responses/Forbidden" },
+          "404": { "$ref": "#/components/responses/NotFound" },
+          "429": { "$ref": "#/components/responses/RateLimited" },
+          "500": { "$ref": "#/components/responses/InternalError" },
+          "502": { "$ref": "#/components/responses/BadGateway" },
+          "503": { "$ref": "#/components/responses/ServiceUnavailable" }
+        }
+      }
+    }
+  },
   "components": {
     "securitySchemes": {
       "BearerAuth": {
         "type": "http",
         "scheme": "bearer",
-        "description": "API key authentication. Use your OpenModex API key as the bearer token."
+        "description": "API key authentication. Pass your OpenModex API key as a Bearer token in the Authorization header: `Authorization: Bearer omx_sk_...`"
+      },
+      "ApiKeyAuth": {
+        "type": "apiKey",
+        "in": "header",
+        "name": "x-api-key",
+        "description": "Anthropic-compatible API key authentication. Pass your OpenModex API key via the x-api-key header: `x-api-key: omx_sk_...`"
+      }
+    },
+    "schemas": {
+      "ChatMessage": {
+        "type": "object",
+        "description": "A message in the chat conversation.",
+        "required": ["role", "content"],
+        "properties": {
+          "role": {
+            "type": "string",
+            "enum": ["system", "user", "assistant", "tool"],
+            "description": "The role of the message author."
+          },
+          "content": {
+            "type": "string",
+            "description": "The content of the message."
+          },
+          "name": {
+            "type": "string",
+            "description": "An optional name for the participant."
+          },
+          "tool_call_id": {
+            "type": "string",
+            "description": "Tool call that this message is responding to (for role=tool)."
+          },
+          "tool_calls": {
+            "type": "array",
+            "description": "Tool calls generated by the model (for role=assistant).",
+            "items": {
+              "$ref": "#/components/schemas/ToolCall"
+            }
+          }
+        }
+      },
+      "ToolCall": {
+        "type": "object",
+        "description": "A tool call generated by the model.",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "The ID of the tool call."
+          },
+          "type": {
+            "type": "string",
+            "enum": ["function"],
+            "description": "The type of the tool call."
+          },
+          "function": {
+            "type": "object",
+            "description": "The function that the model called.",
+            "properties": {
+              "name": {
+                "type": "string",
+                "description": "The name of the function to call."
+              },
+              "arguments": {
+                "type": "string",
+                "description": "The arguments to call the function with, as a JSON string."
+              }
+            }
+          }
+        }
+      },
+      "Tool": {
+        "type": "object",
+        "description": "A tool the model may call.",
+        "properties": {
+          "type": {
+            "type": "string",
+            "enum": ["function"],
+            "description": "The type of the tool."
+          },
+          "function": {
+            "type": "object",
+            "description": "The function definition.",
+            "properties": {
+              "name": {
+                "type": "string",
+                "description": "The name of the function."
+              },
+              "description": {
+                "type": "string",
+                "description": "A description of what the function does."
+              },
+              "parameters": {
+                "type": "object",
+                "description": "The parameters the function accepts, described as a JSON Schema object."
+              }
+            }
+          }
+        }
+      },
+      "RoutingConfig": {
+        "type": "object",
+        "description": "Configuration for intelligent request routing.",
+        "properties": {
+          "strategy": {
+            "type": "string",
+            "description": "The routing strategy to use (e.g., 'cost', 'latency', 'quality')."
+          },
+          "fallback": {
+            "type": "array",
+            "items": { "type": "string" },
+            "description": "Ordered list of fallback model IDs if the primary model is unavailable."
+          },
+          "allow_upgrade": {
+            "type": "boolean",
+            "description": "Whether to allow automatic upgrade to a more capable model if the requested model is unavailable."
+          }
+        }
+      },
+      "CacheConfig": {
+        "type": "object",
+        "description": "Configuration for response caching.",
+        "properties": {
+          "enabled": {
+            "type": "boolean",
+            "description": "Whether caching is enabled for this request."
+          },
+          "ttl": {
+            "type": "integer",
+            "description": "Cache time-to-live in seconds."
+          }
+        }
+      },
+      "CreateChatCompletionRequest": {
+        "type": "object",
+        "description": "Request body for creating a chat completion.",
+        "required": ["model", "messages"],
+        "properties": {
+          "model": {
+            "type": "string",
+            "description": "ID of the model to use."
+          },
+          "messages": {
+            "type": "array",
+            "description": "A list of messages comprising the conversation so far.",
+            "items": {
+              "$ref": "#/components/schemas/ChatMessage"
+            }
+          },
+          "stream": {
+            "type": "boolean",
+            "description": "If true, partial message deltas will be sent as server-sent events.",
+            "default": false
+          },
+          "temperature": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 2,
+            "description": "Sampling temperature between 0 and 2. Higher values make output more random."
+          },
+          "top_p": {
+            "type": "number",
+            "description": "Nucleus sampling parameter. Only consider tokens with top_p probability mass."
+          },
+          "n": {
+            "type": "integer",
+            "description": "How many completions to generate for each prompt."
+          },
+          "max_tokens": {
+            "type": "integer",
+            "description": "The maximum number of tokens to generate in the completion."
+          },
+          "stop": {
+            "oneOf": [
+              { "type": "string" },
+              { "type": "array", "items": { "type": "string" } }
+            ],
+            "description": "Up to 4 sequences where the API will stop generating further tokens."
+          },
+          "frequency_penalty": {
+            "type": "number",
+            "minimum": -2,
+            "maximum": 2,
+            "description": "Penalizes new tokens based on their existing frequency in the text so far."
+          },
+          "presence_penalty": {
+            "type": "number",
+            "minimum": -2,
+            "maximum": 2,
+            "description": "Penalizes new tokens based on whether they appear in the text so far."
+          },
+          "logit_bias": {
+            "type": "object",
+            "additionalProperties": { "type": "number" },
+            "description": "Modify the likelihood of specified tokens appearing in the completion. Maps token IDs to bias values from -100 to 100."
+          },
+          "tools": {
+            "type": "array",
+            "description": "A list of tools the model may call.",
+            "items": {
+              "$ref": "#/components/schemas/Tool"
+            }
+          },
+          "tool_choice": {
+            "oneOf": [
+              { "type": "string" },
+              { "type": "object" }
+            ],
+            "description": "Controls which tool is called by the model. Can be 'none', 'auto', 'required', or a specific tool object."
+          },
+          "response_format": {
+            "type": "object",
+            "description": "An object specifying the format the model must output (e.g., {\"type\": \"json_object\"}).",
+            "properties": {
+              "type": {
+                "type": "string",
+                "description": "The format type, e.g., 'json_object' or 'text'."
+              }
+            }
+          },
+          "seed": {
+            "type": "integer",
+            "description": "If specified, the system will attempt to sample deterministically."
+          },
+          "user": {
+            "type": "string",
+            "description": "A unique identifier representing your end-user, for abuse monitoring."
+          },
+          "routing": {
+            "$ref": "#/components/schemas/RoutingConfig"
+          },
+          "cache": {
+            "$ref": "#/components/schemas/CacheConfig"
+          }
+        }
+      },
+      "ChatCompletionResponse": {
+        "type": "object",
+        "description": "Response from a chat completion request.",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "A unique identifier for the completion."
+          },
+          "object": {
+            "type": "string",
+            "enum": ["chat.completion"],
+            "description": "The object type, always 'chat.completion'."
+          },
+          "created": {
+            "type": "integer",
+            "description": "Unix timestamp (in seconds) of when the completion was created."
+          },
+          "model": {
+            "type": "string",
+            "description": "The model used for the completion."
+          },
+          "choices": {
+            "type": "array",
+            "description": "A list of completion choices.",
+            "items": {
+              "type": "object",
+              "properties": {
+                "index": {
+                  "type": "integer",
+                  "description": "The index of the choice in the list."
+                },
+                "message": {
+                  "type": "object",
+                  "description": "The message generated by the model.",
+                  "properties": {
+                    "role": {
+                      "type": "string",
+                      "description": "The role of the author (always 'assistant')."
+                    },
+                    "content": {
+                      "type": "string",
+                      "description": "The content of the message."
+                    },
+                    "tool_calls": {
+                      "type": "array",
+                      "description": "Tool calls generated by the model.",
+                      "items": {
+                        "$ref": "#/components/schemas/ToolCall"
+                      }
+                    }
+                  }
+                },
+                "finish_reason": {
+                  "type": "string",
+                  "enum": ["stop", "length", "tool_calls", "content_filter"],
+                  "description": "The reason the model stopped generating tokens."
+                }
+              }
+            }
+          },
+          "usage": {
+            "$ref": "#/components/schemas/CompletionUsage"
+          },
+          "system_fingerprint": {
+            "type": "string",
+            "description": "A fingerprint representing the backend configuration."
+          },
+          "openmodex": {
+            "$ref": "#/components/schemas/OpenModexMetadata"
+          }
+        }
+      },
+      "ChatCompletionChunk": {
+        "type": "object",
+        "description": "A chunk of a streamed chat completion response.",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "A unique identifier for the completion."
+          },
+          "object": {
+            "type": "string",
+            "enum": ["chat.completion.chunk"],
+            "description": "The object type, always 'chat.completion.chunk'."
+          },
+          "created": {
+            "type": "integer",
+            "description": "Unix timestamp (in seconds) of when the chunk was created."
+          },
+          "model": {
+            "type": "string",
+            "description": "The model used for the completion."
+          },
+          "choices": {
+            "type": "array",
+            "description": "A list of completion choices.",
+            "items": {
+              "type": "object",
+              "properties": {
+                "index": {
+                  "type": "integer",
+                  "description": "The index of the choice in the list."
+                },
+                "delta": {
+                  "type": "object",
+                  "description": "The delta content for this chunk.",
+                  "properties": {
+                    "role": {
+                      "type": "string",
+                      "description": "The role of the author."
+                    },
+                    "content": {
+                      "type": "string",
+                      "description": "The content delta."
+                    },
+                    "tool_calls": {
+                      "type": "array",
+                      "description": "Tool call deltas.",
+                      "items": {
+                        "$ref": "#/components/schemas/ToolCall"
+                      }
+                    }
+                  }
+                },
+                "finish_reason": {
+                  "type": ["string", "null"],
+                  "enum": ["stop", "length", "tool_calls", "content_filter", null],
+                  "description": "The reason the model stopped generating, or null if still streaming."
+                }
+              }
+            }
+          },
+          "system_fingerprint": {
+            "type": "string",
+            "description": "A fingerprint representing the backend configuration."
+          }
+        }
+      },
+      "CreateCompletionRequest": {
+        "type": "object",
+        "description": "Request body for creating a text completion (legacy).",
+        "required": ["model", "prompt"],
+        "properties": {
+          "model": {
+            "type": "string",
+            "description": "ID of the model to use."
+          },
+          "prompt": {
+            "oneOf": [
+              { "type": "string" },
+              { "type": "array", "items": { "type": "string" } }
+            ],
+            "description": "The prompt(s) to generate completions for."
+          },
+          "max_tokens": {
+            "type": "integer",
+            "description": "The maximum number of tokens to generate."
+          },
+          "temperature": {
+            "type": "number",
+            "description": "Sampling temperature between 0 and 2."
+          },
+          "top_p": {
+            "type": "number",
+            "description": "Nucleus sampling parameter."
+          },
+          "n": {
+            "type": "integer",
+            "description": "How many completions to generate for each prompt."
+          },
+          "stream": {
+            "type": "boolean",
+            "description": "Whether to stream back partial progress via SSE.",
+            "default": false
+          },
+          "stop": {
+            "oneOf": [
+              { "type": "string" },
+              { "type": "array", "items": { "type": "string" } }
+            ],
+            "description": "Up to 4 sequences where the API will stop generating further tokens."
+          },
+          "frequency_penalty": {
+            "type": "number",
+            "description": "Penalizes new tokens based on their existing frequency in the text."
+          },
+          "presence_penalty": {
+            "type": "number",
+            "description": "Penalizes new tokens based on whether they appear in the text so far."
+          },
+          "logit_bias": {
+            "type": "object",
+            "additionalProperties": { "type": "number" },
+            "description": "Modify the likelihood of specified tokens appearing in the completion."
+          },
+          "suffix": {
+            "type": "string",
+            "description": "The suffix that comes after a completion of inserted text."
+          },
+          "user": {
+            "type": "string",
+            "description": "A unique identifier representing your end-user."
+          },
+          "routing": {
+            "$ref": "#/components/schemas/RoutingConfig"
+          }
+        }
+      },
+      "CompletionResponse": {
+        "type": "object",
+        "description": "Response from a text completion request.",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "A unique identifier for the completion."
+          },
+          "object": {
+            "type": "string",
+            "enum": ["text_completion"],
+            "description": "The object type, always 'text_completion'."
+          },
+          "created": {
+            "type": "integer",
+            "description": "Unix timestamp (in seconds) of when the completion was created."
+          },
+          "model": {
+            "type": "string",
+            "description": "The model used for the completion."
+          },
+          "choices": {
+            "type": "array",
+            "description": "A list of completion choices.",
+            "items": {
+              "type": "object",
+              "properties": {
+                "index": {
+                  "type": "integer",
+                  "description": "The index of the choice."
+                },
+                "text": {
+                  "type": "string",
+                  "description": "The generated text."
+                },
+                "finish_reason": {
+                  "type": "string",
+                  "enum": ["stop", "length"],
+                  "description": "The reason the model stopped generating."
+                }
+              }
+            }
+          },
+          "usage": {
+            "$ref": "#/components/schemas/CompletionUsage"
+          },
+          "openmodex": {
+            "$ref": "#/components/schemas/OpenModexMetadata"
+          }
+        }
+      },
+      "CreateEmbeddingRequest": {
+        "type": "object",
+        "description": "Request body for creating embeddings.",
+        "required": ["model", "input"],
+        "properties": {
+          "model": {
+            "type": "string",
+            "description": "ID of the model to use."
+          },
+          "input": {
+            "oneOf": [
+              { "type": "string" },
+              { "type": "array", "items": { "type": "string" } }
+            ],
+            "description": "Input text to embed. Can be a single string or an array of strings."
+          },
+          "encoding_format": {
+            "type": "string",
+            "enum": ["float", "base64"],
+            "description": "The format to return the embeddings in.",
+            "default": "float"
+          },
+          "dimensions": {
+            "type": "integer",
+            "description": "The number of dimensions the resulting output embeddings should have. Only supported by certain models."
+          },
+          "user": {
+            "type": "string",
+            "description": "A unique identifier representing your end-user."
+          }
+        }
+      },
+      "EmbeddingResponse": {
+        "type": "object",
+        "description": "Response from an embedding request.",
+        "properties": {
+          "object": {
+            "type": "string",
+            "enum": ["list"],
+            "description": "The object type, always 'list'."
+          },
+          "data": {
+            "type": "array",
+            "description": "A list of embedding objects.",
+            "items": {
+              "type": "object",
+              "properties": {
+                "object": {
+                  "type": "string",
+                  "enum": ["embedding"],
+                  "description": "The object type, always 'embedding'."
+                },
+                "embedding": {
+                  "type": "array",
+                  "items": { "type": "number" },
+                  "description": "The embedding vector."
+                },
+                "index": {
+                  "type": "integer",
+                  "description": "The index of the embedding in the list."
+                }
+              }
+            }
+          },
+          "model": {
+            "type": "string",
+            "description": "The model used to generate the embeddings."
+          },
+          "usage": {
+            "type": "object",
+            "description": "Usage statistics for the embedding request.",
+            "properties": {
+              "prompt_tokens": {
+                "type": "integer",
+                "description": "Number of tokens in the input."
+              },
+              "total_tokens": {
+                "type": "integer",
+                "description": "Total number of tokens used."
+              }
+            }
+          }
+        }
+      },
+      "Model": {
+        "type": "object",
+        "description": "Represents a model available through OpenModex.",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "The unique model identifier."
+          },
+          "object": {
+            "type": "string",
+            "description": "The object type (e.g., 'model')."
+          },
+          "name": {
+            "type": "string",
+            "description": "The display name of the model."
+          },
+          "provider": {
+            "type": "string",
+            "description": "The provider of the model (e.g., 'openai', 'anthropic', 'google')."
+          },
+          "description": {
+            "type": "string",
+            "description": "A human-readable description of the model."
+          },
+          "category": {
+            "type": "array",
+            "items": { "type": "string" },
+            "description": "Categories the model belongs to (e.g., 'chat', 'embedding', 'image')."
+          },
+          "context_length": {
+            "type": "integer",
+            "description": "Maximum context length in tokens."
+          },
+          "max_output_tokens": {
+            "type": "integer",
+            "description": "Maximum number of output tokens the model can generate."
+          },
+          "modalities": {
+            "type": "object",
+            "description": "Supported input and output modalities.",
+            "properties": {
+              "input": {
+                "type": "array",
+                "items": { "type": "string" },
+                "description": "Supported input modalities (e.g., 'text', 'image', 'audio')."
+              },
+              "output": {
+                "type": "array",
+                "items": { "type": "string" },
+                "description": "Supported output modalities (e.g., 'text', 'image')."
+              }
+            }
+          },
+          "features": {
+            "type": "array",
+            "items": { "type": "string" },
+            "description": "List of supported features (e.g., 'streaming', 'function_calling', 'json_mode')."
+          },
+          "license": {
+            "type": "string",
+            "description": "The license under which the model is available."
+          },
+          "pricing": {
+            "type": "object",
+            "description": "Pricing information for the model.",
+            "properties": {
+              "official_input_per_m": {
+                "type": "number",
+                "description": "Official provider price per million input tokens (USD)."
+              },
+              "official_output_per_m": {
+                "type": "number",
+                "description": "Official provider price per million output tokens (USD)."
+              },
+              "openmodex_input_per_m": {
+                "type": "number",
+                "description": "OpenModex price per million input tokens (USD)."
+              },
+              "openmodex_output_per_m": {
+                "type": "number",
+                "description": "OpenModex price per million output tokens (USD)."
+              },
+              "cached_input_per_m": {
+                "type": "number",
+                "description": "Price per million cached input tokens (USD)."
+              },
+              "currency": {
+                "type": "string",
+                "description": "Currency code (e.g., 'USD')."
+              }
+            }
+          },
+          "performance": {
+            "type": "object",
+            "description": "Performance metrics for the model.",
+            "properties": {
+              "availability": {
+                "type": "number",
+                "description": "Availability percentage (e.g., 99.9)."
+              },
+              "latency_p50_ms": {
+                "type": "number",
+                "description": "Median latency in milliseconds."
+              },
+              "latency_p99_ms": {
+                "type": "number",
+                "description": "99th percentile latency in milliseconds."
+              }
+            }
+          },
+          "quality_scores": {
+            "type": "object",
+            "description": "Quality benchmark scores for the model.",
+            "properties": {
+              "overall": {
+                "type": "number",
+                "description": "Overall quality score."
+              },
+              "code": {
+                "type": "number",
+                "description": "Code generation quality score."
+              },
+              "math": {
+                "type": "number",
+                "description": "Math reasoning quality score."
+              },
+              "reasoning": {
+                "type": "number",
+                "description": "General reasoning quality score."
+              }
+            }
+          }
+        }
+      },
+      "ModelListResponse": {
+        "type": "object",
+        "description": "Response from listing models.",
+        "properties": {
+          "object": {
+            "type": "string",
+            "enum": ["list"],
+            "description": "The object type, always 'list'."
+          },
+          "data": {
+            "type": "array",
+            "description": "Array of model objects.",
+            "items": {
+              "$ref": "#/components/schemas/Model"
+            }
+          },
+          "total": {
+            "type": "integer",
+            "description": "Total number of models available."
+          },
+          "has_more": {
+            "type": "boolean",
+            "description": "Whether there are more models available beyond this response."
+          }
+        }
+      },
+      "ModelComparisonResponse": {
+        "type": "object",
+        "description": "Response from comparing models.",
+        "properties": {
+          "object": {
+            "type": "string",
+            "enum": ["model_comparison"],
+            "description": "The object type, always 'model_comparison'."
+          },
+          "models": {
+            "type": "array",
+            "items": { "type": "string" },
+            "description": "The list of model IDs being compared."
+          },
+          "comparison": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "object",
+              "description": "Comparison data for a specific model."
+            },
+            "description": "An object mapping each model ID to its comparison data including pricing, performance, and quality scores."
+          },
+          "highlights": {
+            "type": "object",
+            "description": "Highlights identifying the best model in each category.",
+            "properties": {
+              "cheapest": {
+                "type": "string",
+                "description": "Model ID of the cheapest option."
+              },
+              "fastest": {
+                "type": "string",
+                "description": "Model ID of the fastest option."
+              },
+              "best_quality": {
+                "type": "string",
+                "description": "Model ID with the highest overall quality score."
+              },
+              "best_code": {
+                "type": "string",
+                "description": "Model ID with the highest code quality score."
+              },
+              "longest_context": {
+                "type": "string",
+                "description": "Model ID with the longest context window."
+              }
+            }
+          }
+        }
+      },
+      "CreateMessageRequest": {
+        "type": "object",
+        "description": "Request body for creating a message (Anthropic-compatible format).",
+        "required": ["model", "messages", "max_tokens"],
+        "properties": {
+          "model": {
+            "type": "string",
+            "description": "ID of the model to use."
+          },
+          "messages": {
+            "type": "array",
+            "description": "A list of input messages.",
+            "items": {
+              "type": "object",
+              "required": ["role", "content"],
+              "properties": {
+                "role": {
+                  "type": "string",
+                  "enum": ["user", "assistant"],
+                  "description": "The role of the message author."
+                },
+                "content": {
+                  "oneOf": [
+                    { "type": "string" },
+                    {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "description": "A content block (text, image, etc.)."
+                      }
+                    }
+                  ],
+                  "description": "The content of the message. Can be a string or an array of content blocks."
+                }
+              }
+            }
+          },
+          "max_tokens": {
+            "type": "integer",
+            "description": "The maximum number of tokens to generate before stopping."
+          },
+          "system": {
+            "oneOf": [
+              { "type": "string" },
+              {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "description": "A system content block."
+                }
+              }
+            ],
+            "description": "System prompt. Can be a string or an array of content blocks."
+          },
+          "temperature": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 1,
+            "description": "Sampling temperature between 0 and 1."
+          },
+          "top_p": {
+            "type": "number",
+            "description": "Nucleus sampling parameter."
+          },
+          "stream": {
+            "type": "boolean",
+            "description": "Whether to stream the response using server-sent events.",
+            "default": false
+          },
+          "stop_sequences": {
+            "type": "array",
+            "items": { "type": "string" },
+            "description": "Custom text sequences that will cause the model to stop generating."
+          },
+          "tools": {
+            "type": "array",
+            "description": "Definitions of tools that the model may use.",
+            "items": {
+              "type": "object",
+              "properties": {
+                "name": {
+                  "type": "string",
+                  "description": "The name of the tool."
+                },
+                "description": {
+                  "type": "string",
+                  "description": "A description of what the tool does."
+                },
+                "input_schema": {
+                  "type": "object",
+                  "description": "JSON Schema for the tool's input parameters."
+                }
+              }
+            }
+          },
+          "tool_choice": {
+            "type": "object",
+            "description": "How the model should use the provided tools.",
+            "properties": {
+              "type": {
+                "type": "string",
+                "description": "The tool choice type (e.g., 'auto', 'any', 'tool')."
+              },
+              "name": {
+                "type": "string",
+                "description": "The name of the tool to use (when type is 'tool')."
+              }
+            }
+          },
+          "metadata": {
+            "type": "object",
+            "description": "Optional metadata for the request.",
+            "properties": {
+              "user_id": {
+                "type": "string",
+                "description": "An external identifier for the user making the request."
+              }
+            }
+          }
+        }
+      },
+      "MessageResponse": {
+        "type": "object",
+        "description": "Response from the messages endpoint (Anthropic-compatible format).",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "Unique identifier for the message."
+          },
+          "type": {
+            "type": "string",
+            "enum": ["message"],
+            "description": "The object type, always 'message'."
+          },
+          "role": {
+            "type": "string",
+            "enum": ["assistant"],
+            "description": "The role of the generated message, always 'assistant'."
+          },
+          "content": {
+            "type": "array",
+            "description": "The generated content blocks.",
+            "items": {
+              "type": "object",
+              "properties": {
+                "type": {
+                  "type": "string",
+                  "enum": ["text"],
+                  "description": "The type of content block."
+                },
+                "text": {
+                  "type": "string",
+                  "description": "The generated text."
+                }
+              }
+            }
+          },
+          "model": {
+            "type": "string",
+            "description": "The model that handled the request."
+          },
+          "stop_reason": {
+            "type": "string",
+            "description": "The reason the model stopped generating (e.g., 'end_turn', 'max_tokens', 'stop_sequence', 'tool_use')."
+          },
+          "stop_sequence": {
+            "type": ["string", "null"],
+            "description": "Which stop sequence was generated, if any."
+          },
+          "usage": {
+            "type": "object",
+            "description": "Token usage information.",
+            "properties": {
+              "input_tokens": {
+                "type": "integer",
+                "description": "Number of input tokens."
+              },
+              "output_tokens": {
+                "type": "integer",
+                "description": "Number of output tokens."
+              },
+              "cache_creation_input_tokens": {
+                "type": "integer",
+                "description": "Number of input tokens used to create a cache entry."
+              },
+              "cache_read_input_tokens": {
+                "type": "integer",
+                "description": "Number of input tokens read from cache."
+              }
+            }
+          }
+        }
+      },
+      "CompletionUsage": {
+        "type": "object",
+        "description": "Token usage statistics for a completion request.",
+        "properties": {
+          "prompt_tokens": {
+            "type": "integer",
+            "description": "Number of tokens in the prompt."
+          },
+          "completion_tokens": {
+            "type": "integer",
+            "description": "Number of tokens in the generated completion."
+          },
+          "total_tokens": {
+            "type": "integer",
+            "description": "Total number of tokens used (prompt + completion)."
+          },
+          "cost_usd": {
+            "type": "number",
+            "description": "Estimated cost of the request in USD."
+          }
+        }
+      },
+      "OpenModexMetadata": {
+        "type": "object",
+        "description": "OpenModex-specific metadata included in completion responses.",
+        "properties": {
+          "request_id": {
+            "type": "string",
+            "description": "Unique identifier for the request, useful for debugging and support."
+          },
+          "model_used": {
+            "type": "string",
+            "description": "The actual model that served the request (may differ from requested model if routing or fallback occurred)."
+          },
+          "provider": {
+            "type": "string",
+            "description": "The provider that served the request."
+          },
+          "cache_hit": {
+            "type": "boolean",
+            "description": "Whether the response was served from cache."
+          },
+          "routing_strategy": {
+            "type": "string",
+            "description": "The routing strategy that was applied."
+          },
+          "fallback_used": {
+            "type": "boolean",
+            "description": "Whether a fallback model was used."
+          },
+          "latency_ms": {
+            "type": "number",
+            "description": "Total request latency in milliseconds."
+          }
+        }
+      },
+      "ErrorResponse": {
+        "type": "object",
+        "description": "Error response returned by the API.",
+        "properties": {
+          "error": {
+            "type": "object",
+            "description": "The error details.",
+            "properties": {
+              "message": {
+                "type": "string",
+                "description": "A human-readable error message."
+              },
+              "type": {
+                "type": "string",
+                "description": "The error type (e.g., 'invalid_request_error', 'authentication_error')."
+              },
+              "code": {
+                "type": "string",
+                "description": "A machine-readable error code."
+              }
+            },
+            "required": ["message", "type", "code"]
+          }
+        },
+        "required": ["error"]
+      }
+    },
+    "responses": {
+      "BadRequest": {
+        "description": "Bad request. The request was invalid or cannot be served.",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/ErrorResponse"
+            }
+          }
+        }
+      },
+      "Unauthorized": {
+        "description": "Unauthorized. Invalid or missing API key.",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/ErrorResponse"
+            }
+          }
+        }
+      },
+      "Forbidden": {
+        "description": "Forbidden. The API key does not have permission for the requested resource.",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/ErrorResponse"
+            }
+          }
+        }
+      },
+      "NotFound": {
+        "description": "Not found. The requested resource does not exist.",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/ErrorResponse"
+            }
+          }
+        }
+      },
+      "RateLimited": {
+        "description": "Too many requests. Rate limit exceeded.",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/ErrorResponse"
+            }
+          }
+        }
+      },
+      "InternalError": {
+        "description": "Internal server error.",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/ErrorResponse"
+            }
+          }
+        }
+      },
+      "BadGateway": {
+        "description": "Bad gateway. The upstream provider returned an invalid response.",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/ErrorResponse"
+            }
+          }
+        }
+      },
+      "ServiceUnavailable": {
+        "description": "Service unavailable. The upstream provider or service is temporarily unavailable.",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/ErrorResponse"
+            }
+          }
+        }
       }
     }
-  },
-  "paths": {}
+  }
 }
