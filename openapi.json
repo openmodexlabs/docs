@@ -1,0 +1,38 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "OpenModex API",
+    "description": "One API, 100+ AI models. OpenAI-compatible with intelligent routing, automatic fallbacks, and unified billing.",
+    "version": "1.0.0",
+    "contact": {
+      "name": "OpenModex",
+      "url": "https://openmodex.com",
+      "email": "support@openmodex.com"
+    }
+  },
+  "servers": [
+    {
+      "url": "https://api.openmodex.com/v1",
+      "description": "Production"
+    },
+    {
+      "url": "https://api-sandbox.openmodex.com/v1",
+      "description": "Sandbox"
+    }
+  ],
+  "security": [
+    {
+      "BearerAuth": []
+    }
+  ],
+  "components": {
+    "securitySchemes": {
+      "BearerAuth": {
+        "type": "http",
+        "scheme": "bearer",
+        "description": "API key authentication. Use your OpenModex API key as the bearer token."
+      }
+    }
+  },
+  "paths": {}
+}

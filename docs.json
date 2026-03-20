@@ -1014,13 +1014,7 @@
   "search": {
     "prompt": "Search documentation..."
   },
-  "api": {
-    "baseUrl": "https://api.openmodex.com/v1",
-    "auth": {
-      "method": "bearer",
-      "name": "Authorization"
-    }
-  },
+  "openapi": ["openapi.json"],
   "seo": {
     "indexHiddenPages": false
   },
