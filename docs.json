@@ -23,10 +23,7 @@
       "weight": 400
     }
   },
-  "layout": "sidenav",
-  "sidebar": {
-    "items": "border"
-  },
+  "layout": "topnav",
   "rounded": "default",
   "navbar": {
     "links": [
