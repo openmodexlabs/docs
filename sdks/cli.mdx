@@ -3,34 +3,206 @@ title: "CLI"
 description: "Command-line interface for the OpenModex API."
 ---
 
-<Note>
-  The OpenModex CLI is currently in early development. Core features are coming soon.
-</Note>
-
 ## Installation
 
 ```bash
 npm install -g @openmodex/cli
 ```
 
-## Usage
+Verify the installation:
 
 ```bash
-# Check version
 openmodex --version
-
-# Show help
-openmodex --help
 ```
 
-## Planned Features
+## Authentication
 
-| Command | Description | Status |
-|---------|-------------|--------|
-| `openmodex chat` | Interactive chat from terminal | Coming Soon |
-| `openmodex models` | List and compare models | Coming Soon |
-| `openmodex config` | Manage API keys and settings | Coming Soon |
-| `openmodex playground` | Quick prompt testing | Coming Soon |
+Before using the CLI, set up your API key:
+
+```bash
+# Interactive login (stores key in ~/.openmodex/config.json)
+openmodex auth login
+
+# Or set via environment variable
+export OPENMODEX_API_KEY=omx_sk_...
+
+# Or pass directly to any command
+openmodex chat --api-key omx_sk_...
+```
+
+## Global Options
+
+These options are available on all commands:
+
+| Option | Description |
+|--------|-------------|
+| `--api-key <key>` | API key (overrides config and env) |
+| `--base-url <url>` | API base URL (default: `https://api.openmodex.com/v1`) |
+| `--model <model>` | Model to use |
+| `--output json\|table\|text` | Output format (default: `text`) |
+| `--no-color` | Disable colored output |
+| `--help` | Show help |
+| `--version` | Show version |
+
+## Commands
+
+### `openmodex chat`
+
+Interactive chat with streaming output.
+
+```bash
+# Start interactive chat session
+openmodex chat
+
+# Start with a specific model
+openmodex chat --model claude-3.5-sonnet
+
+# One-shot mode (non-interactive)
+openmodex chat -m "What is the capital of France?"
+
+# One-shot with a specific model and JSON output
+openmodex chat -m "Explain quantum computing" --model gpt-4o --output json
+```
+
+In interactive mode, type your messages and press Enter to send. The assistant response streams in real-time. Type `exit` or press `Ctrl+C` to quit.
+
+### `openmodex models`
+
+List, inspect, and compare available models.
+
+```bash
+# List all available models
+openmodex models list
+
+# List models in table format
+openmodex models list --output table
+
+# Get detailed info for a specific model
+openmodex models info gpt-4o
+
+# Compare models side by side
+openmodex models compare gpt-4o claude-3.5-sonnet
+
+# Compare with table output
+openmodex models compare gpt-4o claude-3.5-sonnet gemini-2.0-flash --output table
+```
+
+### `openmodex completions`
+
+Create text completions.
+
+```bash
+# Create a completion
+openmodex completions create --model gpt-4o --prompt "Once upon a time"
+
+# With parameters
+openmodex completions create \
+  --model gpt-4o \
+  --prompt "Write a haiku about programming" \
+  --temperature 0.9 \
+  --max-tokens 100
+
+# JSON output
+openmodex completions create --model gpt-4o --prompt "Hello" --output json
+```
+
+### `openmodex embeddings`
+
+Create text embeddings.
+
+```bash
+# Create an embedding
+openmodex embeddings create --model text-embedding-3-small --input "Hello world"
+
+# JSON output for programmatic use
+openmodex embeddings create \
+  --model text-embedding-3-small \
+  --input "Hello world" \
+  --output json
+```
+
+### `openmodex config`
+
+Manage CLI configuration stored in `~/.openmodex/config.json`.
+
+```bash
+# Set a config value
+openmodex config set api_key omx_sk_...
+openmodex config set model gpt-4o
+openmodex config set base_url https://api.openmodex.com/v1
+
+# Get a config value
+openmodex config get model
+
+# List all config values
+openmodex config list
+
+# Reset config to defaults
+openmodex config reset
+```
+
+### `openmodex api-keys`
+
+Manage API keys from the command line.
+
+```bash
+# List your API keys
+openmodex api-keys list
+
+# Create a new API key
+openmodex api-keys create --name "production-key"
+
+# Output in JSON format
+openmodex api-keys list --output json
+```
+
+### `openmodex auth`
+
+Manage authentication state.
+
+```bash
+# Interactive login
+openmodex auth login
+
+# Log out (removes stored credentials)
+openmodex auth logout
+
+# Check authentication status
+openmodex auth status
+```
+
+## Examples
+
+### Pipe input from another command
+
+```bash
+echo "Summarize this text" | openmodex chat -m -
+
+cat README.md | openmodex chat -m "Summarize this document:"
+```
+
+### Use JSON output for scripting
+
+```bash
+# Get model list as JSON and pipe to jq
+openmodex models list --output json | jq '.data[].id'
+
+# Get a completion and extract the text
+openmodex completions create \
+  --model gpt-4o \
+  --prompt "Hello" \
+  --output json | jq -r '.choices[0].text'
+```
+
+### Switch between models quickly
+
+```bash
+# Set a default model
+openmodex config set model claude-3.5-sonnet
+
+# Override for a single command
+openmodex chat -m "Hello" --model gpt-4o
+```
 
 ## Links
 

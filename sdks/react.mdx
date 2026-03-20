@@ -1,6 +1,6 @@
 ---
 title: "React Hooks"
-description: "React hooks for building AI-powered interfaces — useChat, useCompletion, useModels."
+description: "React hooks for building AI-powered interfaces — useChat, useCompletion, useModels, useModelCompare, useEmbedding."
 ---
 
 ## Installation
@@ -11,18 +11,55 @@ npm install @openmodex/react
 
 Requires **React 18+**.
 
+## OpenModexProvider
+
+Wrap your app with `OpenModexProvider` to set global configuration for all hooks:
+
+```tsx
+import { OpenModexProvider } from '@openmodex/react';
+
+function App() {
+  return (
+    <OpenModexProvider
+      apiKey="omx_sk_..."
+      baseURL="https://api.openmodex.com/v1"
+      model="gpt-4o"
+    >
+      <ChatApp />
+    </OpenModexProvider>
+  );
+}
+```
+
+When using the provider, individual hooks inherit the global `apiKey`, `baseURL`, and `model` values. You can still override them per-hook.
+
 ## useChat
 
-Full-featured chat hook with streaming, message history, and abort support.
+Full-featured chat hook with streaming, message history, abort support, and smart routing.
 
 ```tsx
 import { useChat } from '@openmodex/react';
 
 function ChatApp() {
-  const { messages, input, setInput, sendMessage, isLoading, stop, error } = useChat({
+  const {
+    messages,
+    input,
+    setInput,
+    sendMessage,
+    isLoading,
+    stop,
+    error,
+    reload,
+    append,
+    metadata,
+  } = useChat({
     apiKey: 'omx_sk_...',
     model: 'gpt-4o',
     system: 'You are a helpful assistant.',
+    temperature: 0.7,
+    max_tokens: 1024,
+    top_p: 0.9,
+    routing: { strategy: 'cost-optimized' },
     onFinish: (message) => console.log('Done:', message.content),
     onError: (error) => console.error(error),
   });
@@ -47,7 +84,13 @@ function ChatApp() {
         {isLoading && <button onClick={stop}>Stop</button>}
       </form>
 
+      <button onClick={reload}>Regenerate last response</button>
+
       {error && <p style={{ color: 'red' }}>{error.message}</p>}
+
+      {metadata && (
+        <p>Model: {metadata.model_used} | Latency: {metadata.latency_ms}ms</p>
+      )}
     </div>
   );
 }
@@ -57,31 +100,38 @@ function ChatApp() {
 
 | Option | Type | Default | Description |
 |--------|------|---------|-------------|
-| `apiKey` | `string` | — | API key |
+| `apiKey` | `string` | -- | API key (or use `OpenModexProvider`) |
 | `baseURL` | `string` | `https://api.openmodex.com/v1` | API URL |
 | `model` | `string` | `gpt-4o` | Model to use |
 | `initialMessages` | `ChatMessage[]` | `[]` | Pre-populate conversation |
 | `initialInput` | `string` | `''` | Initial input value |
-| `system` | `string` | — | System prompt |
-| `onFinish` | `(message) => void` | — | Called when done |
-| `onError` | `(error) => void` | — | Called on error |
+| `system` | `string` | -- | System prompt |
+| `temperature` | `number` | -- | Sampling temperature (0-2) |
+| `max_tokens` | `number` | -- | Maximum tokens to generate |
+| `top_p` | `number` | -- | Nucleus sampling parameter |
+| `routing` | `RoutingConfig` | -- | OpenModex routing config (`{ strategy, fallback, allow_upgrade }`) |
+| `onFinish` | `(message) => void` | -- | Called when response completes |
+| `onError` | `(error) => void` | -- | Called on error |
 
 ### Returns
 
 | Property | Type | Description |
 |----------|------|-------------|
-| `messages` | `ChatMessage[]` | All messages |
-| `setMessages` | `Dispatch` | Set messages |
-| `input` | `string` | Current input |
-| `setInput` | `Dispatch` | Update input |
-| `sendMessage` | `(content?) => Promise` | Send message |
-| `isLoading` | `boolean` | Loading state |
+| `messages` | `ChatMessage[]` | All messages in the conversation |
+| `setMessages` | `Dispatch` | Directly set messages |
+| `input` | `string` | Current input value |
+| `setInput` | `Dispatch` | Update input value |
+| `sendMessage` | `(content?) => Promise` | Send a message (uses `input` if no content provided) |
+| `append` | `(message) => Promise` | Append a message and get a response |
+| `reload` | `() => Promise` | Regenerate the last assistant response |
+| `isLoading` | `boolean` | Whether a request is in progress |
 | `error` | `Error \| null` | Last error |
-| `stop` | `() => void` | Abort stream |
+| `stop` | `() => void` | Abort the current stream |
+| `metadata` | `OpenModexMetadata \| null` | OpenModex response metadata (model used, latency, cache hit, etc.) |
 
 ## useCompletion
 
-Single-turn completion with streaming.
+Single-turn completion with streaming and routing support.
 
 ```tsx
 import { useCompletion } from '@openmodex/react';
@@ -90,6 +140,9 @@ function CompletionApp() {
   const { completion, input, setInput, complete, isLoading, stop } = useCompletion({
     apiKey: 'omx_sk_...',
     model: 'gpt-4o',
+    temperature: 0.8,
+    max_tokens: 256,
+    routing: { strategy: 'cost-optimized' },
   });
 
   return (
@@ -103,9 +156,19 @@ function CompletionApp() {
 }
 ```
 
+### Options
+
+| Option | Type | Default | Description |
+|--------|------|---------|-------------|
+| `apiKey` | `string` | -- | API key |
+| `model` | `string` | `gpt-4o` | Model to use |
+| `temperature` | `number` | -- | Sampling temperature |
+| `max_tokens` | `number` | -- | Maximum tokens to generate |
+| `routing` | `RoutingConfig` | -- | OpenModex routing config |
+
 ## useModels
 
-Fetch available models.
+Fetch and filter available models.
 
 ```tsx
 import { useModels } from '@openmodex/react';
@@ -113,6 +176,10 @@ import { useModels } from '@openmodex/react';
 function ModelList() {
   const { models, isLoading, error, refetch } = useModels({
     apiKey: 'omx_sk_...',
+    category: 'chat',
+    provider: 'openai',
+    search: 'gpt',
+    sort: 'name',
   });
 
   if (isLoading) return <p>Loading models...</p>;
@@ -122,7 +189,7 @@ function ModelList() {
     <ul>
       {models.map((m) => (
         <li key={m.id}>
-          <strong>{m.name}</strong> — {m.provider}
+          <strong>{m.name}</strong> -- {m.provider}
           <br />
           <small>{m.description}</small>
         </li>
@@ -131,6 +198,135 @@ function ModelList() {
   );
 }
 ```
+
+### Options
+
+| Option | Type | Default | Description |
+|--------|------|---------|-------------|
+| `apiKey` | `string` | -- | API key |
+| `category` | `string` | -- | Filter by model category (e.g. `"chat"`, `"embedding"`) |
+| `provider` | `string` | -- | Filter by provider (e.g. `"openai"`, `"anthropic"`) |
+| `search` | `string` | -- | Search models by name |
+| `sort` | `string` | -- | Sort order (e.g. `"name"`, `"provider"`, `"created"`) |
+
+### Returns
+
+| Property | Type | Description |
+|----------|------|-------------|
+| `models` | `Model[]` | Filtered list of models |
+| `isLoading` | `boolean` | Loading state |
+| `error` | `Error \| null` | Last error |
+| `refetch` | `() => void` | Re-fetch the model list |
+
+## useModelCompare
+
+Compare models side by side with pricing, performance, and quality scores.
+
+```tsx
+import { useModelCompare } from '@openmodex/react';
+
+function ModelCompare() {
+  const { comparison, highlights, isLoading, error } = useModelCompare({
+    apiKey: 'omx_sk_...',
+    models: ['gpt-4o', 'claude-3.5-sonnet', 'gemini-2.0-flash'],
+  });
+
+  if (isLoading) return <p>Comparing models...</p>;
+  if (error) return <p>Error: {error.message}</p>;
+
+  return (
+    <div>
+      {highlights && (
+        <div>
+          <p>Cheapest: {highlights.cheapest}</p>
+          <p>Fastest: {highlights.fastest}</p>
+          <p>Best quality: {highlights.best_quality}</p>
+        </div>
+      )}
+
+      <table>
+        <thead>
+          <tr>
+            <th>Model</th>
+            <th>Provider</th>
+            <th>Input $/M</th>
+            <th>Latency (p50)</th>
+          </tr>
+        </thead>
+        <tbody>
+          {comparison && Object.entries(comparison).map(([id, item]) => (
+            <tr key={id}>
+              <td>{item.name}</td>
+              <td>{item.provider}</td>
+              <td>${item.pricing?.openmodex_input_per_m}</td>
+              <td>{item.performance?.latency_p50_ms}ms</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  );
+}
+```
+
+### Options
+
+| Option | Type | Default | Description |
+|--------|------|---------|-------------|
+| `apiKey` | `string` | -- | API key |
+| `models` | `string[]` | -- | Array of model IDs to compare |
+
+### Returns
+
+| Property | Type | Description |
+|----------|------|-------------|
+| `comparison` | `Record<string, ComparisonItem>` | Model comparison data keyed by model ID |
+| `highlights` | `ComparisonHighlights \| null` | Winners in each category (cheapest, fastest, best quality) |
+| `isLoading` | `boolean` | Loading state |
+| `error` | `Error \| null` | Last error |
+
+## useEmbedding
+
+Create text embeddings.
+
+```tsx
+import { useEmbedding } from '@openmodex/react';
+
+function EmbeddingApp() {
+  const { embedding, isLoading, error, create } = useEmbedding({
+    apiKey: 'omx_sk_...',
+    model: 'text-embedding-3-small',
+  });
+
+  return (
+    <div>
+      <button onClick={() => create('Hello world')} disabled={isLoading}>
+        Create Embedding
+      </button>
+
+      {isLoading && <p>Creating embedding...</p>}
+      {error && <p>Error: {error.message}</p>}
+      {embedding && <p>Dimensions: {embedding.length}</p>}
+    </div>
+  );
+}
+```
+
+### Options
+
+| Option | Type | Default | Description |
+|--------|------|---------|-------------|
+| `apiKey` | `string` | -- | API key |
+| `model` | `string` | -- | Embedding model to use |
+
+### Returns
+
+| Property | Type | Description |
+|----------|------|-------------|
+| `embedding` | `number[] \| null` | The embedding vector |
+| `isLoading` | `boolean` | Loading state |
+| `error` | `Error \| null` | Last error |
+| `create` | `(input: string) => Promise` | Create an embedding for the given text |
 
 ## Links
 

@@ -127,11 +127,12 @@
                   "sdks/overview",
                   "sdks/node",
                   "sdks/python",
-                  "sdks/go"
+                  "sdks/go",
+                  "sdks/rust"
                 ]
               },
               {
-                "group": "Frontend",
+                "group": "Tools & Frontend",
                 "pages": [
                   "sdks/react",
                   "sdks/cli"
@@ -246,11 +247,12 @@
                   "zh/sdks/overview",
                   "zh/sdks/node",
                   "zh/sdks/python",
-                  "zh/sdks/go"
+                  "zh/sdks/go",
+                  "zh/sdks/rust"
                 ]
               },
               {
-                "group": "前端",
+                "group": "工具 & 前端",
                 "pages": [
                   "zh/sdks/react",
                   "zh/sdks/cli"
@@ -365,11 +367,12 @@
                   "zh-Hant/sdks/overview",
                   "zh-Hant/sdks/node",
                   "zh-Hant/sdks/python",
-                  "zh-Hant/sdks/go"
+                  "zh-Hant/sdks/go",
+                  "zh-Hant/sdks/rust"
                 ]
               },
               {
-                "group": "前端",
+                "group": "工具 & 前端",
                 "pages": [
                   "zh-Hant/sdks/react",
                   "zh-Hant/sdks/cli"
@@ -484,11 +487,12 @@
                   "ja/sdks/overview",
                   "ja/sdks/node",
                   "ja/sdks/python",
-                  "ja/sdks/go"
+                  "ja/sdks/go",
+                  "ja/sdks/rust"
                 ]
               },
               {
-                "group": "フロントエンド",
+                "group": "ツール & フロントエンド",
                 "pages": [
                   "ja/sdks/react",
                   "ja/sdks/cli"
@@ -603,11 +607,12 @@
                   "ko/sdks/overview",
                   "ko/sdks/node",
                   "ko/sdks/python",
-                  "ko/sdks/go"
+                  "ko/sdks/go",
+                  "ko/sdks/rust"
                 ]
               },
               {
-                "group": "프론트엔드",
+                "group": "도구 & 프론트엔드",
                 "pages": [
                   "ko/sdks/react",
                   "ko/sdks/cli"
@@ -722,11 +727,12 @@
                   "vi/sdks/overview",
                   "vi/sdks/node",
                   "vi/sdks/python",
-                  "vi/sdks/go"
+                  "vi/sdks/go",
+                  "vi/sdks/rust"
                 ]
               },
               {
-                "group": "Frontend",
+                "group": "Công cụ & Frontend",
                 "pages": [
                   "vi/sdks/react",
                   "vi/sdks/cli"
@@ -841,11 +847,12 @@
                   "es/sdks/overview",
                   "es/sdks/node",
                   "es/sdks/python",
-                  "es/sdks/go"
+                  "es/sdks/go",
+                  "es/sdks/rust"
                 ]
               },
               {
-                "group": "Frontend",
+                "group": "Herramientas & Frontend",
                 "pages": [
                   "es/sdks/react",
                   "es/sdks/cli"
@@ -960,11 +967,12 @@
                   "fr/sdks/overview",
                   "fr/sdks/node",
                   "fr/sdks/python",
-                  "fr/sdks/go"
+                  "fr/sdks/go",
+                  "fr/sdks/rust"
                 ]
               },
               {
-                "group": "Frontend",
+                "group": "Outils & Frontend",
                 "pages": [
                   "fr/sdks/react",
                   "fr/sdks/cli"

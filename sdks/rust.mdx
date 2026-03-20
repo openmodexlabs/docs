@@ -1,0 +1,284 @@
+---
+title: "Rust SDK"
+description: "Official Rust SDK for the OpenModex API."
+---
+
+## Installation
+
+Add `openmodex` to your `Cargo.toml`:
+
+```toml
+[dependencies]
+openmodex = "0.1"
+tokio = { version = "1", features = ["full"] }
+futures = "0.3"  # Required for streaming
+```
+
+Requires **Rust 2021 edition** (1.56+). The SDK uses `tokio` for async and `reqwest` for HTTP.
+
+## Quick Start
+
+```rust
+use openmodex::{OpenModex, ChatCompletionRequest, ChatMessage, Error};
+
+#[tokio::main]
+async fn main() -> Result<(), Error> {
+    let client = OpenModex::new("omx_sk_YOUR_KEY")?;
+
+    let response = client.chat().completions().create(
+        ChatCompletionRequest::new("gpt-4o")
+            .message(ChatMessage::system("You are a helpful assistant."))
+            .message(ChatMessage::user("Hello!"))
+            .temperature(0.7)
+            .max_tokens(256)
+    ).await?;
+
+    let content = response.choices[0]
+        .message.as_ref()
+        .and_then(|m| m.content.as_deref())
+        .unwrap_or("");
+    println!("{content}");
+
+    Ok(())
+}
+```
+
+<Tip>
+  You can also create a client from the `OPENMODEX_API_KEY` environment variable using `OpenModex::from_env()?`.
+</Tip>
+
+## Configuration
+
+Use `ClientBuilder` for advanced configuration:
+
+```rust
+use std::time::Duration;
+
+let client = OpenModex::builder()
+    .api_key("omx_sk_...")
+    .base_url("https://api.openmodex.com/v1")
+    .timeout(Duration::from_secs(60))
+    .max_retries(3)
+    .default_model("gpt-4o")
+    .fallback_models(["claude-3.5-sonnet", "gemini-2.0-flash"])
+    .default_header("X-Custom", "value")
+    .build()?;
+```
+
+| Option | Method | Default | Description |
+|--------|--------|---------|-------------|
+| API key | `.api_key()` | `OPENMODEX_API_KEY` env | API key |
+| Base URL | `.base_url()` | `https://api.openmodex.com/v1` | API base URL |
+| Timeout | `.timeout()` | 30 seconds | Request timeout |
+| Max retries | `.max_retries()` | `2` | Auto retry count (retries on 429, 5xx) |
+| Default model | `.default_model()` | -- | Default model for requests |
+| Fallback models | `.fallback_models()` | `[]` | Fallback model chain |
+| Custom headers | `.default_header()` | -- | Custom headers on all requests |
+
+## Chat Completions
+
+```rust
+let response = client.chat().completions().create(
+    ChatCompletionRequest::new("gpt-4o")
+        .message(ChatMessage::system("You are a helpful assistant."))
+        .message(ChatMessage::user("What is Rust?"))
+        .temperature(0.7)
+        .max_tokens(500)
+        .top_p(0.9)
+).await?;
+
+println!("{}", response.choices[0]
+    .message.as_ref()
+    .and_then(|m| m.content.as_deref())
+    .unwrap_or(""));
+
+// Access usage statistics
+if let Some(usage) = &response.usage {
+    println!("Tokens: {} prompt + {} completion = {} total",
+        usage.prompt_tokens, usage.completion_tokens, usage.total_tokens);
+}
+```
+
+## Streaming
+
+The SDK returns a `ChatCompletionStream` that implements `futures::Stream`:
+
+```rust
+use futures::StreamExt;
+
+let mut stream = client.chat().completions().create_stream(
+    ChatCompletionRequest::new("gpt-4o")
+        .message(ChatMessage::user("Write a poem about Rust."))
+        .temperature(0.9)
+        .max_tokens(512)
+).await?;
+
+while let Some(chunk) = stream.next().await {
+    let chunk = chunk?;
+    if let Some(content) = chunk.choices.first()
+        .and_then(|c| c.delta.content.as_ref())
+    {
+        print!("{content}");
+    }
+}
+```
+
+## Embeddings
+
+```rust
+use openmodex::EmbeddingRequest;
+
+// Single input
+let response = client.embeddings().create(
+    EmbeddingRequest::new("text-embedding-3-small", "Hello world")
+).await?;
+
+println!("Dimensions: {}", response.data[0].embedding.len());
+
+// Batch input
+let response = client.embeddings().create(
+    EmbeddingRequest::new_batch(
+        "text-embedding-3-small",
+        vec!["Hello".into(), "World".into()]
+    ).dimensions(256)
+).await?;
+```
+
+## Models
+
+```rust
+// List all available models
+let models = client.models().list().await?;
+for model in &models.data {
+    println!("{}: {} ({})", model.id, model.name, model.provider);
+}
+
+// Get model details
+let model = client.models().get("gpt-4o").await?;
+println!("Context length: {}", model.context_length);
+
+// Compare models side by side
+let comparison = client.models()
+    .compare(&["gpt-4o", "claude-3.5-sonnet"])
+    .await?;
+
+if let Some(highlights) = &comparison.highlights {
+    println!("Cheapest: {}", highlights.cheapest);
+    println!("Fastest: {}", highlights.fastest);
+    println!("Best quality: {}", highlights.best_quality);
+}
+```
+
+## Smart Routing
+
+Configure per-request routing with the OpenModex routing extension:
+
+```rust
+use openmodex::RoutingConfig;
+
+let response = client.chat().completions().create(
+    ChatCompletionRequest::new("gpt-4o")
+        .message(ChatMessage::user("Hello!"))
+        .routing(
+            RoutingConfig::new("cost-optimized")
+                .fallback(vec!["claude-3.5-sonnet".into(), "gemini-2.0-flash".into()])
+                .allow_upgrade(true)
+        )
+).await?;
+
+// Check which model actually served the request
+if let Some(meta) = &response.openmodex {
+    println!("Model used: {} ({})", meta.model_used, meta.provider);
+    println!("Routing strategy: {}", meta.routing_strategy);
+}
+```
+
+## Cache Control
+
+Enable prompt caching per request:
+
+```rust
+use openmodex::CacheConfig;
+
+let response = client.chat().completions().create(
+    ChatCompletionRequest::new("gpt-4o")
+        .message(ChatMessage::user("What is 2 + 2?"))
+        .cache(CacheConfig::enabled().ttl(3600))
+).await?;
+
+if let Some(meta) = &response.openmodex {
+    println!("Cache hit: {}", meta.cache_hit);
+}
+```
+
+## Fallbacks
+
+Configure client-level fallbacks that activate automatically on failures (5xx, 429, or network errors):
+
+```rust
+let client = OpenModex::builder()
+    .api_key("omx_sk_...")
+    .fallback_models(["claude-3.5-sonnet", "gpt-4o-mini", "gemini-1.5-pro"])
+    .max_retries(2)
+    .build()?;
+
+// If gpt-4o fails, the SDK tries claude-3.5-sonnet, then gpt-4o-mini, then gemini-1.5-pro
+let response = client.chat().completions().create(
+    ChatCompletionRequest::new("gpt-4o")
+        .message(ChatMessage::user("Hello!"))
+).await?;
+
+if let Some(meta) = &response.openmodex {
+    println!("Fallback used: {}", meta.fallback_used);
+}
+```
+
+## Error Handling
+
+```rust
+use openmodex::{Error, ApiError};
+
+match client.chat().completions().create(request).await {
+    Ok(response) => println!("{:?}", response),
+    Err(Error::Api(api_err)) => {
+        println!("Status: {}", api_err.status_code);
+        println!("Message: {}", api_err.message);
+        println!("Rate limited: {}", api_err.is_rate_limited());
+        println!("Auth error: {}", api_err.is_auth_error());
+        println!("Server error: {}", api_err.is_server_error());
+    }
+    Err(Error::MissingApiKey) => println!("No API key provided"),
+    Err(Error::AllFallbacksFailed) => println!("All fallback models failed"),
+    Err(Error::Timeout) => println!("Request timed out"),
+    Err(e) => println!("Other error: {e}"),
+}
+```
+
+| Error Variant | Description |
+|--------------|-------------|
+| `Error::Api(ApiError)` | API returned an error (4xx/5xx) with status code and message |
+| `Error::Http` | Network or transport error |
+| `Error::Json` | JSON serialization/deserialization error |
+| `Error::MissingApiKey` | No API key provided and `OPENMODEX_API_KEY` not set |
+| `Error::AllFallbacksFailed` | All models in the fallback chain failed |
+| `Error::Stream` | Error during SSE stream parsing |
+| `Error::Timeout` | Request timed out |
+
+## OpenAI Compatibility
+
+Already using the OpenAI API with `reqwest`? You can point to OpenModex by changing the base URL:
+
+```rust
+let client = OpenModex::builder()
+    .api_key("omx_sk_...")
+    .base_url("https://api.openmodex.com/v1")
+    .build()?;
+```
+
+The OpenModex API is fully compatible with the OpenAI API format. All standard parameters like `temperature`, `max_tokens`, `top_p`, `stop`, `tools`, `tool_choice`, and `response_format` work as expected.
+
+## Links
+
+- [crates.io](https://crates.io/crates/openmodex)
+- [docs.rs](https://docs.rs/openmodex)
+- [GitHub](https://github.com/openmodexlabs/openmodex-sdk-rust)

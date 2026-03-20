@@ -1,6 +1,6 @@
 ---
 title: "SDK Overview"
-description: "Official SDKs for Node.js, Python, Go, React, and CLI."
+description: "Official SDKs for Node.js, Python, Go, Rust, React, and CLI."
 ---
 
 ## Official SDKs
@@ -17,6 +17,9 @@ OpenModex provides official SDKs for all major platforms:
   <Card title="Go" icon="golang" href="/sdks/go">
     `go get github.com/openmodexlabs/openmodex-sdk-go`
   </Card>
+  <Card title="Rust" icon="rust" href="/sdks/rust">
+    `cargo add openmodex`
+  </Card>
   <Card title="React" icon="react" href="/sdks/react">
     `npm install @openmodex/react`
   </Card>
@@ -24,19 +27,19 @@ OpenModex provides official SDKs for all major platforms:
 
 ## Feature Matrix
 
-| Feature | Node.js | Python | Go |
-|---------|:-------:|:------:|:--:|
-| Chat completions | ✅ | ✅ | ✅ |
-| Streaming | ✅ | ✅ | ✅ |
-| Embeddings | ✅ | ✅ | ✅ |
-| Model listing | ✅ | ✅ | ✅ |
-| Model comparison | ✅ | ✅ | ✅ |
-| Client-side fallbacks | ✅ | ✅ | ✅ |
-| Routing config | ✅ | ✅ | ✅ |
-| Cache config | ✅ | ✅ | ✅ |
-| Auto retries | ✅ | ✅ | ✅ |
-| Async support | ✅ | ✅ | ✅ |
-| TypeScript types | ✅ | — | — |
+| Feature | Node.js | Python | Go | Rust |
+|---------|:-------:|:------:|:--:|:----:|
+| Chat completions | ✅ | ✅ | ✅ | ✅ |
+| Streaming | ✅ | ✅ | ✅ | ✅ |
+| Embeddings | ✅ | ✅ | ✅ | ✅ |
+| Model listing | ✅ | ✅ | ✅ | ✅ |
+| Model comparison | ✅ | ✅ | ✅ | ✅ |
+| Client-side fallbacks | ✅ | ✅ | ✅ | ✅ |
+| Routing config | ✅ | ✅ | ✅ | ✅ |
+| Cache config | ✅ | ✅ | ✅ | ✅ |
+| Auto retries | ✅ | ✅ | ✅ | ✅ |
+| Async support | ✅ | ✅ | ✅ | ✅ |
+| TypeScript types | ✅ | — | — | — |
 
 ## OpenAI SDK Compatibility
 
@@ -59,5 +62,14 @@ client = OpenAI(
     api_key="omx_sk_...",
     base_url="https://api.openmodex.com/v1",
 )
+```
+
+```rust Rust
+use openmodex::OpenModex;
+
+let client = OpenModex::builder()
+    .api_key("omx_sk_...")
+    .base_url("https://api.openmodex.com/v1")
+    .build()?;
 ```
 </CodeGroup>
