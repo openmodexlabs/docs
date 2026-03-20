@@ -11,11 +11,7 @@
   "colors": {
     "primary": "#18181B",
     "light": "#52525B",
-    "dark": "#FAFAFA",
-    "background": {
-      "light": "#FFFFFF",
-      "dark": "#09090B"
-    }
+    "dark": "#FAFAFA"
   },
   "font": {
     "headings": {
